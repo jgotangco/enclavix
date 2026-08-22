@@ -1,0 +1,264 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 158 64% 28%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 158 40% 94%;
+    --accent-foreground: 158 64% 24%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 158 64% 28%;
+
+    --radius: 0.625rem;
+  }
+
+  /* Treasury Gold Theme (Finance / Treasurer Palette) */
+  [data-theme="treasury"] {
+    --primary: 38 92% 38%;
+    --primary-foreground: 48 100% 96%;
+    --accent: 48 100% 94%;
+    --accent-foreground: 38 92% 25%;
+    --ring: 38 92% 38%;
+  }
+
+  /* Ocean Azure Theme (Resident / Homeowner Palette) */
+  [data-theme="ocean"] {
+    --primary: 199 89% 38%;
+    --primary-foreground: 204 100% 97%;
+    --accent: 204 94% 94%;
+    --accent-foreground: 199 89% 25%;
+    --ring: 199 89% 38%;
+  }
+
+  /* Tactical Obsidian Theme (Security Station Palette) */
+  [data-theme="tactical"] {
+    --primary: 38 92% 50%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 38 92% 50%;
+    --ring: 38 92% 50%;
+  }
+
+  /* Midnight Modern Theme (Dark Mode) */
+  [data-theme="dark"] {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 6.5%;
+    --card-foreground: 210 40% 98%;
+    --primary: 238 84% 67%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 238 84% 67%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 158 64% 40%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 158 64% 40%;
+  }
+}
+
+/* ========================================================================= */
+/* THEME PALETTE OVERRIDES FOR INSTANT WORKSPACE TRANSFORMATION              */
+/* ========================================================================= */
+
+/* 1. TREASURY GOLD OVERRIDES */
+[data-theme="treasury"] .bg-emerald-600,
+[data-theme="treasury"] .bg-emerald-700,
+[data-theme="treasury"] .bg-emerald-800 {
+  background-color: #d97706 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="treasury"] .hover\:bg-emerald-800:hover,
+[data-theme="treasury"] .hover\:bg-emerald-700:hover {
+  background-color: #b45309 !important;
+}
+
+[data-theme="treasury"] .text-emerald-700,
+[data-theme="treasury"] .text-emerald-800,
+[data-theme="treasury"] .text-emerald-900,
+[data-theme="treasury"] .text-emerald-950 {
+  color: #b45309 !important;
+}
+
+[data-theme="treasury"] .text-emerald-400,
+[data-theme="treasury"] .text-emerald-500 {
+  color: #f59e0b !important;
+}
+
+[data-theme="treasury"] .bg-emerald-50,
+[data-theme="treasury"] .bg-emerald-100 {
+  background-color: #fffbeb !important;
+}
+
+[data-theme="treasury"] .border-emerald-200,
+[data-theme="treasury"] .border-emerald-300,
+[data-theme="treasury"] .border-emerald-500 {
+  border-color: #fde68a !important;
+}
+
+/* 2. OCEAN AZURE OVERRIDES */
+[data-theme="ocean"] .bg-emerald-600,
+[data-theme="ocean"] .bg-emerald-700,
+[data-theme="ocean"] .bg-emerald-800 {
+  background-color: #0284c7 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="ocean"] .hover\:bg-emerald-800:hover,
+[data-theme="ocean"] .hover\:bg-emerald-700:hover {
+  background-color: #0369a1 !important;
+}
+
+[data-theme="ocean"] .text-emerald-700,
+[data-theme="ocean"] .text-emerald-800,
+[data-theme="ocean"] .text-emerald-900,
+[data-theme="ocean"] .text-emerald-950 {
+  color: #0369a1 !important;
+}
+
+[data-theme="ocean"] .text-emerald-400,
+[data-theme="ocean"] .text-emerald-500 {
+  color: #38bdf8 !important;
+}
+
+[data-theme="ocean"] .bg-emerald-50,
+[data-theme="ocean"] .bg-emerald-100 {
+  background-color: #f0f9ff !important;
+}
+
+[data-theme="ocean"] .border-emerald-200,
+[data-theme="ocean"] .border-emerald-300,
+[data-theme="ocean"] .border-emerald-500 {
+  border-color: #bae6fd !important;
+}
+
+/* 3. TACTICAL OBSIDIAN OVERRIDES */
+[data-theme="tactical"] .bg-emerald-600,
+[data-theme="tactical"] .bg-emerald-700,
+[data-theme="tactical"] .bg-emerald-800 {
+  background-color: #f59e0b !important;
+  color: #0f172a !important;
+}
+
+[data-theme="tactical"] .text-emerald-700,
+[data-theme="tactical"] .text-emerald-800,
+[data-theme="tactical"] .text-emerald-400 {
+  color: #f59e0b !important;
+}
+
+[data-theme="tactical"] .border-emerald-200,
+[data-theme="tactical"] .border-emerald-300 {
+  border-color: #f59e0b !important;
+}
+
+/* 4. MIDNIGHT DARK OVERRIDES */
+[data-theme="dark"] body,
+[data-theme="dark"] .bg-slate-100\/70,
+[data-theme="dark"] .bg-slate-50 {
+  background-color: #0b0f19 !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .bg-white {
+  background-color: #111827 !important;
+  border-color: #1f2937 !important;
+  color: #f9fafb !important;
+}
+
+[data-theme="dark"] .text-slate-900,
+[data-theme="dark"] .text-slate-800 {
+  color: #f9fafb !important;
+}
+
+[data-theme="dark"] .text-slate-700,
+[data-theme="dark"] .text-slate-600 {
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .border-slate-200,
+[data-theme="dark"] .border-slate-100 {
+  border-color: #1f2937 !important;
+}
+
+[data-theme="dark"] .bg-slate-50\/80,
+[data-theme="dark"] .bg-slate-50\/60 {
+  background-color: #1a2234 !important;
+}
+
+[data-theme="dark"] .bg-emerald-600,
+[data-theme="dark"] .bg-emerald-700,
+[data-theme="dark"] .bg-emerald-800 {
+  background-color: #6366f1 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .text-emerald-400,
+[data-theme="dark"] .text-emerald-700 {
+  color: #818cf8 !important;
+}
+
+[data-theme="dark"] .bg-emerald-50,
+[data-theme="dark"] .bg-emerald-100 {
+  background-color: #1e1b4b !important;
+  color: #c7d2fe !important;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
