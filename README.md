@@ -91,5 +91,14 @@ All seeded demo accounts use the standard password: **`Password123!`**
 
 ---
 
+## 👨‍💻 Author & Development
+
+**Enclavix** is architected and developed by **[Jerome Gotangco](https://github.com/jgotangco)**.
+
+- **GitHub Profile:** [https://github.com/jgotangco](https://github.com/jgotangco)
+- **Source Repository:** [https://github.com/jgotangco/enclavix](https://github.com/jgotangco/enclavix)
+
+---
+
 ## 📄 License
 This project is licensed under the MIT License.

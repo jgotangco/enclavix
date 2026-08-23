@@ -1,6 +1,8 @@
 # HOA Management System — Persona & Operations Manual
 **Enclave Edition: 150 Planned Residential Lots**  
 **Version:** 2.0.0 Production  
+**Lead Architect & Developer:** [Jerome Gotangco](https://github.com/jgotangco)  
+**Repository:** [https://github.com/jgotangco/enclavix](https://github.com/jgotangco/enclavix)  
 **Classification:** Official HOA Standard Operating Procedure (SOP)
 
 ---
