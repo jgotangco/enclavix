@@ -236,12 +236,12 @@ export default function HomePage() {
       <footer className="border-t border-slate-200 bg-white py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <div>
-            © 2026 {settings.villageName} Homeowners Association, Inc. All rights reserved.
+            © 2026 {settings.villageName} Homeowners Association, Inc. • Developed by <a href="https://github.com/jgotangco" target="_blank" rel="noopener noreferrer" className="font-semibold text-slate-700 hover:text-emerald-700 underline">Jerome Gotangco</a>
           </div>
           <div className="flex items-center gap-4">
             <Link href="/about" className="hover:text-emerald-700 transition-colors font-semibold text-slate-700">About Enclavix</Link>
             <span>•</span>
-            <span>Powered by Next.js 14 & Supabase</span>
+            <a href="https://github.com/jgotangco/enclavix" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-700 transition-colors">GitHub Repo</a>
             <span>•</span>
             <span>Cloud Run Ready</span>
           </div>

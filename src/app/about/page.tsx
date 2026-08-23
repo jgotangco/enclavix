@@ -22,7 +22,10 @@ import {
   Database,
   Cpu,
   Globe,
-  Award
+  Award,
+  Code,
+  ExternalLink,
+  UserCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -154,7 +157,7 @@ export default function AboutPage() {
         {/* Why Enclavix / Mission */}
         <section className="py-14 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-            <div classNamespace-y-4">
+            <div className="space-y-4">
               <Badge variant="outline" className="text-emerald-700 border-emerald-300 bg-emerald-50 font-bold text-xs">
                 Built for High-Trust Residential Living
               </Badge>
@@ -280,6 +283,61 @@ export default function AboutPage() {
           </div>
         </section>
 
+        {/* Lead Architect & Developer Section */}
+        <section className="py-14 bg-gradient-to-b from-slate-100/60 to-white border-y border-slate-200">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <Card className="border-emerald-200/80 bg-white shadow-md overflow-hidden relative">
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-600 via-teal-500 to-sky-600"></div>
+              <CardContent className="p-6 sm:p-8 space-y-6">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-slate-900 text-white border-2 border-emerald-500 flex items-center justify-center font-black text-2xl sm:text-3xl shadow-lg shrink-0">
+                    JG
+                  </div>
+                  <div className="space-y-2 flex-1">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100/80 text-emerald-900 text-[11px] font-bold border border-emerald-300">
+                      <Code className="w-3.5 h-3.5 text-emerald-700" />
+                      Lead Developer & Software Architect
+                    </div>
+                    <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                      Jerome Gotangco
+                    </h2>
+                    <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                      Creator and lead software engineer of <strong>Enclavix</strong>. Architected the platform end-to-end to deliver high-trust community governance, formula-based accounting automation, dual-tier gate security, and seamless multi-persona role switching for modern residential enclaves.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                    <Award className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>Open Source Community Project • Released under MIT License</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <a
+                      href="https://github.com/jgotangco"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition-colors"
+                    >
+                      <span>GitHub: @jgotangco</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-emerald-400" />
+                    </a>
+                    <a
+                      href="https://github.com/jgotangco/enclavix"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-800 font-semibold text-xs transition-colors"
+                    >
+                      <span>Repository</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                    </a>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
         {/* Call to Action */}
         <section className="py-12 bg-slate-900 text-white border-t border-slate-800">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-4">
@@ -310,10 +368,13 @@ export default function AboutPage() {
             <span className="font-black text-slate-900 text-sm">Enclavix</span>
             <span>•</span>
             <span>Version 2.0.0 (Cloud Run Ready)</span>
+            <span>•</span>
+            <span>Architected by <a href="https://github.com/jgotangco" target="_blank" rel="noopener noreferrer" className="font-bold text-slate-700 hover:text-emerald-700 underline">Jerome Gotangco</a></span>
           </div>
           <div className="flex items-center gap-4">
             <Link href="/" className="hover:text-emerald-700 transition-colors font-medium">Home</Link>
             <Link href="/about" className="text-emerald-700 font-bold">About</Link>
+            <a href="https://github.com/jgotangco" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-700 transition-colors font-medium">GitHub</a>
             <Link href="/login" className="hover:text-emerald-700 transition-colors font-medium">Sign In</Link>
           </div>
         </div>
