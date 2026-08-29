@@ -1,8 +1,12 @@
 {
   "name": "enclave-hoa",
   "version": "2.0.0",
-  "description": "Enclavix — HOA & Enclave Operating System",
+  "description": "Enclavix — HOA & Enclave Operating System. Designed and product-directed by Jerome Gotangco. Developed with Google Antigravity / Gemini.",
   "author": "Jerome Gotangco <https://github.com/jgotangco>",
+  "contributors": [
+    "Jerome Gotangco (Design & Product Direction)",
+    "Google Antigravity / Gemini (Development)"
+  ],
   "homepage": "https://github.com/jgotangco/enclavix#readme",
   "repository": {
     "type": "git",

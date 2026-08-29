@@ -91,11 +91,11 @@ All seeded demo accounts use the standard password: **`Password123!`**
 
 ---
 
-## 👨‍💻 Author & Development
+## 👨‍💻 Credits & Attribution
 
-**Enclavix** is architected and developed by **[Jerome Gotangco](https://github.com/jgotangco)**.
+Designed and product-directed by **[Jerome Gotangco](https://github.com/jgotangco)**. Developed with **Google Antigravity / Gemini**.
 
-- **GitHub Profile:** [https://github.com/jgotangco](https://github.com/jgotangco)
+- **Product Lead & Design:** [Jerome Gotangco (GitHub: @jgotangco)](https://github.com/jgotangco)
 - **Source Repository:** [https://github.com/jgotangco/enclavix](https://github.com/jgotangco/enclavix)
 
 ---
