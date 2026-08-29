@@ -295,14 +295,17 @@ export default function AboutPage() {
                   </div>
                   <div className="space-y-2 flex-1">
                     <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100/80 text-emerald-900 text-[11px] font-bold border border-emerald-300">
-                      <Code className="w-3.5 h-3.5 text-emerald-700" />
-                      Lead Developer & Software Architect
+                      <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
+                      Design & Product Direction
                     </div>
                     <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                       Jerome Gotangco
                     </h2>
                     <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                      Creator and lead software engineer of <strong>Enclavix</strong>. Architected the platform end-to-end to deliver high-trust community governance, formula-based accounting automation, dual-tier gate security, and seamless multi-persona role switching for modern residential enclaves.
+                      Designed and product-directed by <strong><a href="https://github.com/jgotangco" target="_blank" rel="noopener noreferrer" className="text-slate-900 font-bold hover:text-emerald-700 underline">Jerome Gotangco</a></strong>. Developed with <strong>Google Antigravity / Gemini</strong>.
+                    </p>
+                    <p className="text-xs text-slate-500 leading-relaxed">
+                      Architected as a modern, high-trust community operating system delivering automated formula-based dues accounting, dual-tier RFID gate security, elevated curbside parking enforcement, and responsive role switching for boutique gated enclaves.
                     </p>
                   </div>
                 </div>
@@ -364,12 +367,12 @@ export default function AboutPage() {
       {/* Footer */}
       <footer className="border-t border-slate-200 bg-white py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="font-black text-slate-900 text-sm">Enclavix</span>
             <span>•</span>
-            <span>Version 2.0.0 (Cloud Run Ready)</span>
+            <span>Version 2.0.0</span>
             <span>•</span>
-            <span>Architected by <a href="https://github.com/jgotangco" target="_blank" rel="noopener noreferrer" className="font-bold text-slate-700 hover:text-emerald-700 underline">Jerome Gotangco</a></span>
+            <span>Designed and product-directed by <a href="https://github.com/jgotangco" target="_blank" rel="noopener noreferrer" className="font-bold text-slate-700 hover:text-emerald-700 underline">Jerome Gotangco</a>. Developed with Google Antigravity / Gemini.</span>
           </div>
           <div className="flex items-center gap-4">
             <Link href="/" className="hover:text-emerald-700 transition-colors font-medium">Home</Link>

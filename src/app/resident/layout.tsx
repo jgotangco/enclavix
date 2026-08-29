@@ -238,7 +238,7 @@ export default function ResidentLayout({
       {/* Resident Portal Footer */}
       <footer className="border-t border-slate-200 bg-white py-4 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
-          <div>{settings.villageName} • Enclavix Resident Portal • Developed by <a href="https://github.com/jgotangco" target="_blank" rel="noopener noreferrer" className="font-semibold text-slate-700 hover:text-emerald-700 underline">Jerome Gotangco</a></div>
+          <div>{settings.villageName} • Enclavix Resident Portal • Designed and product-directed by <a href="https://github.com/jgotangco" target="_blank" rel="noopener noreferrer" className="font-semibold text-slate-700 hover:text-emerald-700 underline">Jerome Gotangco</a>. Developed with Google Antigravity / Gemini.</div>
           <div className="flex items-center gap-3">
             <Link href="/about" className="hover:text-emerald-700 font-semibold text-slate-700">About Enclavix</Link>
             <span>•</span>
