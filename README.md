@@ -2,7 +2,7 @@
 
 > **The Intelligent Operating System for Boutique Residential Enclaves & Homeowners Associations.**
 
-Enclavix is a comprehensive, production-ready community governance platform designed specifically for private gated villages, townhouse developments, and residential subdivisions. It unifies automated formula-driven dues computation, dual-gate RFID security clearance, elevated curbside parking quota enforcement, domesticated pet health tracking, and role-based stakeholder portals.
+Enclavix is a concept for a community governance platform designed specifically for private gated villages, townhouse developments, and residential subdivisions. It unifies automated formula-driven dues computation, dual-gate RFID security clearance, elevated curbside parking quota enforcement, domesticated pet health tracking, and role-based stakeholder portals.
 
 ---
 
