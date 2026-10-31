@@ -212,7 +212,7 @@ export default function ResidentDashboardPage() {
                 Your upcoming reservation schedule
               </CardDescription>
             </div>
-            <Link href="/resident/reservations" className="text-xs font-semibold text-emerald-700 hover:underline">
+            <Link href="/resident/amenities" className="text-xs font-semibold text-emerald-700 hover:underline">
               Book Facility
             </Link>
           </CardHeader>

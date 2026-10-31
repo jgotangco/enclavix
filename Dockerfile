@@ -1,57 +1,34 @@
-# ==============================================================================
-# Production Dockerfile for Next.js 14 on Google Cloud Run
-# ==============================================================================
-
-# 1. Base Node.js image
-FROM node:20-alpine AS base
-
-# Install libc6-compat for Alpine compatibility
+# S00 contained production build. No deployment or mock data service connections.
+FROM node:24-alpine AS base
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# 2. Dependencies stage
 FROM base AS deps
-COPY package.json package-lock.json* ./
+COPY package.json package-lock.json ./
 RUN npm ci
 
-# 3. Builder stage
 FROM base AS builder
-WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-
-# Environment variables for build time (if needed by Next.js)
+ARG ENCLAVIX_APP_ENV=production
 ARG NEXT_PUBLIC_SUPABASE_URL
 ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+ENV ENCLAVIX_APP_ENV=$ENCLAVIX_APP_ENV
+ENV NEXT_PUBLIC_APP_ENV=$ENCLAVIX_APP_ENV
 ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
 ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
 ENV NEXT_TELEMETRY_DISABLED=1
-
 RUN npm run build
 
-# 4. Runner stage (Production Image)
-FROM node:20-alpine AS runner
+FROM node:24-alpine AS runner
 WORKDIR /app
-
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV PORT=8080
-ENV HOSTNAME="0.0.0.0"
-
-# Create non-root user for security
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-# Copy static assets and standalone build
-COPY --from=builder /app/public ./public
-
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
+ARG ENCLAVIX_APP_ENV=production
+ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=8080 HOSTNAME=0.0.0.0
+ENV ENCLAVIX_APP_ENV=$ENCLAVIX_APP_ENV
+RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
 USER nextjs
-
 EXPOSE 8080
-
 CMD ["node", "server.js"]

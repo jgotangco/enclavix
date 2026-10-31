@@ -118,7 +118,29 @@ export default function AdminBillingPage() {
       const total = sqmAmount + baseFee + villageFee + violationFines;
 
       return {
-        id: `10000000-0000-0000-0000-${String(invoices.length + idx + 10).padStart(12, "0")}`,\n        property_id: prop.id,\n        billing_period: batchPeriod,\n        lot_area_snapshot: lotArea,\n        rate_per_sqm_snapshot: rate,\n        sqm_amount: sqmAmount,\n        base_fixed_amount: baseFee,\n        mother_village_amount: villageFee,\n        special_assessments: 0.00,\n        penalty_amount: 0.00,\n        violation_fines_amount: violationFines,\n        total_due: total,\n        due_date: batchDueDate,\n        status: "UNPAID",\n        payment_method: null,\n        payment_reference_no: null,\n        proof_of_payment_url: null,\n        paid_amount: null,\n        paid_at: null,\n        verified_by: null,\n        notes: `Generated on ${new Date().toLocaleDateString()}`,\n        created_at: new Date().toISOString(),\n      };
+        id: `10000000-0000-0000-0000-${String(invoices.length + idx + 10).padStart(12, "0")}`,
+        property_id: prop.id,
+        billing_period: batchPeriod,
+        lot_area_snapshot: lotArea,
+        rate_per_sqm_snapshot: rate,
+        sqm_amount: sqmAmount,
+        base_fixed_amount: baseFee,
+        mother_village_amount: villageFee,
+        special_assessments: 0.00,
+        penalty_amount: 0.00,
+        violation_fines_amount: violationFines,
+        total_due: total,
+        due_date: batchDueDate,
+        status: "UNPAID",
+        payment_method: null,
+        payment_reference_no: null,
+        proof_of_payment_url: null,
+        paid_amount: null,
+        paid_at: null,
+        verified_by: null,
+        notes: `Generated on ${new Date().toLocaleDateString()}`,
+        created_at: new Date().toISOString(),
+      };
     });
 
     setInvoices([...newInvoices, ...invoices]);

@@ -59,6 +59,7 @@ DECLARE
     addr VARCHAR(100);
     lot_sz NUMERIC(8,2);
     flr_sz NUMERIC(8,2);
+    prop_id UUID;
 BEGIN
     FOR b IN 1..8 LOOP
         IF b = 8 THEN
@@ -70,17 +71,20 @@ BEGIN
         FOR l IN 1..max_l LOOP
             blk_str := b::TEXT;
             lot_str := l::TEXT;
+            prop_id := ('b' || blk_str || '000000-0000-0000-0000-' || LPAD(lot_str, 12, '0'))::UUID;
             addr := 'Block ' || blk_str || ' Lot ' || lot_str || ', Grand Enclave Residences';
             lot_sz := 180.00 + ((b * 7 + l * 3) % 85);
             flr_sz := lot_sz + 45.00;
             
-            INSERT INTO properties (block_number, lot_number, unit_address, lot_area_sqm, floor_area_sqm, carport_capacity, curb_parallel_allowance, occupancy)
-            VALUES (blk_str, lot_str, addr, lot_sz, flr_sz, 2, 1, 'OWNER_OCCUPIED')
+            INSERT INTO properties (id, block_number, lot_number, unit_address, lot_area_sqm, floor_area_sqm, carport_capacity, curb_parallel_allowance, occupancy)
+            VALUES (prop_id, blk_str, lot_str, addr, lot_sz, flr_sz, 2, 1, 'OWNER_OCCUPIED')
             ON CONFLICT (block_number, lot_number) DO NOTHING;
         END LOOP;
     END LOOP;
 END $$;
 
+-- Test users must be provisioned before this local-only seed runs.
+-- PGlite uses tests/fixtures/relational_users.sql; Supabase uses the Admin API.
 -- 3. Sample Demo Profiles (Pre-seeded with fixed UUIDs for development)
 INSERT INTO profiles (id, property_id, first_name, last_name, email, phone_number, role, is_primary_contact)
 VALUES

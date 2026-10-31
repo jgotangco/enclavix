@@ -1,3 +1,5 @@
+> Historical prototype documentation. For current production requirements and implementation scope, read [Start here](START_HERE.md) and [BRD](BRD.md). Capabilities described below are not production acceptance evidence.
+
 # HOA Management System — Persona & Operations Manual
 **Enclave Edition: 150 Planned Residential Lots**  
 **Version:** 2.0.0 Production  

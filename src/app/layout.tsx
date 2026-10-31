@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Grand Enclave Residences | HOA Management System",
@@ -19,7 +17,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full">
-      <body className={`${inter.className} min-h-full flex flex-col bg-slate-50 text-slate-900`}>
+      <body className={"min-h-full flex flex-col bg-slate-50 text-slate-900"}>
+        <p role="note" className="bg-amber-100 text-amber-950 px-4 py-3 text-sm text-center">
+          {process.env.NEXT_PUBLIC_APP_ENV === "demo"
+            ? "Synthetic demo only. Changes are temporary. Do not use for payments, resident records, or gate decisions."
+            : "Preview only. Resident access and operational services are not enabled yet."}
+        </p>
         <CommunitySettingsProvider>
           {children}
         </CommunitySettingsProvider>
