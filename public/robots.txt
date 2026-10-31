@@ -1,0 +1,3 @@
+# Disallow all indexing by default on enclave internal portal
+User-agent: *
+Disallow: /
