@@ -61,7 +61,7 @@ jobs:
       - name: Verify contained production runtime
         run: |
           docker run -d --name enclavix-s00 -p 127.0.0.1:3000:8080 enclavix-s00
-          curl --retry 20 --retry-delay 1 --retry-connrefused --fail http://127.0.0.1:3000/login -o /dev/null
+          curl --retry 20 --retry-delay 1 --retry-all-errors --fail http://127.0.0.1:3000/login -o /dev/null
           test "$(curl -s -o /dev/null -w '%{http_code}' -H 'Cookie: demo_user_role=SUPER_ADMIN' http://127.0.0.1:3000/admin)" = 307
       - if: always()
         run: docker logs enclavix-s00 || true
