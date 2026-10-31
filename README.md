@@ -1,6 +1,6 @@
 # 🛡️ Enclavix — HOA & Enclave Operating System
 
-> **Production refresh planning:** The current application is a prototype and is not approved for real resident data, financial operations, or gate decisions. Start with [the delivery guide](docs/START_HERE.md), [the updated BRD](docs/BRD.md), and [the sprint roadmap](docs/delivery/SPRINTS.md). Codex is completing S00 on the feature branch; see the sprint evidence and development guide for current validation.
+> **Production refresh planning:** The current application is a prototype and is not approved for real resident data, financial operations, or gate decisions. Start with [the delivery guide](docs/START_HERE.md), [the updated BRD](docs/BRD.md), and [the sprint roadmap](docs/delivery/SPRINTS.md). Codex has implemented the S00 foundation on the feature branch, pending owner acceptance; see the sprint evidence and development guide for current validation.
 
 > **The Intelligent Operating System for Boutique Residential Enclaves & Homeowners Associations.**
 

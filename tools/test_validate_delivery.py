@@ -15,6 +15,11 @@ class DeliveryValidationTests(unittest.TestCase):
         shutil.copytree(ROOT / "docs", self.root / "docs")
         shutil.copy(ROOT / "AGENTS.md", self.root / "AGENTS.md")
         self.status = self.root / "docs/delivery/STATUS.json"
+        # Regression fixtures must not depend on the real roadmap's current progress.
+        data = json.loads(self.status.read_text())
+        for sprint in data["sprints"]:
+            sprint.update(status="not_started", blockers=[], accepted_by=None, accepted_at=None)
+        self.status.write_text(json.dumps(data))
 
     def change_status(self, index, state):
         data = json.loads(self.status.read_text())

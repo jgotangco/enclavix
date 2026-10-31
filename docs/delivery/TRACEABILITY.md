@@ -1,5 +1,7 @@
 # Requirement traceability
 
+S00 foundational containment and build evidence is in [evidence/S00.md](evidence/S00.md). No later-sprint requirement is marked complete by S00.
+
 Each BRD requirement has one sprint accountable for completion evidence. Earlier sprints may establish prerequisites. All are initially unverified; completion evidence belongs in the assigned sprint report. Update verification state only with actual evidence.
 
 | Requirement | Completion sprint | Verification state |

@@ -6,7 +6,7 @@
     {
       "id": "S00",
       "title": "Reproducible foundation and demo containment",
-      "status": "in_progress",
+      "status": "ready_for_review",
       "depends_on": [],
       "prompt": "docs/delivery/sprints/S00.md",
       "evidence": "docs/delivery/evidence/S00.md",
