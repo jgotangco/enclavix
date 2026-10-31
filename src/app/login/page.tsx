@@ -25,11 +25,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCommunitySettings } from "@/lib/context/community-settings";
 import { INITIAL_USERS } from "@/lib/data/mock-data";
 import { UserRole } from "@/types/database";
+import { isDemoModeEnabledClient } from "@/lib/env";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { settings } = useCommunitySettings();
+
+  const isDemo = isDemoModeEnabledClient();
+  const errorParam = searchParams.get("error");
 
   const [activeTab, setActiveTab] = useState<"signin" | "register" | "forgot">("signin");
   const [email, setEmail] = useState("");
@@ -39,9 +43,12 @@ function LoginForm() {
   const [lotAddress, setLotAddress] = useState("");
   const [phone, setPhone] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(
+    errorParam === "configuration_required" || errorParam === "production_not_enabled"
+      ? "Resident access is not enabled while this service is being prepared for launch."
+      : null
+  );
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [showDemoAccordion, setShowDemoAccordion] = useState(false);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,16 +56,26 @@ function LoginForm() {
     setErrorMessage(null);
     setSuccessMessage(null);
 
+    if (!isDemo) {
+      setTimeout(() => {
+        setIsLoading(false);
+        setErrorMessage(
+          "Sign-in is unavailable while this service is being prepared for launch."
+        );
+      }, 300);
+      return;
+    }
+
     const trimmedEmail = email.trim().toLowerCase();
 
-    // Check against seeded user database
+    // Check against seeded user database in demo mode
     const matchedUser = INITIAL_USERS.find(
       (u) => u.email.toLowerCase() === trimmedEmail
     );
 
     setTimeout(() => {
       if (matchedUser) {
-        // Successful login
+        // Successful demo login
         const role = matchedUser.role;
         const name = `${matchedUser.first_name} ${matchedUser.last_name}`;
 
@@ -66,7 +83,7 @@ function LoginForm() {
         document.cookie = `demo_user_name=${encodeURIComponent(name)}; path=/; max-age=86400; SameSite=Lax`;
         document.cookie = `demo_user_email=${encodeURIComponent(matchedUser.email)}; path=/; max-age=86400; SameSite=Lax`;
 
-        setSuccessMessage(`Welcome back, ${name}! Redirecting...`);
+        setSuccessMessage(`Welcome back, ${name}! Redirecting (Demo Mode)...`);
 
         setTimeout(() => {
           if (role === "SUPER_ADMIN" || role === "TREASURER") {
@@ -78,20 +95,8 @@ function LoginForm() {
           }
           router.refresh();
         }, 500);
-      } else if (trimmedEmail) {
-        // If unknown email in demo, default to new resident
-        const demoName = fullName || trimmedEmail.split("@")[0];
-        document.cookie = `demo_user_role=RESIDENT; path=/; max-age=86400; SameSite=Lax`;
-        document.cookie = `demo_user_name=${encodeURIComponent(demoName)}; path=/; max-age=86400; SameSite=Lax`;
-        document.cookie = `demo_user_email=${encodeURIComponent(trimmedEmail)}; path=/; max-age=86400; SameSite=Lax`;
-
-        setSuccessMessage(`Signed in as Resident. Redirecting to Homeowner portal...`);
-        setTimeout(() => {
-          router.push("/resident");
-          router.refresh();
-        }, 500);
       } else {
-        setErrorMessage("Please enter a valid email address.");
+        setErrorMessage("Please enter a valid demo account email or select one below.");
         setIsLoading(false);
       }
     }, 400);
@@ -102,13 +107,23 @@ function LoginForm() {
     setIsLoading(true);
     setErrorMessage(null);
 
+    if (!isDemo) {
+      setTimeout(() => {
+        setIsLoading(false);
+        setErrorMessage(
+          "Resident registration is not available yet."
+        );
+      }, 300);
+      return;
+    }
+
     setTimeout(() => {
       const name = fullName || "New Resident";
       document.cookie = `demo_user_role=RESIDENT; path=/; max-age=86400; SameSite=Lax`;
       document.cookie = `demo_user_name=${encodeURIComponent(name)}; path=/; max-age=86400; SameSite=Lax`;
       document.cookie = `demo_user_email=${encodeURIComponent(email || "resident@enclavehoa.com")}; path=/; max-age=86400; SameSite=Lax`;
 
-      setSuccessMessage("Account registration submitted! Entering Homeowner Portal...");
+      setSuccessMessage("Account registration submitted! Entering Homeowner Portal (Demo)...");
       setTimeout(() => {
         router.push("/resident");
         router.refresh();
@@ -167,9 +182,35 @@ function LoginForm() {
 
             {/* SIGN IN TAB */}
             <TabsContent value="signin" className="p-6 pt-4 space-y-4">
-              {errorMessage && (\n                <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-lg flex items-center gap-2 text-rose-300 text-xs">\n                  <AlertCircle className="w-4 h-4 shrink-0" />\n                  <span>{errorMessage}</span>\n                </div>\n              )}
+              {isDemo ? (
+                <div className="p-2.5 bg-sky-500/10 border border-sky-500/30 rounded-lg flex items-center justify-between text-xs text-sky-300">
+                  <span className="font-semibold flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5" /> Isolated Synthetic Demo
+                  </span>
+                  <Badge variant="outline" className="text-[10px] text-sky-400 border-sky-500/40">Prototype Mode</Badge>
+                </div>
+              ) : (
+                <div className="p-2.5 bg-slate-800/80 border border-slate-700 rounded-lg flex items-center justify-between text-xs text-slate-300">
+                  <span className="font-semibold flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Resident access unavailable
+                  </span>
+                  <Badge variant="outline" className="text-[10px] text-slate-400 border-slate-600">Preview</Badge>
+                </div>
+              )}
 
-              {successMessage && (\n                <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg flex items-center gap-2 text-emerald-300 text-xs">\n                  <CheckCircle2 className="w-4 h-4 shrink-0" />\n                  <span>{successMessage}</span>\n                </div>\n              )}
+              {errorMessage && (
+                <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-lg flex items-center gap-2 text-rose-300 text-xs">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
+              {successMessage && (
+                <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg flex items-center gap-2 text-emerald-300 text-xs">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  <span>{successMessage}</span>
+                </div>
+              )}
 
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-1.5">
@@ -235,6 +276,27 @@ function LoginForm() {
                   )}
                 </Button>
               </form>
+
+              {isDemo && (
+                <div className="mt-4 pt-3 border-t border-slate-800 space-y-2">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                    <Sparkles className="w-3 h-3 text-sky-400" /> Quick-Fill Demo Personas:
+                  </div>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {INITIAL_USERS.slice(0, 4).map((u) => (
+                      <button
+                        key={u.id}
+                        type="button"
+                        onClick={() => handleQuickFill(u)}
+                        className="text-left p-1.5 rounded bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[11px] transition-colors"
+                      >
+                        <div className="font-semibold text-slate-200 truncate">{u.first_name} {u.last_name}</div>
+                        <div className="text-[10px] text-slate-400 truncate">{u.role}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </TabsContent>
 
             {/* REGISTER TAB */}
@@ -332,7 +394,7 @@ function LoginForm() {
                 </Button>
                 <Button
                   onClick={() => {
-                    setSuccessMessage("Password reset email sent to your inbox.");
+                    setSuccessMessage(isDemo ? "This demo does not send password reset emails." : "Password recovery is not available yet.");
                     setActiveTab("signin");
                   }}
                   className="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold h-9"
@@ -348,7 +410,7 @@ function LoginForm() {
         <div className="mt-6 text-center text-xs text-slate-500 space-y-1.5">
           <p className="flex items-center justify-center gap-1.5">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-            <span>Enclavix • 256-Bit Encrypted HOA Governance Platform</span>
+            <span>Enclavix community platform preview</span>
           </p>
           <div className="flex items-center justify-center gap-3 text-[11px] text-slate-400">
             <Link href="/about" className="hover:text-emerald-400 font-semibold underline underline-offset-2">About Enclavix</Link>
@@ -356,7 +418,7 @@ function LoginForm() {
             <Link href="/" className="hover:text-emerald-400">Public Portal</Link>
           </div>
           <p className="text-[10px] text-slate-600">
-            {settings.villageName} • Protected under RA 9904 (Magna Carta for Homeowners)
+            {settings.villageName} • Synthetic demonstration
           </p>
         </div>
       </div>

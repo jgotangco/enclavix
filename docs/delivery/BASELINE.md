@@ -17,3 +17,16 @@ Source reviewed: `main` at `d150f8b3a84b77a53c9f1136434481ed544d4067`, 31 Octobe
 | B11 | Vaccine reference date is fixed; amenity conflicts are not enforced | pet and amenity pages | S09 |
 
 No deployed grants, storage policies, data leakage or installed dependency CVEs were verified. Resolve actual deployment inventory before migrating any real users. Do not use live resident information to reproduce these issues.
+
+## S00 engineering baseline selected on 31 October 2026
+
+Node 24 LTS and Next.js 16 replace the unsupported Node 20 / Next.js 14 baseline. Exact dependency versions are recorded in package.json and package-lock.json. Current selection: Node 24 major, Next.js 16.4.3, React 19.3.1, ESLint 10.14.0. Supabase remains a candidate for S02 identity; its application clients are disabled in S00. SQL execution in PGlite is separate from the local Supabase Auth/API integration check.
+
+Official references verified on 31 October 2026:
+- https://nodejs.org/en/about/previous-releases
+- https://nextjs.org/support-policy
+- https://nextjs.org/docs/app/guides/upgrading/version-16
+- https://supabase.com/docs/reference/javascript/auth-admin-createuser
+- https://supabase.com/docs/guides/local-development/cli/config
+
+S00 uses the Next.js Node proxy convention, explicit ESLint CLI, and the webpack build path. No Google font download is required during build. Mock demos accept no backend credentials; production portals and authentication callbacks remain closed until real identity and persistence are delivered. Local and CI results are recorded in evidence/S00.md; documentation is not a substitute for execution.

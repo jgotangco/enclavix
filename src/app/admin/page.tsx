@@ -180,7 +180,7 @@ export default function AdminDashboardPage() {
                   Scheduled bookings for community amenities
                 </CardDescription>
               </div>
-              <Link href="/admin/reservations" className="text-xs font-semibold text-emerald-700 hover:underline flex items-center gap-1">
+              <Link href="/admin/amenities" className="text-xs font-semibold text-emerald-700 hover:underline flex items-center gap-1">
                 Calendar View <ArrowUpRight className="w-3.5 h-3.5" />
               </Link>
             </CardHeader>

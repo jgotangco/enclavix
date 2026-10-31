@@ -29,6 +29,7 @@ class DeliveryValidationTests(unittest.TestCase):
         self.assertTrue(any("predecessor" in e for e in validate(self.root)))
 
     def test_acceptance_needs_owner_and_evidence(self):
+        (self.root / "docs/delivery/evidence/S00.md").unlink(missing_ok=True)
         self.change_status(0, "accepted")
         errors = validate(self.root)
         self.assertTrue(any("acceptance owner" in e for e in errors))

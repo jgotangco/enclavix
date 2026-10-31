@@ -1,0 +1,67 @@
+name: S00 verification
+on:
+  push:
+    branches: [main, 'feature/**', 'planning/**']
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        mode: [production, demo]
+    env:
+      ENCLAVIX_APP_ENV: ${{ matrix.mode }}
+      NEXT_PUBLIC_APP_ENV: ${{ matrix.mode }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ matrix.mode == 'production' && 'https://s00-ci.invalid' || '' }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ matrix.mode == 'production' && 'ci-public-test-key' || '' }}
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: python3 tests/s00_foundation.py
+      - run: python3 tools/validate_delivery.py
+      - run: python3 tools/test_validate_delivery.py
+      - run: npm audit --omit=dev --audit-level=moderate
+      - run: npm run build
+      - run: node tools/check-http.mjs
+  supabase:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx supabase start -x realtime,edge-runtime,logflare,vector,supavisor
+      - run: npx supabase db reset --local --no-seed
+      - run: node tools/check-local-supabase.mjs
+      - if: always()
+        run: npx supabase stop --no-backup
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build --build-arg NEXT_PUBLIC_SUPABASE_URL=https://s00-ci.invalid --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=ci-public-test-key -t enclavix-s00 .
+      - name: Verify contained production runtime
+        run: |
+          docker run -d --name enclavix-s00 -p 127.0.0.1:3000:8080 enclavix-s00
+          curl --retry 20 --retry-delay 1 --retry-connrefused --fail http://127.0.0.1:3000/login -o /dev/null
+          test "$(curl -s -o /dev/null -w '%{http_code}' -H 'Cookie: demo_user_role=SUPER_ADMIN' http://127.0.0.1:3000/admin)" = 307
+      - if: always()
+        run: docker logs enclavix-s00 || true

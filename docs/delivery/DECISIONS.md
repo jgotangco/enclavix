@@ -15,8 +15,22 @@ Status is `proposed`, `approved`, `rejected` or `superseded`. A proposed default
 | D09 | Service targets | BRD NFR targets are internal proposals until cost and load evidence support them | proposed | S10 | Sponsor and operations owner |
 | D10 | Pilot and phasing | Release A core web plus resident Android; Release B guard and extended operations; one village and condo pilot | proposed | S00 planning; S11 launch | Product and pilot sponsors |
 | D11 | Subscription lifecycle | Platform fees distinct from dues; no commercial billing engine in initial scope | proposed | Before commercialization | Sponsor |
+| D12 | Supported runtime baseline | Node.js 24 LTS, Next.js 16, React 19; mock-only demos; PostgreSQL 15 local validation | proposed | S00 | Architecture and engineering leads |
 
 ## Decision record template
 ID and title / status / date / actual approver / context / options / decision / rationale / BRD IDs / affected data and compatibility / reversal plan / links to evidence.
 
-Unapproved decisions must remain visibly proposed. Where a decision blocks a sprint, mark `blocked` with the exact decision ID; complete independent work without inventing approval.
+### D12 Supported runtime and containment baseline
+- Status: proposed for owner acceptance; engineering implementation is reviewable.
+- Date: 2026-10-31.
+- Actual approver: pending. No owner approval is claimed.
+- Engineering selection: Node 24, Next.js 16.4.3, React 19.3.1, ESLint 10.14.0; exact dependency versions are locked. Webpack remains the build path for this existing project.
+- Rationale: replace unsupported framework/runtime versions before building production features. Use the official Next and React lint plugins directly with compatible ESLint 10 instead of the preset that brings legacy peer ranges. Prototype-specific compiler lint exceptions are explicit in eslint.config.mjs.
+- Demo boundary: synthetic in-memory UI only; no Supabase URL, public key or service key may be configured. Both application client factories are disabled. Production routes cannot reach mock operations, including authenticated sessions, until S02 adds trusted services.
+- Alternatives: retaining Node 20 / Next 14 was rejected because they are unsupported. Connected hosted demos are deferred until separate accounts, credential boundaries and infrastructure isolation are designed and verified.
+- BRD relationship: IAM 02 and REL 01 containment prerequisites. This does not complete real identity, tenant isolation, subscription lifecycle or any later-sprint requirement.
+- Compatibility: Next proxy replaces middleware entry convention; clients and callback are explicitly disabled rather than maintaining dead identity integration.
+- Sources and support dates: see BASELINE.md. Verification and remaining risks: evidence/S00.md.
+- Rollback: revert only this feature branch change set in development. No production data or deployment was modified.
+
+Unapproved decisions remain proposed. Engineering choices do not represent regulatory approval, product acceptance or authorization to deploy.

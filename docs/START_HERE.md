@@ -1,6 +1,6 @@
 # Start here
 
-Enclavix is being refreshed into a production web and Android service for independent village and condominium associations. The checked-in application remains a prototype. This planning branch adds requirements and delivery instructions; it does not repair or certify the application.
+Enclavix is being refreshed into a production web and Android service for independent village and condominium associations. The checked-in application remains a prototype. S00 foundation repairs are in progress; the application remains a contained prototype, not a production service.
 
 ## Reading order
 1. `docs/BRD.md` — business outcomes and stable requirement IDs.
@@ -10,8 +10,8 @@ Enclavix is being refreshed into a production web and Android service for indepe
 5. `docs/antigravity/MASTER_PROMPT.md` and the selected file in `docs/delivery/sprints/`.
 6. `docs/delivery/TRACEABILITY.md` and `docs/delivery/ACCEPTANCE.md`.
 
-## Run the first sprint
-Open this repository in Antigravity. Paste the master prompt, then specify **S00** and paste `docs/delivery/sprints/S00.md`. Ask it to read `AGENTS.md` explicitly. Review its changes and evidence before moving on. `docs/antigravity/CONTINUE_PROMPT.md` provides the next-sprint and repair prompts.
+## Development handoff
+Codex is continuing S00 on the feature branch. Read `AGENTS.md`, the selected sprint and its evidence before continuing. `docs/development.md` documents local setup and containment. The Antigravity prompts remain available for any future handoff.
 
 Run `python3 tools/validate_delivery.py` from the repository root to validate planning structure. Python 3.9 or later is sufficient; no packages or application credentials are needed. App checks are added and executed by Antigravity in S00 and later sprints.
 
