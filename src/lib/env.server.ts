@@ -1,7 +1,8 @@
 /** S00 demos use bundled mocks only. Configured backends invalidate demo mode. */
 export function hasBackendCredentials(): boolean {
-  return [process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    process.env.SUPABASE_SERVICE_ROLE_KEY].some((value) => Boolean(value?.trim()));
+  // Dynamic lookup also sees credentials injected at runtime into a prebuilt demo.
+  return ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY"].some((name) => Boolean(process.env[name]?.trim()));
 }
 
 export function isDemoModeAllowedServer(): boolean {

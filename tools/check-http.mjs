@@ -37,7 +37,26 @@ try {
   assert.equal(callback.status, 307);
   assert.equal(new URL(callback.headers.get('location'), base).pathname, '/login');
   console.log(`HTTP containment verified for built ${demo ? 'mock demo' : 'production'} server`);
+  if (demo) {
+    // The public URL was absent at build time. Runtime injection must still fail startup.
+    const invalid = spawn(process.execPath, ['node_modules/next/dist/bin/next', 'start', '--hostname', '127.0.0.1', '--port', '0'], {
+      env: { ...process.env, NEXT_PUBLIC_SUPABASE_URL: 'https://demo-isolated.invalid' },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    let invalidOutput = '';
+    invalid.stdout.on('data', data => { invalidOutput += data; });
+    invalid.stderr.on('data', data => { invalidOutput += data; });
+    const timeout = setTimeout(() => invalid.kill('SIGKILL'), 10000);
+    try {
+      const [code] = await once(invalid, 'exit');
+      assert.notEqual(code, 0);
+      assert.match(invalidOutput, /Synthetic demos cannot configure Supabase credentials/);
+      console.log('Built demo rejects backend credentials injected at startup');
+    } finally { clearTimeout(timeout); }
+  }
 } finally {
-  child.kill('SIGTERM');
-  await once(child, 'exit');
+  if (child.exitCode === null && child.signalCode === null) {
+    child.kill('SIGTERM');
+    await once(child, 'exit');
+  }
 }
