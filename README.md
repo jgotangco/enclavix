@@ -1,5 +1,7 @@
 # 🛡️ Enclavix — HOA & Enclave Operating System
 
+> **Production refresh planning:** The current application is a prototype and is not approved for real resident data, financial operations, or gate decisions. Start with [the delivery guide](docs/START_HERE.md), [the updated BRD](docs/BRD.md), and [the sprint roadmap](docs/delivery/SPRINTS.md). Antigravity implementation begins with S00; this handoff does not implement application repairs.
+
 > **The Intelligent Operating System for Boutique Residential Enclaves & Homeowners Associations.**
 
 Enclavix is a concept for a community governance platform designed specifically for private gated villages, townhouse developments, and residential subdivisions. It unifies automated formula-driven dues computation, dual-gate RFID security clearance, elevated curbside parking quota enforcement, domesticated pet health tracking, and role-based stakeholder portals.

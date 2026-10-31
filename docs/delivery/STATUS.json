@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "baseline_commit": "d150f8b3a84b77a53c9f1136434481ed544d4067",
+  "current_sprint": "S00",
+  "sprints": [
+    {
+      "id": "S00",
+      "title": "Reproducible foundation and demo containment",
+      "status": "not_started",
+      "depends_on": [],
+      "prompt": "docs/delivery/sprints/S00.md",
+      "evidence": "docs/delivery/evidence/S00.md",
+      "blockers": [],
+      "accepted_by": null,
+      "accepted_at": null
+    },
+    {
+      "id": "S01",
+      "title": "Tenant domain and architecture",
+      "status": "not_started",
+      "depends_on": [
+        "S00"
+      ],
+      "prompt": "docs/delivery/sprints/S01.md",
+      "evidence": "docs/delivery/evidence/S01.md",
+      "blockers": [],
+      "accepted_by": null,
+      "accepted_at": null
+    },
+    {
+      "id": "S02",
+      "title": "Real identity and tenant authorization",
+      "status": "not_started",
+      "depends_on": [
+        "S01"
+      ],
+      "prompt": "docs/delivery/sprints/S02.md",
+      "evidence": "docs/delivery/evidence/S02.md",
+      "blockers": [],
+      "accepted_by": null,
+      "accepted_at": null
+    },
+    {
+      "id": "S03",
+      "title": "Onboarding and property membership workflows",
+      "status": "not_started",
+      "depends_on": [
+        "S02"
+      ],
+      "prompt": "docs/delivery/sprints/S03.md",
+      "evidence": "docs/delivery/evidence/S03.md",
+      "blockers": [],
+      "accepted_by": null,
+      "accepted_at": null
+    },
+    {
+      "id": "S04",
+      "title": "Receivables and payment verification",
+      "status": "not_started",
+      "depends_on": [
+        "S03"
+      ],
+      "prompt": "docs/delivery/sprints/S04.md",
+      "evidence": "docs/delivery/evidence/S04.md",
+      "blockers": [],
+      "accepted_by": null,
+      "accepted_at": null
+    },
+    {
+      "id": "S05",
+      "title": "Core resident services and private documents",
+      "status": "not_started",
+      "depends_on": [
+        "S04"
+      ],
+      "prompt": "docs/delivery/sprints/S05.md",
+      "evidence": "docs/delivery/evidence/S05.md",
+      "blockers": [],
+      "accepted_by": null,
+      "accepted_at": null
+    },
+    {
+      "id": "S06",
+      "title": "Android foundation and account context",
+      "status": "not_started",
+      "depends_on": [
+        "S05"
+      ],
+      "prompt": "docs/delivery/sprints/S06.md",
+      "evidence": "docs/delivery/evidence/S06.md",
+      "blockers": [],
+      "accepted_by": null,
+      "accepted_at": null
+    },
+    {
+      "id": "S07",
+      "title": "Resident Android workflows and cross-channel parity",
+      "status": "not_started",
+      "depends_on": [
+        "S06"
+      ],
+      "prompt": "docs/delivery/sprints/S07.md",
+      "evidence": "docs/delivery/evidence/S07.md",
+      "blockers": [],
+      "accepted_by": null,
+      "accepted_at": null
+    },
+    {
+      "id": "S08",
+      "title": "Visitor and guard operations",
+      "status": "not_started",
+      "depends_on": [
+        "S07"
+      ],
+      "prompt": "docs/delivery/sprints/S08.md",
+      "evidence": "docs/delivery/evidence/S08.md",
+      "blockers": [],
+      "accepted_by": null,
+      "accepted_at": null
+    },
+    {
+      "id": "S09",
+      "title": "Parking pets amenities and condominium moves",
+      "status": "not_started",
+      "depends_on": [
+        "S08"
+      ],
+      "prompt": "docs/delivery/sprints/S09.md",
+      "evidence": "docs/delivery/evidence/S09.md",
+      "blockers": [],
+      "accepted_by": null,
+      "accepted_at": null
+    },
+    {
+      "id": "S10",
+      "title": "Production hardening and operating readiness",
+      "status": "not_started",
+      "depends_on": [
+        "S09"
+      ],
+      "prompt": "docs/delivery/sprints/S10.md",
+      "evidence": "docs/delivery/evidence/S10.md",
+      "blockers": [],
+      "accepted_by": null,
+      "accepted_at": null
+    },
+    {
+      "id": "S11",
+      "title": "Village and condominium pilot acceptance",
+      "status": "not_started",
+      "depends_on": [
+        "S10"
+      ],
+      "prompt": "docs/delivery/sprints/S11.md",
+      "evidence": "docs/delivery/evidence/S11.md",
+      "blockers": [],
+      "accepted_by": null,
+      "accepted_at": null
+    }
+  ]
+}

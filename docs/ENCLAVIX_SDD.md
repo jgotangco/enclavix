@@ -1,3 +1,5 @@
+> Historical prototype documentation. For current production requirements and implementation scope, read [Start here](START_HERE.md) and [BRD](BRD.md). Capabilities described below are not production acceptance evidence.
+
 # 🛡️ Enclavix — Software Design Document & Technical Specification
 
 **Product:** Enclavix (HOA & Enclave Operating System)  

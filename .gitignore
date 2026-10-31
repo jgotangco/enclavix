@@ -32,6 +32,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Planning tools
+__pycache__/
+*.py[cod]
+
 # OS Files
 .DS_Store
 *.pem
