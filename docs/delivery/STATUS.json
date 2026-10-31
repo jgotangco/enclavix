@@ -6,13 +6,13 @@
     {
       "id": "S00",
       "title": "Reproducible foundation and demo containment",
-      "status": "ready_for_review",
+      "status": "accepted",
       "depends_on": [],
       "prompt": "docs/delivery/sprints/S00.md",
       "evidence": "docs/delivery/evidence/S00.md",
       "blockers": [],
-      "accepted_by": null,
-      "accepted_at": null
+      "accepted_by": "Jerome Gotangco via explicit review and merge authorization",
+      "accepted_at": "2026-10-31"
     },
     {
       "id": "S01",
