@@ -20,3 +20,11 @@ Requires Docker. Run `npm ci`, `npx supabase start -x realtime,edge-runtime,logf
 Run `node tools/check-local-supabase.mjs` immediately after the reset. It reads the local CLI status internally, refuses any endpoint other than 127.0.0.1 on the expected ports, creates 10 synthetic users with random passwords through the Admin API, confirms sign-in, maps actual user IDs into the local relational seed, and checks denied API access. It never prints keys or passwords. Re-running requires a fresh local reset. Stop with `npx supabase stop --no-backup`.
 
 `tests/fixtures/standalone_test_auth_scaffolding.sql` and `relational_users.sql` are PGlite relational fixtures, not usable authentication accounts. They are never deployable migrations. `supabase/seed.sql` requires users already provisioned by the local verification script and automatic seeding is disabled. Never apply synthetic seeds to a real association.
+
+
+## S01 domain foundation
+The new private `app` schema is additive to the prototype. No ordinary role can access it and it is not exposed by the Data API. Domain fixtures are loaded only by disposable test tools.
+
+After editing migrations run `npm run types:domain`; commit `src/types/domain.generated.ts`. CI runs `npm run types:check`, and local Supabase verification independently compares real PostgreSQL catalogs to that file. The generator maps exact numeric/bigint values to strings and timestamps to serialized strings. Do not cast raw pg Date/numeric values to these types without the future API adapter.
+
+`npm test` includes tenant-domain invariants. The local Supabase verification also seeds both community forms, verifies scoped references and RLS, and uses two independent connections to race the same operation key. It still refuses any hosted database. See `docs/architecture/README.md` for the domain model, proposed decisions and later-sprint enforcement work.

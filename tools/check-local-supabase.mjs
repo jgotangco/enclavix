@@ -5,6 +5,8 @@ import { randomBytes } from 'node:crypto';
 import assert from 'node:assert/strict';
 import { createClient } from '@supabase/supabase-js';
 import pg from 'pg';
+import { seedDomainFixtures } from './lib/domain-fixtures.mjs';
+import { verifyDomainPostgres, verifyDomainConcurrency } from './lib/verify-domain.mjs';
 
 const state = JSON.parse(execFileSync('node_modules/.bin/supabase', ['status', '--output', 'json'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }));
 for (const key of ['API_URL', 'DB_URL']) {
@@ -47,6 +49,17 @@ try {
   const denied = await sessions[0].from('announcements').insert({ title: 'Denied', content: 'Test', published_by: (await sessions[0].auth.getUser()).data.user.id });
   assert.ok(denied.error, 'Authenticated write must remain denied before S02');
   console.log('Local Supabase: 10 Admin API users can sign in; seed and API deny-by-default checks passed');
+  const owner=(await sessions[0].auth.getUser()).data.user.id;
+  const staff=(await sessions[1].auth.getUser()).data.user.id;
+  await seedDomainFixtures(db,owner,staff);
+  await verifyDomainPostgres(db);
+  await verifyDomainConcurrency(async () => {
+    const client=new pg.Client({ connectionString: state.DB_URL });
+    await client.connect();
+    return client;
+  });
+  const unexposed=await publicClient.schema('app').from('people').select('*');
+  assert.equal(unexposed.error?.code,'PGRST106','Private domain schema must not be in the exposed schema list');
 } finally {
   await db.end();
   await Promise.all(sessions.map(client => client.auth.signOut()));

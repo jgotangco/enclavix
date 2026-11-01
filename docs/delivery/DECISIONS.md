@@ -34,3 +34,10 @@ ID and title / status / date / actual approver / context / options / decision / 
 - Rollback: revert only this feature branch change set in development. No production data or deployment was modified.
 
 Unapproved decisions remain proposed. Engineering choices do not represent regulatory approval, product acceptance or authorization to deploy.
+
+
+## S01 recommendations recorded 1 November 2026
+
+D01: keep Philippines/PHP/Asia-Manila defaults configurable. D02: use association-scoped records with explicit memberships and composite foreign keys; business confirmation remains with the sponsor and architecture lead. See ADR 0001. D03: evaluate managed Supabase plus a container API/worker; no production region, purchased tier or recovery commitment selected. See ADR 0002. D04: evaluate Kotlin/Compose first for the Android-only goal, retain React Native as an alternative; device/build spike and actual owner approval remain required before S06. See ADR 0003. API evolution and migration compatibility are in ADR 0004.
+
+These are engineering recommendations, not invented approvals. S01 may finish its reversible schema/testing scope while production hosting, legal onboarding rules and the mobile stack remain explicitly unresolved for their decision owners. S00's runtime and containment implementation was accepted through PR #1; it does not approve any later deployment or spending.
