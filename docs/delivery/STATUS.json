@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "baseline_commit": "d150f8b3a84b77a53c9f1136434481ed544d4067",
-  "current_sprint": "S00",
+  "current_sprint": "S01",
   "sprints": [
     {
       "id": "S00",
@@ -17,7 +17,7 @@
     {
       "id": "S01",
       "title": "Tenant domain and architecture",
-      "status": "not_started",
+      "status": "ready_for_review",
       "depends_on": [
         "S00"
       ],
