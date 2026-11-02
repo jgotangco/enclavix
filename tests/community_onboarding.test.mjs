@@ -147,3 +147,18 @@ test('activation requires the explicit reviewed revision, including rejection of
  assert.equal((await db.query("SELECT count(*)::int n FROM app.lifecycle_events WHERE tenant_id=$1 AND event_type='onboarding.activated'",[t])).rows[0].n,0);
  const current=await rpc('enclavix_s03_setup',[t]);assert.equal((await rpc('enclavix_s03_activate',[t,current.setup.revision,'Approve the explicitly reviewed revision'])).activated,true);
 });
+test('activation rechecks the nominated account verification and suspension state',async()=>{
+ const {t}=await setup('revalidate-nominated-account');
+ await rpc('enclavix_s03_submit',[t,'Submit verified administrator setup']);
+ await as('reviewer');
+ const snapshot=await rpc('enclavix_s03_setup',[t]);
+ try {
+  await db.query("UPDATE auth.users SET banned_until=now()+interval '1 hour' WHERE id=$1",[users.admin]);
+  assert.equal((await rpc('enclavix_s03_setup',[t])).checklist.administrator,false);
+  await assert.rejects(rpc('enclavix_s03_activate',[t,snapshot.setup.revision,'Reject suspended administrator activation']),e=>e.code==='22023');
+  await db.query('UPDATE auth.users SET banned_until=NULL,email_confirmed_at=NULL WHERE id=$1',[users.admin]);
+  assert.equal((await rpc('enclavix_s03_setup',[t])).checklist.administrator,false);
+  await assert.rejects(rpc('enclavix_s03_activate',[t,snapshot.setup.revision,'Reject unverified administrator activation']),e=>e.code==='22023');
+ } finally {await db.query('UPDATE auth.users SET banned_until=NULL,email_confirmed_at=now() WHERE id=$1',[users.admin]);}
+ assert.equal((await db.query('SELECT status FROM app.tenants WHERE id=$1',[t])).rows[0].status,'onboarding');
+});

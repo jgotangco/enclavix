@@ -252,7 +252,7 @@ END $$;
 CREATE FUNCTION app.setup_checklist(t uuid) RETURNS jsonb LANGUAGE sql STABLE SECURITY DEFINER SET search_path=pg_catalog AS $$
  SELECT jsonb_build_object(
  'structure',EXISTS(SELECT 1 FROM app.communities WHERE tenant_id=t) AND EXISTS(SELECT 1 FROM app.properties WHERE tenant_id=t) AND NOT EXISTS(SELECT 1 FROM app.properties WHERE tenant_id=t AND location_id IS NULL),
- 'administrator',EXISTS(SELECT 1 FROM app.memberships m JOIN app.people p ON (p.tenant_id,p.id)=(m.tenant_id,m.person_id) JOIN app.membership_roles r ON (r.tenant_id,r.membership_id)=(m.tenant_id,m.id)
+ 'administrator',EXISTS(SELECT 1 FROM app.memberships m JOIN app.people p ON (p.tenant_id,p.id)=(m.tenant_id,m.person_id) JOIN app.membership_roles r ON (r.tenant_id,r.membership_id)=(m.tenant_id,m.id) JOIN auth.users u ON u.id=p.auth_user_id AND u.email_confirmed_at IS NOT NULL AND (u.banned_until IS NULL OR u.banned_until<=statement_timestamp())
  WHERE m.tenant_id=t AND p.auth_user_id=s.administrator_id AND m.status='active' AND m.valid_from<=statement_timestamp() AND (m.valid_until IS NULL OR m.valid_until>statement_timestamp()) AND r.role='association_admin' AND r.community_id IS NULL AND r.revoked_at IS NULL AND r.valid_from<=statement_timestamp() AND (r.valid_until IS NULL OR r.valid_until>statement_timestamp())),
  'contact_details',length(btrim(s.address))>=10 AND s.notification_contact ~ '^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$' AND length(btrim(s.support_contact))>=5,
  'privacy_notice',length(btrim(s.privacy_notice_ref))>=10,
