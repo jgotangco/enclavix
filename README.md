@@ -13,7 +13,7 @@ Accepted engineering delivery baseline as of 2 November 2026:
 | [S00](docs/delivery/evidence/S00.md) | Accepted — [PR #1](https://github.com/jgotangco/enclavix/pull/1) | Reproducible builds, mock-demo isolation, closed production portals and default-deny prototype tables |
 | [S01](docs/delivery/evidence/S01.md) | Accepted — [PR #2](https://github.com/jgotangco/enclavix/pull/2) | Private tenant domain, scoped relationships, generated types, fixtures, isolation/concurrency checks and architecture contracts |
 | [S02](docs/delivery/evidence/S02.md) | Accepted — [PR #3](https://github.com/jgotangco/enclavix/pull/3) | Verified identity, MFA, scoped account services, invitations/approval, revocation and private download authorization |
-| [S03](docs/delivery/evidence/S03.md) | In progress — reviewed increment; completion pending | Synthetic onboarding, property/asset relationships, import reconciliation and export/offboarding staging |
+| [S03](docs/delivery/evidence/S03.md) | Engineering ready for owner review — acceptance pending | Synthetic onboarding, property/asset relationships, import reconciliation and export/offboarding staging |
 | S04–S05, S08–S11 | Not started | Web finance, resident/guard operations, hardening and pilot acceptance |
 | S06–S07 | Deferred — not started | Commercial Android after S11 acceptance and pilot evidence |
 
