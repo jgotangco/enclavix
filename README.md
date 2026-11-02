@@ -33,9 +33,9 @@ Dues and payment verification, documents, visitors, parking, pets and amenities 
 
 **Implemented web workspace — accepted S03 scope, synthetic review data.** Residents see their currently authorized property/asset records; administrators have separate registry and onboarding controls. This is an actual built-web screenshot, not a production deployment.
 
-![S03 web workspace showing authorized property and asset records](docs/delivery/evidence/assets/S03-resident-assets.png)
+![S03 web workspace showing authorized property and asset records](docs/delivery/evidence/assets/S03-resident-assets.jpg)
 
-The [onboarding review screenshot](docs/delivery/evidence/assets/S03-onboarding-sandbox.png) shows completed synthetic setup and independent sandbox activation. Browser review used a disposable local Auth stand-in for screen behavior; real Auth/MFA and authorization were verified separately in Supabase CI. See [S03 evidence](docs/delivery/evidence/S03.md).
+The [onboarding review screenshot](docs/delivery/evidence/assets/S03-onboarding-sandbox.jpg) shows completed synthetic setup and independent sandbox activation. Browser review used a disposable local Auth stand-in for screen behavior; real Auth/MFA and authorization were verified separately in Supabase CI. See [S03 evidence](docs/delivery/evidence/S03.md).
 
 **Planned Android interface — illustrative concept only, not implemented.** This mockup shows possible future resident home, payment-proof and request screens. Names, amounts and community details are fictional examples, not a selected pilot. The layout is a design direction, not an approved feature release or evidence of working mobile services. Commercial Android remains after S11 acceptance and pilot evidence; stack, distribution and license decisions remain separate.
 
