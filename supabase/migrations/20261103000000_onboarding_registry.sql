@@ -165,9 +165,13 @@ BEGIN
    v_kind:=(p_data->>'kind')::app.relationship_kind;
    SELECT community_id INTO community FROM app.properties WHERE tenant_id=p_tenant AND id=(p_data->>'property_id')::uuid AND is_active;
    IF community IS NULL THEN RAISE EXCEPTION 'Unknown property' USING ERRCODE='42501'; END IF;
+   IF EXISTS(SELECT 1 FROM jsonb_each_text(p_data) x WHERE x.key IN ('valid_from','valid_until') AND nullif(x.value,'') IS NOT NULL
+    AND x.value !~ '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,6})?)?(Z|[+-]\d{2}:\d{2})$')
+   THEN RAISE EXCEPTION 'Effective dates require an ISO timestamp and explicit time zone' USING ERRCODE='22023'; END IF;
    effective:=coalesce(nullif(p_data->>'valid_from','')::timestamptz,statement_timestamp());
    IF effective<statement_timestamp()-interval '5 minutes' THEN RAISE EXCEPTION 'Backdated access changes are not supported' USING ERRCODE='22023'; END IF;
    effective:=greatest(effective,statement_timestamp());
+   IF nullif(p_data->>'valid_until','')::timestamptz<=effective THEN RAISE EXCEPTION 'End must follow the effective start' USING ERRCODE='22023'; END IF;
    IF p_action='transfer' THEN
     IF v_kind NOT IN ('owner','tenant') OR target IS NULL OR target=person THEN RAISE EXCEPTION 'Invalid transfer' USING ERRCODE='22023'; END IF;
     SELECT * INTO old FROM app.property_relationships WHERE tenant_id=p_tenant AND property_id=(p_data->>'property_id')::uuid AND person_id=person AND app.property_relationships.kind=v_kind

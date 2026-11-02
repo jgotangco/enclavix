@@ -131,6 +131,8 @@ test('terminology and contact responsibilities are configuration with bounded va
  await assert.rejects(command(f.villageTenant,'community',{code:'BAD-LABEL',name:'Bad term',kind:'village',structure_labels:{property:{nested:'not text'}}}),e=>e.code==='22023');
  const first=(await command(f.villageTenant,'person',{external_key:'PRIMARY-ONE',name:'Primary sample',kind:'individual'})).id;
  const second=(await command(f.villageTenant,'person',{external_key:'PRIMARY-TWO',name:'Other sample',kind:'individual'})).id;
+ await assert.rejects(command(f.villageTenant,'relationship',{property_id:f.lot,person_id:first,kind:'occupant',valid_from:'2030-01-01T12:00:00'}),e=>e.code==='22023');
+ await assert.rejects(command(f.villageTenant,'relationship',{property_id:f.lot,person_id:first,kind:'occupant',valid_from:'2030-01-01T12:00:00Z',valid_until:'2029-01-01T12:00:00Z'}),e=>e.code==='22023');
  const current=await command(f.villageTenant,'relationship',{property_id:f.lot,person_id:first,kind:'occupant',primary_contact:true,billing_contact:true});
  await assert.rejects(command(f.villageTenant,'relationship',{property_id:f.lot,person_id:second,kind:'occupant',primary_contact:true}),e=>e.code==='23505');
  await command(f.villageTenant,'end_relationship',{id:current.id});
