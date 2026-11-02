@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "baseline_commit": "d150f8b3a84b77a53c9f1136434481ed544d4067",
-  "current_sprint": "S01",
+  "current_sprint": "S02",
   "sprints": [
     {
       "id": "S00",
@@ -30,7 +30,7 @@
     {
       "id": "S02",
       "title": "Real identity and tenant authorization",
-      "status": "not_started",
+      "status": "in_progress",
       "depends_on": [
         "S01"
       ],

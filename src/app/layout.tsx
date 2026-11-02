@@ -3,9 +3,9 @@ import "./globals.css";
 
 
 export const metadata: Metadata = {
-  title: "Grand Enclave Residences | HOA Management System",
+  title: "Enclavix | Community account",
   description:
-    "Official HOA Management, Billing, Security Compliance & Resident Portal for Grand Enclave Residences",
+    "Enclavix web and Android community platform for villages and condominiums",
 };
 
 import { CommunitySettingsProvider } from "@/lib/context/community-settings";
@@ -21,7 +21,7 @@ export default function RootLayout({
         <p role="note" className="bg-amber-100 text-amber-950 px-4 py-3 text-sm text-center">
           {process.env.NEXT_PUBLIC_APP_ENV === "demo"
             ? "Synthetic demo only. Changes are temporary. Do not use for payments, resident records, or gate decisions."
-            : "Preview only. Resident access and operational services are not enabled yet."}
+            : "Development preview. Association access requires approval. Operational services are not enabled."}
         </p>
         <CommunitySettingsProvider>
           {children}

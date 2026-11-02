@@ -1,3 +1,5 @@
+export function runtimeEnvironment(name: string): string | undefined { return process.env[name]; }
+
 /** S00 demos use bundled mocks only. Configured backends invalidate demo mode. */
 export function hasBackendCredentials(): boolean {
   // Dynamic lookup also sees credentials injected at runtime into a prebuilt demo.
@@ -26,12 +28,13 @@ export function assertApplicationEnvironment(): void {
 }
 
 export function isSupabaseConfigured(): boolean {
-  const raw = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+  const raw = runtimeEnvironment("NEXT_PUBLIC_SUPABASE_URL")?.trim();
+  const key = runtimeEnvironment("NEXT_PUBLIC_SUPABASE_ANON_KEY")?.trim();
   if (!raw || !key || /dummy|your-supabase|placeholder/i.test(raw + key)) return false;
   try {
     const url = new URL(raw);
-    return url.protocol === "https:" && !url.username && !url.password &&
+    const protocolAllowed = url.protocol === "https:" || (runtimeEnvironment("ENCLAVIX_LOCAL_AUTH_TEST") === "1" && url.protocol === "http:" && url.hostname === "127.0.0.1" && url.port === "54321");
+    return protocolAllowed && !url.username && !url.password &&
       url.pathname === "/" && !url.search && !url.hash;
   } catch { return false; }
 }

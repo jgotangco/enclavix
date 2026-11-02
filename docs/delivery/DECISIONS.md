@@ -10,7 +10,7 @@ Status is `proposed`, `approved`, `rejected` or `superseded`. A proposed default
 | D04 | Android implementation | Compare Kotlin Compose and React Native with auth, push, uploads and device spike | proposed | S01 recommendation; S06 approval | Product and engineering leads |
 | D05 | Android device support | Android 10 onward subject to actual device survey and current store requirements | proposed | S06 | Product owner |
 | D06 | Finance policy | Manual payment verification first; tenant-approved rounding, allocation, approval limits and document terminology | proposed | S04 production policy | Association finance owner |
-| D07 | Security and staff identity | MFA for privileged roles; approved support access; shared-device policy | proposed | S02 | Security and operations owners |
+| D07 | Security and staff identity | MFA for every staff/admin role; individual accounts; immediate revocation; explicitly approved time-limited support | approved | S02 | Security and operations owners |
 | D08 | Privacy and retention | Data inventory and tenant notices; explicit schedules and legal holds; specialist validation | proposed | S05 and before real onboarding | Privacy owner |
 | D09 | Service targets | BRD NFR targets are internal proposals until cost and load evidence support them | proposed | S10 | Sponsor and operations owner |
 | D10 | Pilot and phasing | Release A core web plus resident Android; Release B guard and extended operations; one village and condo pilot | proposed | S00 planning; S11 launch | Product and pilot sponsors |
@@ -41,3 +41,7 @@ Unapproved decisions remain proposed. Engineering choices do not represent regul
 D01: keep Philippines/PHP/Asia-Manila defaults configurable. D02: use association-scoped records with explicit memberships and composite foreign keys; business confirmation remains with the sponsor and architecture lead. See ADR 0001. D03: evaluate managed Supabase plus a container API/worker; no production region, purchased tier or recovery commitment selected. See ADR 0002. D04: evaluate Kotlin/Compose first for the Android-only goal, retain React Native as an alternative; device/build spike and actual owner approval remain required before S06. See ADR 0003. API evolution and migration compatibility are in ADR 0004.
 
 These are engineering recommendations, not invented approvals. S01 may finish its reversible schema/testing scope while production hosting, legal onboarding rules and the mobile stack remain explicitly unresolved for their decision owners. S00's runtime and containment implementation was accepted through PR #1; it does not approve any later deployment or spending.
+
+## D07 security policy approval — 2 November 2026
+
+Approved by Jerome Gotangco through the explicit response “Use this policy”: MFA for all staff and administrator roles, no shared staff accounts, immediate membership revocation, support disabled until explicitly approved and time-limited. ADR 0005 defines the reviewable implementation (8-hour resident, 1-hour staff, 30-minute guard absolute sessions; sensitive changes within 10 minutes; support at most 60 minutes, metadata only). Implementation details require engineering review; production infrastructure and deployment remain unapproved.

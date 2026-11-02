@@ -12,3 +12,5 @@ The new domain lives in the private PostgreSQL `app` schema. Existing public tab
 - [Workers and private documents](workers-and-storage.md).
 
 These documents distinguish implemented database constraints from future application enforcement. None of them represents regulatory certification, a production release, financial posting acceptance, or an independent security assessment.
+
+S02 work in progress: [identity and authorization contract](adr/0005-identity-and-access.md). The S01 boundary described above is the accepted baseline; the S02 branch adds narrow account services while retaining mock portal containment.

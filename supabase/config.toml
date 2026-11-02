@@ -18,12 +18,20 @@ enabled = false
 enabled = false
 
 [inbucket]
-enabled = false
+enabled = true
 
 [storage]
-enabled = false
+enabled = true
 
 [auth]
 enabled = true
 site_url = "http://localhost:3000"
-enable_signup = false
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+enable_confirmations = true
+
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true

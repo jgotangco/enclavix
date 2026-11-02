@@ -1,5 +1,6 @@
 "use client";
 
+import { AccountAccess } from "@/components/account-access";
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -28,6 +29,11 @@ import { UserRole } from "@/types/database";
 import { isDemoModeEnabledClient } from "@/lib/env";
 
 function LoginForm() {
+  if (!isDemoModeEnabledClient()) return <AccountAccess />;
+  return <DemoLoginForm />;
+}
+
+function DemoLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { settings } = useCommunitySettings();

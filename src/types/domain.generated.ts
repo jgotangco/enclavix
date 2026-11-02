@@ -4,6 +4,41 @@ export type DomainJson = string | number | boolean | null | { [key: string]: Dom
 export interface DomainDatabase {
   app: {
     Tables: {
+      "access_applications": {
+        Row: {
+          "id": string;
+          "tenant_id": string;
+          "applicant_id": string;
+          "display_name": string;
+          "requested_property": string;
+          "status": string;
+          "reviewed_by_membership_id": string | null;
+          "reason": string | null;
+          "created_at": string;
+        };
+        Insert: {
+          "id"?: string;
+          "tenant_id": string;
+          "applicant_id": string;
+          "display_name": string;
+          "requested_property": string;
+          "status"?: string;
+          "reviewed_by_membership_id"?: string | null;
+          "reason"?: string | null;
+          "created_at"?: string;
+        };
+        Update: {
+          "id"?: string;
+          "tenant_id"?: string;
+          "applicant_id"?: string;
+          "display_name"?: string;
+          "requested_property"?: string;
+          "status"?: string;
+          "reviewed_by_membership_id"?: string | null;
+          "reason"?: string | null;
+          "created_at"?: string;
+        };
+      };
       "asset_allocations": {
         Row: {
           "id": string;
@@ -281,6 +316,44 @@ export interface DomainDatabase {
           "status"?: DomainDatabase["app"]["Enums"]["import_row_status"];
         };
       };
+      "invitations": {
+        Row: {
+          "id": string;
+          "tenant_id": string;
+          "person_id": string;
+          "email": string;
+          "token_hash": string;
+          "created_by_membership_id": string;
+          "expires_at": string;
+          "accepted_at": string | null;
+          "revoked_at": string | null;
+          "created_at": string;
+        };
+        Insert: {
+          "id"?: string;
+          "tenant_id": string;
+          "person_id": string;
+          "email": string;
+          "token_hash": string;
+          "created_by_membership_id": string;
+          "expires_at": string;
+          "accepted_at"?: string | null;
+          "revoked_at"?: string | null;
+          "created_at"?: string;
+        };
+        Update: {
+          "id"?: string;
+          "tenant_id"?: string;
+          "person_id"?: string;
+          "email"?: string;
+          "token_hash"?: string;
+          "created_by_membership_id"?: string;
+          "expires_at"?: string;
+          "accepted_at"?: string | null;
+          "revoked_at"?: string | null;
+          "created_at"?: string;
+        };
+      };
       "locations": {
         Row: {
           "id": string;
@@ -324,6 +397,7 @@ export interface DomainDatabase {
           "valid_from": string;
           "valid_until": string | null;
           "created_at": string;
+          "revoked_at": string | null;
         };
         Insert: {
           "id"?: string;
@@ -335,6 +409,7 @@ export interface DomainDatabase {
           "valid_from": string;
           "valid_until"?: string | null;
           "created_at"?: string;
+          "revoked_at"?: string | null;
         };
         Update: {
           "id"?: string;
@@ -346,6 +421,7 @@ export interface DomainDatabase {
           "valid_from"?: string;
           "valid_until"?: string | null;
           "created_at"?: string;
+          "revoked_at"?: string | null;
         };
       };
       "memberships": {
@@ -485,6 +561,20 @@ export interface DomainDatabase {
           "created_at"?: string;
         };
       };
+      "platform_operators": {
+        Row: {
+          "auth_user_id": string;
+          "enabled": boolean;
+        };
+        Insert: {
+          "auth_user_id": string;
+          "enabled"?: boolean;
+        };
+        Update: {
+          "auth_user_id"?: string;
+          "enabled"?: boolean;
+        };
+      };
       "properties": {
         Row: {
           "id": string;
@@ -571,6 +661,38 @@ export interface DomainDatabase {
           "valid_from"?: string;
           "valid_until"?: string | null;
           "created_at"?: string;
+        };
+      };
+      "support_access": {
+        Row: {
+          "id": string;
+          "tenant_id": string;
+          "operator_id": string;
+          "approved_by_membership_id": string;
+          "reason": string;
+          "starts_at": string;
+          "expires_at": string;
+          "revoked_at": string | null;
+        };
+        Insert: {
+          "id"?: string;
+          "tenant_id": string;
+          "operator_id": string;
+          "approved_by_membership_id": string;
+          "reason": string;
+          "starts_at"?: string;
+          "expires_at": string;
+          "revoked_at"?: string | null;
+        };
+        Update: {
+          "id"?: string;
+          "tenant_id"?: string;
+          "operator_id"?: string;
+          "approved_by_membership_id"?: string;
+          "reason"?: string;
+          "starts_at"?: string;
+          "expires_at"?: string;
+          "revoked_at"?: string | null;
         };
       };
       "tenants": {

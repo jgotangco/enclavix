@@ -118,7 +118,7 @@ test('Database RLS: restricted role "anon" experiences deny-by-default on all 11
   t.after(() => db.close());
 
   // Create unprivileged anon role and grant standard table permissions
-  await db.exec('CREATE ROLE anon NOLOGIN;');
+
   await db.exec('GRANT USAGE ON SCHEMA public TO anon;');
   await db.exec('GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO anon;');
 
@@ -165,7 +165,7 @@ test('Database RLS: restricted role "authenticated" experiences deny-by-default 
   t.after(() => db.close());
 
   // Create authenticated role and grant table permissions
-  await db.exec('CREATE ROLE authenticated NOLOGIN;');
+
   await db.exec('GRANT USAGE ON SCHEMA public TO authenticated;');
   await db.exec('GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO authenticated;');
 
