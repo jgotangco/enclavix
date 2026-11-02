@@ -250,7 +250,7 @@ BEGIN
  UPDATE app.invitations SET accepted_at=statement_timestamp() WHERE id=i.id;
  PERFORM app.record_access(i.tenant_id,m,'access.invitation_accepted',jsonb_build_object('invitation_id',i.id));
 END $$;
-CREATE FUNCTION public.enclavix_set_role(p_tenant uuid,p_member uuid,p_role app.system_role,p_community uuid,p_until timestamptz,p_revoke boolean,p_reason text) RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog AS $$
+CREATE FUNCTION public.enclavix_set_role(p_tenant uuid,p_member uuid,p_role text,p_community uuid,p_until timestamptz,p_revoke boolean,p_reason text) RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog AS $$
 DECLARE actor uuid:=app.require_admin(p_tenant,p_reason);
 BEGIN
  IF p_revoke IS NULL THEN RAISE EXCEPTION 'Explicit action required' USING ERRCODE='22023'; END IF;
@@ -258,11 +258,11 @@ BEGIN
  IF p_member=actor OR NOT EXISTS(SELECT 1 FROM app.memberships WHERE tenant_id=p_tenant AND id=p_member AND status='active') THEN RAISE EXCEPTION 'Invalid role target' USING ERRCODE='42501'; END IF;
  IF p_until IS NOT NULL AND p_until<=statement_timestamp() THEN RAISE EXCEPTION 'Invalid expiry' USING ERRCODE='22023'; END IF;
  UPDATE app.membership_roles SET revoked_at=statement_timestamp()
- WHERE tenant_id=p_tenant AND membership_id=p_member AND role=p_role AND community_id IS NOT DISTINCT FROM p_community
+ WHERE tenant_id=p_tenant AND membership_id=p_member AND role=p_role::app.system_role AND community_id IS NOT DISTINCT FROM p_community
  AND revoked_at IS NULL;
  IF NOT p_revoke THEN
  INSERT INTO app.membership_roles(tenant_id,membership_id,role,community_id,valid_from,valid_until,granted_by_membership_id)
- VALUES(p_tenant,p_member,p_role,p_community,statement_timestamp(),p_until,actor);
+ VALUES(p_tenant,p_member,p_role::app.system_role,p_community,statement_timestamp(),p_until,actor);
  END IF;
  PERFORM app.record_access(p_tenant,actor,'access.role_changed',jsonb_build_object('membership_id',p_member,'role',p_role,'community_id',p_community,'revoked',p_revoke,'reason',p_reason));
 END $$;

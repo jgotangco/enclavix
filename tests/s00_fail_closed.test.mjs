@@ -34,5 +34,5 @@ test('mock demo rejects even partial backend credentials', () => {
   }
 });
 test('browser backend stays disabled and server rejects unconfigured/demo access', async () => {
-  assert.throws(browserClient, /disabled in S00/); await assert.rejects(serverClient, /unavailable in mock demo/);
+  assert.throws(browserClient, /Direct browser backend access is disabled/); await assert.rejects(serverClient, /unavailable in mock demo/);
 });

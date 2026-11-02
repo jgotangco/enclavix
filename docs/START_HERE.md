@@ -1,6 +1,6 @@
 # Start here
 
-Enclavix is being refreshed into a production web and Android service for independent village and condominium associations. The checked-in application remains a prototype. S00 foundation repairs and the S01 tenant domain are accepted; the application remains a contained prototype, not a production service.
+Enclavix is being refreshed into a production web and Android service for independent village and condominium associations. The checked-in application remains a prototype. S00 foundation repairs and the S01 tenant domain are accepted; S02 adds the account and authorization services under review; the application remains a contained prototype, not a production service.
 
 Architecture design and implementation boundaries: [S01 architecture](architecture/README.md).
 
@@ -13,7 +13,7 @@ Architecture design and implementation boundaries: [S01 architecture](architectu
 6. `docs/delivery/TRACEABILITY.md` and `docs/delivery/ACCEPTANCE.md`.
 
 ## Development handoff
-S00 and S01 are accepted following explicit owner review and merge authorization for PR #1 and PR #2. S02 real identity and tenant authorization is next and has not started. Read `AGENTS.md`, the selected sprint and its evidence before continuing. `docs/development.md` documents local setup and containment. The Antigravity prompts remain available for any future handoff.
+S00 and S01 are accepted following explicit owner review and merge authorization for PR #1 and PR #2. S02 real identity and tenant authorization is in progress on its feature branch; review and owner acceptance remain pending. Read `AGENTS.md`, the selected sprint and its evidence before continuing. `docs/development.md` documents local setup and containment. The Antigravity prompts remain available for any future handoff.
 
 Run `python3 tools/validate_delivery.py` from the repository root to validate planning structure. Python 3.9 or later is sufficient; no packages or application credentials are needed. Application checks are documented in `docs/development.md` and the completed sprint evidence.
 

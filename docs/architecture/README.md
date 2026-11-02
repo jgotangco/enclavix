@@ -1,6 +1,6 @@
-# S01 architecture baseline
+# Architecture and implementation boundaries
 
-The new domain lives in the private PostgreSQL `app` schema. Existing public tables and `src/types/database.ts` remain the isolated prototype. No production endpoint, database policy, worker or storage bucket is enabled by this sprint. S00 containment remains in force.
+The new domain lives in the private PostgreSQL `app` schema. Existing public tables and `src/types/database.ts` remain the isolated prototype. S01 established the domain with no application access. S02 adds narrow account services and authorization under review; operational mock portals remain isolated. No hosted deployment, worker or financial service is enabled.
 
 ## Decisions and contracts
 - [Tenant and identity boundary](adr/0001-tenant-boundary.md) — enforced foundation, D01/D02 business assumptions still proposed.

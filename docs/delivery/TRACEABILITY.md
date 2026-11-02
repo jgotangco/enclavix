@@ -21,13 +21,13 @@ Each BRD requirement has one sprint accountable for completion evidence. Earlier
 | FIN 06 | S04 | unverified |
 | FIN 07 | S04 | unverified |
 | FIN 08 | S04 | unverified |
-| IAM 01 | S02 | unverified |
-| IAM 02 | S02 | unverified |
-| IAM 03 | S02 | unverified |
-| IAM 04 | S02 | unverified |
-| IAM 05 | S02 | unverified |
-| IAM 06 | S02 | unverified |
-| IAM 07 | S02 | unverified |
+| IAM 01 | S02 | Implemented; provider and final CI verification in S02 evidence; review pending |
+| IAM 02 | S02 | Forged-cookie/claim and native request checks implemented; review pending |
+| IAM 03 | S02 | Account/property/document service and RLS checks implemented; later modules remain denied |
+| IAM 04 | S02 | MFA, absolute lifetimes and live session/membership checks implemented; review pending |
+| IAM 05 | S02 | Audited scoped role commands, no self-elevation and retry checks implemented; review pending |
+| IAM 06 | S02 | Approved expiring metadata-only support implemented; emergency impersonation disabled |
+| IAM 07 | S02 | Context-scoped reads and state clearing implemented; Android device acceptance remains S06/S07 |
 | NFR 01 | S10 | unverified |
 | NFR 02 | S10 | unverified |
 | NFR 03 | S10 | unverified |

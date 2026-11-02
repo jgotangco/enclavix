@@ -1,5 +1,6 @@
 """Planning-validator regression checks. Run: python3 tools/test_validate_delivery.py."""
 import json
+import re
 import shutil
 import tempfile
 import unittest
@@ -42,7 +43,7 @@ class DeliveryValidationTests(unittest.TestCase):
 
     def test_requirement_must_be_mapped(self):
         trace = self.root / "docs/delivery/TRACEABILITY.md"
-        trace.write_text(trace.read_text().replace("| IAM 02 | S02 | unverified |", ""))
+        trace.write_text(re.sub(r"^\| IAM 02 \|.*\n", "", trace.read_text(), flags=re.MULTILINE))
         self.assertTrue(any("Traceability mismatch" in e for e in validate(self.root)))
 
 
