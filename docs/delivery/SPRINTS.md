@@ -19,7 +19,7 @@ Each sprint is a bounded delivery package, not a fixed duration. The implementin
 
 Release A core web and Android implementation spans S00–S07. S08–S09 implement Release B. S10–S11 are shared production readiness and pilot gates. This conservative sequence validates all modules before full rollout; an earlier core-only pilot may branch after S07 only by formally re-scoping S10/S11 to disabled Release B modules and retaining all core security, recovery and finance gates. Record that change before execution.
 
-Current accepted baseline: S00 and S01 are merged through PR #1 and PR #2. S02 is next and has not started. Consult `STATUS.json` and sprint evidence for authoritative state; a documentation update does not authorize the next sprint.
+Current accepted baseline: S00–S02 through PR #1, PR #2 and PR #3. S03 is next and has not started. Consult `STATUS.json` and sprint evidence for authoritative state; a documentation update does not authorize the next sprint.
 
 ## State meanings
 - not_started: no implementation evidence.

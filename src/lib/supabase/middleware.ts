@@ -6,7 +6,7 @@ const ROLES = new Set(["SUPER_ADMIN", "TREASURER", "GUARD", "RESIDENT"]);
 
 export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  if (PUBLIC_PATHS.has(pathname)) return NextResponse.next();
+  if (PUBLIC_PATHS.has(pathname) || (!isDemoModeAllowedServer() && (pathname === "/account" || pathname === "/auth/callback" || pathname.startsWith("/api/v1/")))) return NextResponse.next();
 
   // Production identity and durable workflows arrive in S02+. Never expose mocks to real users.
   if (!isDemoModeAllowedServer()) {

@@ -42,5 +42,6 @@ test('configured backends invalidate demo auth including misleading URLs', async
   }
 });
 test('callback and invented auth-prefixed routes cannot bypass containment', async () => {
-  for (const p of ['/auth/callback?code=fake', '/api/auth/anything', '/auth-other']) assert.equal((await request(p)).status, 307);
+  assert.equal((await request('/auth/callback?code=fake')).status, 200); // handler validates provider code
+  for (const p of ['/api/auth/anything', '/auth-other']) assert.equal((await request(p)).status, 307);
 });

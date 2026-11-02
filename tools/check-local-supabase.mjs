@@ -1,11 +1,14 @@
 /** Disposable loopback Supabase only. Never accepts a hosted project or remote DB. */
 import { execFileSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
-import { randomBytes } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import assert from 'node:assert/strict';
 import { createClient } from '@supabase/supabase-js';
 import pg from 'pg';
 import { seedDomainFixtures } from './lib/domain-fixtures.mjs';
+import { verifyAccessConcurrency } from './lib/verify-access-concurrency.mjs';
+import { verifyWebIdentity } from './lib/verify-web-identity.mjs';
+import { verifyIdentity } from './lib/verify-identity.mjs';
 import { verifyDomainPostgres, verifyDomainConcurrency } from './lib/verify-domain.mjs';
 
 const state = JSON.parse(execFileSync('node_modules/.bin/supabase', ['status', '--output', 'json'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }));
@@ -15,7 +18,11 @@ for (const key of ['API_URL', 'DB_URL']) {
 }
 assert.equal(new URL(state.API_URL).port, '54321');
 assert.equal(new URL(state.DB_URL).port, '54322');
-const options = { auth: { persistSession: false, autoRefreshToken: false } };
+const options = { global: {fetch: (input,init)=>{
+ const headers=new Headers(init?.headers);
+ if(String(input).includes('/rest/v1/rpc/')&&!headers.has('Idempotency-Key')) headers.set('Idempotency-Key',randomUUID());
+ return fetch(input,{...init,headers});
+}}, auth: { persistSession: false, autoRefreshToken: false } };
 const admin = createClient(state.API_URL, state.SERVICE_ROLE_KEY, options);
 const publicClient = createClient(state.API_URL, state.ANON_KEY, options);
 const fixtures = await readFile('tests/fixtures/relational_users.sql', 'utf8');
@@ -58,6 +65,9 @@ try {
     await client.connect();
     return client;
   });
+  const identity=await verifyIdentity({db,admin,sessions,state});
+  await verifyAccessConcurrency({db,admin,staff:identity.staff,connect:async()=>{const c=new pg.Client({connectionString:state.DB_URL});await c.connect();return c;}});
+  await verifyWebIdentity({state,...identity});
   const unexposed=await publicClient.schema('app').from('people').select('*');
   assert.equal(unexposed.error?.code,'PGRST106','Private domain schema must not be in the exposed schema list');
 } finally {

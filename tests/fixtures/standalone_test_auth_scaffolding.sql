@@ -21,3 +21,13 @@ CREATE TABLE IF NOT EXISTS auth.users (
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Minimal relational shape used by S02; real sessions are provisioned by GoTrue in CI.
+ALTER TABLE auth.users ADD COLUMN banned_until timestamptz;
+CREATE TABLE auth.sessions (
+ id uuid PRIMARY KEY, user_id uuid NOT NULL REFERENCES auth.users(id),
+ created_at timestamptz NOT NULL DEFAULT now(), not_after timestamptz
+);
+CREATE ROLE anon NOLOGIN;
+CREATE ROLE authenticated NOLOGIN;
+CREATE ROLE service_role NOLOGIN;

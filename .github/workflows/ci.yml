@@ -38,6 +38,8 @@ jobs:
       - run: npm audit --omit=dev --audit-level=moderate
       - run: npm run build
       - run: node tools/check-http.mjs
+      - if: matrix.mode == 'production'
+        run: node tools/check-account-repairs.mjs
   supabase:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -50,6 +52,13 @@ jobs:
       - run: npm ci
       - run: npx supabase start -x realtime,edge-runtime,logflare,vector,supavisor
       - run: npx supabase db reset --local --no-seed
+      - run: npm run build
+        env:
+          ENCLAVIX_APP_ENV: production
+          NEXT_PUBLIC_APP_ENV: production
+          NEXT_PUBLIC_SUPABASE_URL: https://s00-ci.invalid
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-public-test-key
+          NEXT_TELEMETRY_DISABLED: '1'
       - run: node tools/check-local-supabase.mjs
       - if: always()
         run: npx supabase stop --no-backup
@@ -61,7 +70,7 @@ jobs:
       - run: docker build --build-arg NEXT_PUBLIC_SUPABASE_URL=https://s00-ci.invalid --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=ci-public-test-key -t enclavix-s00 .
       - name: Verify contained production runtime
         run: |
-          docker run -d --name enclavix-s00 -p 127.0.0.1:3000:8080 enclavix-s00
+          docker run -d --name enclavix-s00 -e NEXT_PUBLIC_SUPABASE_URL=https://s00-ci.invalid -e NEXT_PUBLIC_SUPABASE_ANON_KEY=ci-public-test-key -p 127.0.0.1:3000:8080 enclavix-s00
           curl --retry 20 --retry-delay 1 --retry-all-errors --fail http://127.0.0.1:3000/login -o /dev/null
           test "$(curl -s -o /dev/null -w '%{http_code}' -H 'Cookie: demo_user_role=SUPER_ADMIN' http://127.0.0.1:3000/admin)" = 307
       - if: always()
