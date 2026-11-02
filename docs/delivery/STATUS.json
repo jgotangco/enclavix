@@ -17,15 +17,15 @@
     {
       "id": "S01",
       "title": "Tenant domain and architecture",
-      "status": "ready_for_review",
+      "status": "accepted",
       "depends_on": [
         "S00"
       ],
       "prompt": "docs/delivery/sprints/S01.md",
       "evidence": "docs/delivery/evidence/S01.md",
       "blockers": [],
-      "accepted_by": null,
-      "accepted_at": null
+      "accepted_by": "Jerome Gotangco via explicit review and merge authorization",
+      "accepted_at": "2026-11-02"
     },
     {
       "id": "S02",
