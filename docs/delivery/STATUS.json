@@ -30,7 +30,7 @@
     {
       "id": "S02",
       "title": "Real identity and tenant authorization",
-      "status": "in_progress",
+      "status": "ready_for_review",
       "depends_on": [
         "S01"
       ],
