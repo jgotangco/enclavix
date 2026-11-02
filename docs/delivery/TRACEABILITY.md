@@ -50,15 +50,15 @@ Each BRD requirement has one sprint accountable for completion evidence. Earlier
 | REL 02 | S10 | unverified |
 | REL 03 | S10 | unverified |
 | SCP 01 | S10 | unverified |
-| SCP 02 | S03 | unverified |
+| SCP 02 | S03 | In progress: Configurable sandbox structure, terminology and branding implemented; assessment policies remain S04; see evidence/S03.md |
 | SCP 03 | S10 | unverified |
-| TEN 01 | S03 | unverified |
-| TEN 02 | S03 | unverified |
-| TEN 03 | S03 | unverified |
-| TEN 04 | S03 | unverified |
-| TEN 05 | S03 | unverified |
-| TEN 06 | S03 | unverified |
-| TEN 07 | S03 | unverified |
+| TEN 01 | S03 | In progress: Synthetic operator/nominee/reviewer flow implemented; real-data authority/privacy acceptance pending; see evidence/S03.md |
+| TEN 02 | S03 | In progress: Village/condo hierarchy, lot/townhouse/unit and asset registry implemented; allocation journeys pending; see evidence/S03.md |
+| TEN 03 | S03 | In progress: Contacts, co-ownership, representation, temporal primary/billing relationships implemented; evidence files S05; see evidence/S03.md |
+| TEN 04 | S03 | In progress: Effective relationship/transfer and derived-access regression verified; ledger cutover remains S04; see evidence/S03.md |
+| TEN 05 | S03 | In progress: Property/person/asset/relationship preview and atomic commit implemented; memberships/balances/vehicles deferred to owning workflows; see evidence/S03.md |
+| TEN 06 | S03 | In progress: Revision-bound synthetic checklist and independent activation implemented; real-data onboarding unapproved; see evidence/S03.md |
+| TEN 07 | S03 | In progress: Scoped JSON export and offboarding staging implemented; attachments/settlement/termination/retention remain S05/S10; see evidence/S03.md |
 | UX 01 | S07 | unverified |
 | UX 02 | S07 | unverified |
 | UX 03 | S07 | unverified |

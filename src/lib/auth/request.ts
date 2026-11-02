@@ -34,7 +34,7 @@ export function uuid(value: unknown): string {
   return s;
 }
 
-export async function readJson(request: Request): Promise<unknown> {
+export async function readJson(request: Request, maxBytes = 8192): Promise<unknown> {
   const reader = request.body?.getReader();
   if (!reader) throw new RequestError("JSON required",415);
   const chunks: Uint8Array[] = [];
@@ -44,7 +44,7 @@ export async function readJson(request: Request): Promise<unknown> {
       const {done,value} = await reader.read();
       if (done) break;
       size += value.byteLength;
-      if (size > 8192) { await reader.cancel(); throw new RequestError("Request too large",413); }
+      if (size > maxBytes) { await reader.cancel(); throw new RequestError("Request too large",413); }
       chunks.push(value);
     }
   } finally { reader.releaseLock(); }

@@ -13,7 +13,8 @@ Accepted engineering delivery baseline as of 2 November 2026:
 | [S00](docs/delivery/evidence/S00.md) | Accepted — [PR #1](https://github.com/jgotangco/enclavix/pull/1) | Reproducible builds, mock-demo isolation, closed production portals and default-deny prototype tables |
 | [S01](docs/delivery/evidence/S01.md) | Accepted — [PR #2](https://github.com/jgotangco/enclavix/pull/2) | Private tenant domain, scoped relationships, generated types, fixtures, isolation/concurrency checks and architecture contracts |
 | [S02](docs/delivery/evidence/S02.md) | Accepted — [PR #3](https://github.com/jgotangco/enclavix/pull/3) | Verified identity, MFA, scoped account services, invitations/approval, revocation and private download authorization |
-| S03–S11 | Not started | Onboarding, durable services, Android, operating readiness and pilot acceptance |
+| [S03](docs/delivery/evidence/S03.md) | In progress — review pending | Synthetic onboarding, registry relationships, import reconciliation and export/offboarding staging |
+| S04–S11 | Not started | Finance, durable operations, Android, operating readiness and pilot acceptance |
 
 [STATUS.json](docs/delivery/STATUS.json) is the delivery-state record. Sprint acceptance does not certify production readiness or approve unresolved hosting and mobile decisions. No production deployment or hosted migration has been performed.
 
@@ -59,7 +60,7 @@ See [development setup and containment](docs/development.md) for the separate co
 
 S02 introduces email-verified accounts, association-approved applications, email-bound invitations, MFA for all staff roles, session inventory/sign-out, audited role changes and time-limited metadata-only support access. A civic title or demo cookie grants no production permission. Signed-out, revoked or wrong-association requests fail at trusted service/database boundaries.
 
-The account area uses real services when configured in production mode. Business operations, new-association setup and Android delivery remain later-sprint work. Association administrators review existing verified contacts and properties; this is not yet a complete onboarding workflow. See the [identity contract](docs/architecture/adr/0005-identity-and-access.md) and [security runbook](docs/security-and-access.md).
+The account area uses real services when configured in production mode. S03 adds the `/workspace` web journey and `/api/v1/community` shared services for synthetic association setup, independent activation, community/property/contact registries, effective relationships, imports, and export/offboarding staging. The current private schema has 26 tables. Finance, full offboarding, attachments, real-data onboarding and Android remain later work. See the [onboarding contract](docs/architecture/adr/0006-onboarding-and-registry.md). See the [identity contract](docs/architecture/adr/0005-identity-and-access.md) and [security runbook](docs/security-and-access.md).
 
 ## Verification
 

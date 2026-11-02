@@ -43,6 +43,22 @@ export async function verifyWebIdentity({state,owner,staff,password}) {
    const changed=await fetch(endpoint+'access/role',{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json','Idempotency-Key':'native-role-command'},body:JSON.stringify(roleCommand)});assert.equal(changed.status,200);
   }
   const conflict=await fetch(endpoint+'access/role',{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json','Idempotency-Key':'native-role-command'},body:JSON.stringify({...roleCommand,p_role:'association_admin'})});assert.equal(conflict.status,409);
+  assert.equal((await fetch(base+'/workspace')).status,200);
+  assert.equal((await fetch(endpoint+'community/index',{headers:{cookie:'demo_user_role=SUPER_ADMIN'}})).status,401);
+  const registry=await fetch(endpoint+`community/${f.villageTenant}/registry`,{headers:{authorization:`Bearer ${token}`}});assert.equal(registry.status,200);
+  const registryData=(await registry.json()).data;assert.ok(registryData.people.every(p=>!('auth_user_id' in p)));assert.ok(registryData.properties.every(p=>p.lot_area_sqm===null||typeof p.lot_area_sqm==='string'));
+  const command={p_tenant:f.villageTenant,p_action:'person',p_data:{external_key:'NATIVE-S03',name:'Native synthetic contact',kind:'individual'},p_reason:'Verified shared registry API command'};
+  const nativeHeaders={authorization:`Bearer ${token}`,'content-type':'application/json','Idempotency-Key':'native-s03-command'};
+  for(let i=0;i<2;i++)assert.equal((await fetch(endpoint+'community/registry_command',{method:'POST',headers:nativeHeaders,body:JSON.stringify(command)})).status,200);
+  assert.equal((await fetch(endpoint+'community/registry_command',{method:'POST',headers:nativeHeaders,body:JSON.stringify({...command,role:'association_admin'})})).status,400);
+  assert.equal((await fetch(endpoint+'community/registry_command',{method:'POST',headers:{cookie,origin:'https://attacker.invalid','content-type':'application/json'},body:JSON.stringify(command)})).status,403);
+  assert.equal((await fetch(endpoint+'community/registry_command',{method:'POST',headers:nativeHeaders,body:'x'.repeat(8193)})).status,413);
+  const previewBody={p_tenant:f.villageTenant,p_kind:'person',p_rows:[{external_key:'WEB-IMPORT-S03',name:'Web import synthetic contact',kind:'individual'}],p_reason:'Preview shared web and native import'};
+  const previewResponse=await fetch(endpoint+'community/import_stage',{method:'POST',headers:{...nativeHeaders,'Idempotency-Key':'web-import-s03'},body:JSON.stringify(previewBody)});assert.equal(previewResponse.status,200);
+  const preview=(await previewResponse.json()).data;
+  const rows=await fetch(endpoint+`community/${f.villageTenant}/import_view/${preview.batch_id}`,{headers:nativeHeaders});assert.equal(rows.status,200);assert.equal((await rows.json()).data.rows[0].row,1);
+  assert.equal((await fetch(endpoint+'community/import_commit',{method:'POST',headers:{...nativeHeaders,'Idempotency-Key':'web-import-commit-s03'},body:JSON.stringify({p_tenant:f.villageTenant,p_batch:preview.batch_id,p_expected_hash:preview.source_sha256,p_reason:'Confirm reviewed shared import preview'})})).status,200);
+  console.log('S03 built web: workspace, authenticated shared API, native registry replay, no auth bindings, exact decimals, row preview/commit, CSRF and size limits passed');
   const logout=await fetch(endpoint+'auth/logout',{method:'POST',headers:{cookie,origin:base,'content-type':'application/json'},body:JSON.stringify({scope:'global'})});assert.equal(logout.status,200);
   assert.equal((await fetch(endpoint+'session',{headers:{cookie}})).status,401,'Stolen old cookie denied after logout');
   assert.equal((await fetch(endpoint+`tenants/${f.villageTenant}/documents/${f.document}`,{headers:{cookie}})).status,401);

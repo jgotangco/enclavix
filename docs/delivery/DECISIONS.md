@@ -15,6 +15,7 @@ Status is `proposed`, `approved`, `rejected` or `superseded`. A proposed default
 | D09 | Service targets | BRD NFR targets are internal proposals until cost and load evidence support them | proposed | S10 | Sponsor and operations owner |
 | D10 | Pilot and phasing | Release A core web plus resident Android; Release B guard and extended operations; one village and condo pilot | proposed | S00 planning; S11 launch | Product and pilot sponsors |
 | D11 | Subscription lifecycle | Platform fees distinct from dues; no commercial billing engine in initial scope | proposed | Before commercialization | Sponsor |
+| D13 | Onboarding approval | Operator creates; nominated administrator completes; a different operator independently verifies and activates | approved | S03 | Sponsor |
 | D12 | Supported runtime baseline | Node.js 24 LTS, Next.js 16, React 19; mock-only demos; PostgreSQL 15 local validation | proposed | S00 | Architecture and engineering leads |
 
 ## Decision record template
@@ -45,3 +46,7 @@ These are engineering recommendations, not invented approvals. S01 may finish it
 ## D07 security policy approval — 2 November 2026
 
 Approved by Jerome Gotangco through the explicit response “Use this policy”: MFA for all staff and administrator roles, no shared staff accounts, immediate membership revocation, support disabled until explicitly approved and time-limited. ADR 0005 defines the reviewable implementation (8-hour resident, 1-hour staff, 30-minute guard absolute sessions; sensitive changes within 10 minutes; support at most 60 minutes, metadata only). Implementation details require engineering review; production infrastructure and deployment remain unapproved.
+
+## D13 onboarding approval flow — 2 November 2026
+
+Approved by Jerome Gotangco through “Use this approval flow”: a registered platform operator creates the HOA setup, the nominated administrator completes it, and a different operator verifies the authority evidence and activation checklist. Neither creator nor nominee can self-activate. The implementation remains synthetic-only; approval to use real resident data, privacy/retention policy and production deployment are separate and remain pending. Any setup mutation invalidates an onboarding submission; activation binds to the reviewed revision and recomputes its checklist under the association lock. See evidence/S03.md.

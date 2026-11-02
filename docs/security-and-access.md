@@ -31,3 +31,9 @@ Before hosted enablement, verify HTTPS/proxy origin handling, redirect allowlist
 For a suspected authorization issue, close the account service through the hosting control plane and revoke S02 RPC execution from `authenticated` using a reviewed forward repair. Revoke affected provider sessions and memberships. Preserve audit and operation records; do not drop identity tables or rewrite old migrations. After containment, verify API, direct RPC/database and private-file denial before reopening. No production control-plane action is authorized by this document.
 
 Engineering contracts and sources: [ADR 0005](architecture/adr/0005-identity-and-access.md), [S02 evidence](delivery/evidence/S02.md), [development setup](development.md).
+
+## S03 sandbox registry boundary
+
+D13 requires independent operator approval: creator and nominee cannot activate their own setup. The current database constrains every setup to sandbox mode; real resident data remains unapproved. Global association administrators alone can mutate registries, with recent MFA, a reason and an idempotency key. Neither operators nor residents gain registry access from setup metadata or cookies. Contacts cannot supply auth bindings or roles. Revoking the nominee's membership removes setup access. Effective transfers preserve relationship history and stop obsolete owner/representative access.
+
+Registry exports are allowlisted snapshots, not complete offboarding archives. Each fetch rechecks authority, association, expiry and private response headers. Staging offboarding changes no access or retention state. For containment, a reviewed forward repair can revoke `authenticated` execution of the S03 RPCs; preserve audit, import and snapshot records. [ADR 0006](architecture/adr/0006-onboarding-and-registry.md) records the limitations.
