@@ -2,7 +2,7 @@
 
 Enclavix is being rebuilt as a multi-tenant community platform with a responsive web front end and a planned post-S11 commercial Android app for independent village and condominium associations.
 
-**Current state: a contained prototype with an accepted engineering foundation. It is not approved for real resident data, financial operations or gate decisions.**
+**Current state: a contained development platform with S00–S03 engineering scope accepted. It is not approved for real resident data, financial operations or gate decisions.**
 
 ## Delivery status
 
@@ -13,19 +13,33 @@ Accepted engineering delivery baseline as of 2 November 2026:
 | [S00](docs/delivery/evidence/S00.md) | Accepted — [PR #1](https://github.com/jgotangco/enclavix/pull/1) | Reproducible builds, mock-demo isolation, closed production portals and default-deny prototype tables |
 | [S01](docs/delivery/evidence/S01.md) | Accepted — [PR #2](https://github.com/jgotangco/enclavix/pull/2) | Private tenant domain, scoped relationships, generated types, fixtures, isolation/concurrency checks and architecture contracts |
 | [S02](docs/delivery/evidence/S02.md) | Accepted — [PR #3](https://github.com/jgotangco/enclavix/pull/3) | Verified identity, MFA, scoped account services, invitations/approval, revocation and private download authorization |
-| [S03](docs/delivery/evidence/S03.md) | Engineering ready for owner review — acceptance pending | Synthetic onboarding, property/asset relationships, import reconciliation and export/offboarding staging |
+| [S03](docs/delivery/evidence/S03.md) | Accepted — [PR #4](https://github.com/jgotangco/enclavix/pull/4), [PR #6](https://github.com/jgotangco/enclavix/pull/6) | Synthetic onboarding, property/asset relationships, import reconciliation and export/offboarding staging |
 | S04–S05, S08–S11 | Not started | Web finance, resident/guard operations, hardening and pilot acceptance |
 | S06–S07 | Deferred — not started | Commercial Android after S11 acceptance and pilot evidence |
+
+S03 was reviewed and accepted by Jerome Gotangco on 2 November 2026. S04 (receivables and payment verification) is planned for 3 November 2026, Asia/Manila, and has not started.
 
 [STATUS.json](docs/delivery/STATUS.json) is the delivery-state record. Sprint acceptance does not certify production readiness or approve unresolved hosting and mobile decisions. No production deployment or hosted migration has been performed.
 
 ## Implemented foundation and planned product
 
-The S01 private PostgreSQL `app` schema contains 17 tables covering tenants, communities, village phase/block and condominium tower/floor structures, properties, assets, people, memberships, system roles, civic designations, effective-dated relationships, import staging, operations, outbox, audit and document metadata. Composite foreign keys reject cross-association references. All new tables deny client access by default, and the schema is not exposed through the Data API.
+The current private PostgreSQL `app` schema contains 26 tables. S01 established the tenant domain; S02–S03 added identity/access controls, onboarding approval, registry operations and export/offboarding staging. Village phase/block and condominium tower/floor structures, people, properties, assets and effective-dated relationships share scoped identities. Composite foreign keys reject cross-association references. Ordinary clients have no direct table access; named services enforce authorization, and the schema is not exposed through the Data API.
 
-The existing web screens demonstrate resident, administration, finance and guard experiences using synthetic data. Demo sign-in does not verify a real password. The client-controlled `demo_user_role` cookie selects a mock persona only in explicitly configured mock-demo mode; it cannot authorize production access. Production business portals remain disabled. S02 adds real server-side authentication through `/account` and `/api/v1`; direct browser backend access remains disabled.
+The existing web screens demonstrate resident, administration, finance and guard experiences using synthetic data. Demo sign-in does not verify a real password. The client-controlled `demo_user_role` cookie selects a mock persona only in explicitly configured mock-demo mode; it cannot authorize production access. Legacy mock business portals remain unavailable in production; the delivered account and registry journeys use trusted services. S02 adds real server-side authentication through `/account` and `/api/v1`; direct browser backend access remains disabled.
 
 Dues and payment verification, documents, visitors, parking, pets and amenities remain planned durable workflows. Prototype buttons and screens are not evidence of successful financial or gate operations. The Android app is not implemented. Kotlin/Compose and React Native are compared in the [Android ADR](docs/architecture/adr/0003-android-platform.md); the final choice is pending approval and a device spike.
+
+## Interface previews
+
+**Implemented web workspace — accepted S03 scope, synthetic review data.** Residents see their currently authorized property/asset records; administrators have separate registry and onboarding controls. This is an actual built-web screenshot, not a production deployment.
+
+![S03 web workspace showing authorized property and asset records](docs/delivery/evidence/assets/S03-resident-assets.jpg)
+
+The [onboarding review screenshot](docs/delivery/evidence/assets/S03-onboarding-sandbox.jpg) shows completed synthetic setup and independent sandbox activation. Browser review used a disposable local Auth stand-in for screen behavior; real Auth/MFA and authorization were verified separately in Supabase CI. See [S03 evidence](docs/delivery/evidence/S03.md).
+
+**Planned Android interface — illustrative concept only, not implemented.** This mockup shows possible future resident home, payment-proof and request screens. Names, amounts and community details are fictional examples, not a selected pilot. The layout is a design direction, not an approved feature release or evidence of working mobile services. Commercial Android remains after S11 acceptance and pilot evidence; stack, distribution and license decisions remain separate.
+
+![Illustrative post-S11 Android resident concept, not a built application](docs/design/assets/android-resident-concept.png)
 
 ## Local setup
 
@@ -77,9 +91,9 @@ npm run build
 node tools/check-http.mjs
 ```
 
-The HTTP check uses the same environment mode as the build. `npm test` currently runs 58 checks, including forged-cookie containment, scoped foreign keys, rollback, immutable identities, document paths and default-deny access. After changing migrations, regenerate transport types with `npm run types:domain` and commit the result.
+The HTTP check uses the same environment mode as the build. `npm test` currently runs 80 checks, including forged-cookie containment, scoped foreign keys, rollback, immutable identities, document paths, asset allocation/retry controls, community date presentation and default-deny access. After changing migrations, regenerate transport types with `npm run types:domain` and commit the result.
 
-GitHub Actions verifies production and demo web builds/runtime, a container build/runtime and disposable Supabase. The database job verifies real Auth sign-in and TOTP MFA, recovery, logout/revocation, built-web cookie and native bearer requests, private storage restrictions, migration/type agreement, restricted-role access and concurrent commands. These checks use synthetic fixtures and do not deploy or certify real-world HOA readiness. See the [S01 evidence](docs/delivery/evidence/S01.md) for results and limitations.
+GitHub Actions verifies production and demo web builds/runtime, a container build/runtime and disposable Supabase. The database job verifies real Auth sign-in and TOTP MFA, recovery, logout/revocation, built-web cookie and native bearer requests, private storage restrictions, migration/type agreement, restricted-role access and concurrent commands. These checks use synthetic fixtures and do not deploy or certify real-world HOA readiness. See the [S03 evidence](docs/delivery/evidence/S03.md) and earlier sprint evidence for results and limitations.
 
 ## Documentation
 
@@ -94,7 +108,7 @@ The historical [design specification](docs/ENCLAVIX_SDD.md) and [persona manual]
 
 ## Credits and license
 
-Product direction and design: [Jerome Gotangco](https://github.com/jgotangco). The original prototype was developed with Google Antigravity / Gemini; the S00–S02 refresh was implemented and reviewed with Codex.
+Product direction and design: [Jerome Gotangco](https://github.com/jgotangco). The original prototype was developed with Google Antigravity / Gemini; the S00–S03 refresh was implemented and reviewed with Codex.
 
 Copyright © 2026 Jerome Gotangco. Enclavix is licensed under the [MIT License](LICENSE), including permission for commercial use, modification and distribution subject to its notice requirements. Third-party dependencies retain their respective licenses.
 

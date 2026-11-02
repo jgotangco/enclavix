@@ -50,15 +50,15 @@ Each BRD requirement has one sprint accountable for completion evidence. Earlier
 | REL 02 | S10 | unverified |
 | REL 03 | S10 | unverified |
 | SCP 01 | S10 | unverified |
-| SCP 02 | S03 | In progress: Configurable sandbox structure, terminology and branding implemented; assessment policies remain S04; see evidence/S03.md |
+| SCP 02 | S03 | S03 delivered scope accepted: Configurable sandbox structure, terminology and branding implemented; assessment policies remain S04; see evidence/S03.md |
 | SCP 03 | S10 | unverified |
-| TEN 01 | S03 | In progress: Synthetic operator/nominee/reviewer flow implemented; real-data authority/privacy acceptance pending; see evidence/S03.md |
-| TEN 02 | S03 | In progress: Village/condo hierarchy, lot/townhouse/unit and asset registry and audited effective-dated allocation journeys implemented; owner acceptance pending; see evidence/S03.md |
-| TEN 03 | S03 | In progress: Contacts, co-ownership, representation, temporal primary/billing relationships implemented; evidence files S05; see evidence/S03.md |
-| TEN 04 | S03 | In progress: Effective relationship/transfer and derived-access regression verified; ledger cutover remains S04; see evidence/S03.md |
-| TEN 05 | S03 | In progress: Property/person/asset/relationship preview and atomic commit implemented; memberships/balances/vehicles deferred to owning workflows; see evidence/S03.md |
-| TEN 06 | S03 | In progress: Revision-bound synthetic checklist and independent activation implemented; real-data onboarding unapproved; see evidence/S03.md |
-| TEN 07 | S03 | In progress: Scoped JSON export and offboarding staging implemented; attachments/settlement/termination/retention remain S05/S10; see evidence/S03.md |
+| TEN 01 | S03 | S03 delivered scope accepted: Synthetic operator/nominee/reviewer flow implemented; real-data authority/privacy acceptance pending; see evidence/S03.md |
+| TEN 02 | S03 | S03 delivered scope accepted: Village/condo hierarchy, lot/townhouse/unit and asset registry and audited effective-dated allocation journeys implemented; owner acceptance recorded 2 November 2026; see evidence/S03.md |
+| TEN 03 | S03 | S03 delivered scope accepted: Contacts, co-ownership, representation, temporal primary/billing relationships implemented; evidence files S05; see evidence/S03.md |
+| TEN 04 | S03 | S03 delivered scope accepted: Effective relationship/transfer and derived-access regression verified; ledger cutover remains S04; see evidence/S03.md |
+| TEN 05 | S03 | S03 delivered scope accepted: Property/person/asset/relationship preview and atomic commit implemented; memberships/balances/vehicles deferred to owning workflows; see evidence/S03.md |
+| TEN 06 | S03 | S03 delivered scope accepted: Revision-bound synthetic checklist and independent activation implemented; real-data onboarding unapproved; see evidence/S03.md |
+| TEN 07 | S03 | S03 delivered scope accepted: Scoped JSON export and offboarding staging implemented; attachments/settlement/termination/retention remain S05/S10; see evidence/S03.md |
 | UX 01 | S05 | Web acceptance required through S11; Android equivalent deferred to post-S11 S07; unverified |
 | UX 02 | S05 | Web acceptance required through S11; Android equivalent deferred to post-S11 S07; unverified |
 | UX 03 | S05 | Web acceptance required through S11; Android equivalent deferred to post-S11 S07; unverified |
@@ -68,3 +68,5 @@ Each BRD requirement has one sprint accountable for completion evidence. Earlier
 S01 is the architecture foundation evidence owner for ARC requirements. These requirements span later sprints; foundation verification is not full requirement completion. See [S01 evidence](evidence/S01.md) for implemented and deferred controls. No service authorization, financial posting, mobile compatibility or production rollout is marked complete here.
 
 S02 engineering acceptance includes the four PR #3 review repairs and successful 58-test, web/demo, real Supabase and container verification. It does not accept later modules, production email/hosting configuration, independent security assessment or Android device behavior.
+
+Jerome Gotangco explicitly accepted the bounded S03 engineering delivery on 2 November 2026 after completed review (PR #4/#6). Later finance, document, vehicle/gate and exit/retention obligations within the TEN requirements remain open in their owning workflows; this is not full-product or production acceptance. S04 is planned for 3 November 2026 and remains not_started.
