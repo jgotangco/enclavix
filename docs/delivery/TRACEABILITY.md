@@ -10,9 +10,9 @@ Each BRD requirement has one sprint accountable for completion evidence. Earlier
 | AND 02 | S07 | unverified |
 | AND 03 | S07 | unverified |
 | AND 04 | S07 | unverified |
-| ARC 01 | S01 | unverified |
-| ARC 02 | S01 | unverified |
-| ARC 03 | S01 | unverified |
+| ARC 01 | S01 | Schema/path foundation verified; service and policy controls pending S02–S10 |
+| ARC 02 | S01 | Uniqueness/rollback foundation verified; posting/delivery pending S04/S05 |
+| ARC 03 | S01 | Migration/type foundation verified; client compatibility pending S06/S10 |
 | FIN 01 | S04 | unverified |
 | FIN 02 | S04 | unverified |
 | FIN 03 | S04 | unverified |
@@ -62,3 +62,6 @@ Each BRD requirement has one sprint accountable for completion evidence. Earlier
 | UX 01 | S07 | unverified |
 | UX 02 | S07 | unverified |
 | UX 03 | S07 | unverified |
+
+
+S01 is the architecture foundation evidence owner for ARC requirements. These requirements span later sprints; foundation verification is not full requirement completion. See [S01 evidence](evidence/S01.md) for implemented and deferred controls. No service authorization, financial posting, mobile compatibility or production rollout is marked complete here.

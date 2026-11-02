@@ -13,7 +13,7 @@ Architecture design and implementation boundaries: [S01 architecture](architectu
 6. `docs/delivery/TRACEABILITY.md` and `docs/delivery/ACCEPTANCE.md`.
 
 ## Development handoff
-S00 is merged and accepted. Codex is implementing S01 tenant domain and architecture on its feature branch. Owner acceptance was recorded following the explicit review and merge authorization for PR #1. Read `AGENTS.md`, the selected sprint and its evidence before continuing. `docs/development.md` documents local setup and containment. The Antigravity prompts remain available for any future handoff.
+S00 is merged and accepted. S01 tenant domain and architecture is ready for review on its feature branch; acceptance remains pending. Owner acceptance was recorded following the explicit review and merge authorization for PR #1. Read `AGENTS.md`, the selected sprint and its evidence before continuing. `docs/development.md` documents local setup and containment. The Antigravity prompts remain available for any future handoff.
 
 Run `python3 tools/validate_delivery.py` from the repository root to validate planning structure. Python 3.9 or later is sufficient; no packages or application credentials are needed. App checks are added and executed by Antigravity in S00 and later sprints.
 

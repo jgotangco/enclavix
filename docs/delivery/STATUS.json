@@ -17,7 +17,7 @@
     {
       "id": "S01",
       "title": "Tenant domain and architecture",
-      "status": "in_progress",
+      "status": "ready_for_review",
       "depends_on": [
         "S00"
       ],
