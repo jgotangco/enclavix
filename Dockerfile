@@ -1,4 +1,5 @@
-# S00 contained production build. No deployment or mock data service connections.
+# S02 account foundation. Runtime Supabase URL/public key must be explicitly supplied.
+# Service key, if needed for authorized private downloads, is runtime-only; never a build argument.
 FROM node:24-alpine AS base
 RUN apk add --no-cache libc6-compat
 WORKDIR /app

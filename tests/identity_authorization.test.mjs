@@ -113,6 +113,35 @@ test('support has no routine access; explicit grant is time-limited and never gr
  await db.query("UPDATE app.support_access SET expires_at=now()-interval '1 second', starts_at=now()-interval '2 seconds' WHERE operator_id=$1",[outsider]);
  assert.deepEqual(val(await rpc('SELECT public.enclavix_contexts() AS value')),[]);
 });
+test('role changes take effect on the next request without refreshing the JWT',async()=>{
+ await claims(staff,staffSession,'aal2');
+ await rpc('SELECT public.enclavix_set_role($1,$2,$3,$4,NULL,false,$5)',[f.villageTenant,f.villageMember,'finance_approver',f.village,'Verified temporary approval permission']);
+ await claims(owner,ownerSession,'aal1');assert.deepEqual(val(await rpc('SELECT public.enclavix_contexts() AS value')),[]);
+ await claims(owner,ownerSession,'aal2');
+ assert.equal((await db.query("SELECT app.role_at($1,'finance_approver',$2) AS allowed",[f.villageTenant,f.village])).rows[0].allowed,true);
+ assert.equal((await db.query("SELECT app.role_at($1,'finance_approver',$2) AS allowed",[f.villageTenant,f.condo])).rows[0].allowed,false);
+ await claims(staff,staffSession,'aal2');
+ await rpc('SELECT public.enclavix_set_role($1,$2,$3,$4,NULL,true,$5)',[f.villageTenant,f.villageMember,'finance_approver',f.village,'Temporary approval permission removed']);
+ await claims(owner,ownerSession,'aal2');assert.equal((await db.query("SELECT app.role_at($1,'finance_approver',$2) AS allowed",[f.villageTenant,f.village])).rows[0].allowed,false);
+});
+test('document access checks scan, audience, household ownership and current membership',async()=>{
+ await claims(owner,ownerSession);
+ assert.equal((await db.query('SELECT app.document_access($1) AS allowed',[`${f.villageTenant}/${f.document}`])).rows[0].allowed,false);
+ await db.query("UPDATE app.document_objects SET scan_status='clean',audience='property_owners' WHERE id=$1",[f.document]);
+ assert.equal(val(await rpc('SELECT public.enclavix_document($1,$2) AS value',[f.villageTenant,f.document])).object_path,`${f.villageTenant}/${f.document}`);
+ assert.equal(val(await rpc('SELECT public.enclavix_document($1,$2) AS value',[f.condoTenant,f.document])),null);
+ // Applicant's occupant relationship must not authorize owner-only evidence.
+ await claims(outsider,outsideSession,'aal2');
+ const m=(await db.query('SELECT id FROM app.memberships WHERE person_id=$1',[f.renter])).rows[0].id;
+ await db.query("UPDATE app.memberships SET status='active' WHERE id=$1",[m]);
+ await db.query("INSERT INTO app.membership_roles(tenant_id,membership_id,role,valid_from) VALUES($1,$2,'resident',now())",[f.villageTenant,m]);
+ await db.query('UPDATE app.document_objects SET property_id=$1 WHERE id=$2',[f.secondLot,f.document]);
+ assert.equal(val(await rpc('SELECT public.enclavix_document($1,$2) AS value',[f.villageTenant,f.document])),null);
+ await db.query("UPDATE app.document_objects SET audience='property_occupants' WHERE id=$1",[f.document]);
+ assert.ok(val(await rpc('SELECT public.enclavix_document($1,$2) AS value',[f.villageTenant,f.document])));
+ await db.query("UPDATE app.memberships SET status='revoked' WHERE id=$1",[m]);
+ assert.equal(val(await rpc('SELECT public.enclavix_document($1,$2) AS value',[f.villageTenant,f.document])),null);
+});
 test('session inventory and remote revocation are restricted to the current identity',async()=>{
  await claims(owner,ownerSession);const inventory=val(await rpc('SELECT public.enclavix_sessions() AS value'));
  assert.deepEqual(inventory.map(s=>s.id),[ownerSession]);

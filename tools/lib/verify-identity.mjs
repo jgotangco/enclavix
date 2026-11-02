@@ -34,7 +34,7 @@ export async function verifyIdentity({db,admin,sessions,state}) {
  const path=`${f.villageTenant}/${f.document}`;
  ok(await admin.storage.from('tenant-private').upload(path,Buffer.from('Synthetic CI evidence'),{contentType:'application/pdf'}));
  assert.ok((await owner.storage.from('tenant-private').download(path)).error,'Pending scan objects must be denied');
- await db.query("UPDATE app.document_objects SET scan_status='clean' WHERE id=$1",[f.document]);
+ await db.query("UPDATE app.document_objects SET scan_status='clean',audience='property_owners' WHERE id=$1",[f.document]);
  assert.ok((await owner.storage.from('tenant-private').download(path)).error,'Direct objects stay private even to related residents');
  assert.equal(ok(await owner.rpc('enclavix_document',{p_tenant:f.villageTenant,p_document:f.document})).object_path,path);
  assert.equal(ok(await outsider.rpc('enclavix_document',{p_tenant:f.villageTenant,p_document:f.document})),null);

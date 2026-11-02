@@ -214,6 +214,7 @@ export interface DomainDatabase {
           "sha256": string | null;
           "scan_status": DomainDatabase["app"]["Enums"]["scan_status"];
           "created_at": string;
+          "audience": string;
         };
         Insert: {
           "id"?: string;
@@ -229,6 +230,7 @@ export interface DomainDatabase {
           "sha256"?: string | null;
           "scan_status"?: DomainDatabase["app"]["Enums"]["scan_status"];
           "created_at"?: string;
+          "audience"?: string;
         };
         Update: {
           "id"?: string;
@@ -244,6 +246,7 @@ export interface DomainDatabase {
           "sha256"?: string | null;
           "scan_status"?: DomainDatabase["app"]["Enums"]["scan_status"];
           "created_at"?: string;
+          "audience"?: string;
         };
       };
       "import_batches": {

@@ -38,12 +38,12 @@ export async function GET(request: Request) {
       if (downloaded.error || downloaded.data.size>20971520) return failed(503);
       return new Response(downloaded.data.stream(), {headers:{...headers,"Content-Type":"application/octet-stream","Content-Disposition":'attachment; filename="document"',"Content-Security-Policy":"sandbox; default-src 'none'"}});
     }
-    const match = path.match(/^\/api\/v1\/tenants\/([^/]+)\/(properties|applications|access-audit)$/);
+    const match = path.match(/^\/api\/v1\/tenants\/([^/]+)\/(properties|applications|access-audit|access-directory)$/);
     if (match) {
       const tenant = uuid(match[1]);
       const contexts = result(await client.rpc("enclavix_contexts")) as { tenant_id: string }[];
       if (!contexts.some(c => c.tenant_id === tenant)) return failed();
-      return reply({ data: result(await client.rpc(match[2] === "properties" ? "enclavix_properties" : match[2] === "applications" ? "enclavix_applications" : "enclavix_access_audit", { p_tenant: tenant })) });
+      return reply({ data: result(await client.rpc(match[2] === "properties" ? "enclavix_properties" : match[2] === "applications" ? "enclavix_applications" : match[2] === "access-audit" ? "enclavix_access_audit" : "enclavix_access_directory", { p_tenant: tenant })) });
     }
     return failed(404);
   } catch { return failed(503); }

@@ -7,6 +7,7 @@ GRANT CREATE ON SCHEMA public TO enclavix_reader; -- temporary for function owne
 GRANT SELECT ON ALL TABLES IN SCHEMA app TO enclavix_reader;
 
 ALTER TABLE app.membership_roles ADD COLUMN revoked_at timestamptz;
+ALTER TABLE app.document_objects ADD COLUMN audience text NOT NULL DEFAULT 'association_admin' CHECK(audience IN ('association_admin','property_owners','property_occupants'));
 
 CREATE TABLE app.access_applications (
  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -64,7 +65,7 @@ END $$;
 CREATE FUNCTION app.principal() RETURNS uuid LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=pg_catalog AS $$
 DECLARE c jsonb := coalesce(nullif(current_setting('request.jwt.claims',true),''),'{}')::jsonb; u uuid;
 BEGIN
- IF c->>'role' <> 'authenticated' OR c->>'session_id' IS NULL OR c->>'sub' IS NULL
+ IF coalesce(c->>'role','') <> 'authenticated' OR c->>'session_id' IS NULL OR c->>'sub' IS NULL
     OR coalesce((c->>'exp')::numeric,0) <= extract(epoch FROM statement_timestamp()) THEN RETURN NULL; END IF;
  SELECT a.id INTO u FROM auth.users a JOIN auth.sessions s ON s.user_id=a.id
  WHERE a.id=(c->>'sub')::uuid AND s.id=(c->>'session_id')::uuid
@@ -116,8 +117,15 @@ CREATE FUNCTION app.supports(t uuid) RETURNS boolean LANGUAGE sql STABLE SECURIT
 $$;
 CREATE FUNCTION app.document_access(path text) RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path=pg_catalog AS $$
  SELECT EXISTS(SELECT 1 FROM app.document_objects d WHERE d.object_path=path AND d.scan_status='clean'
- AND ((d.property_id IS NOT NULL AND app.property_access(d.tenant_id,d.property_id))
- OR app.role_at(d.tenant_id,'association_admin',d.community_id)))
+ AND (app.role_at(d.tenant_id,'association_admin',d.community_id) OR
+ (d.property_id IS NOT NULL AND app.property_access(d.tenant_id,d.property_id) AND
+ (d.audience='property_occupants' OR (d.audience='property_owners' AND EXISTS(
+ SELECT 1 FROM app.property_relationships x JOIN app.memberships m ON m.tenant_id=x.tenant_id AND m.person_id=x.person_id
+ WHERE x.tenant_id=d.tenant_id AND x.property_id=d.property_id AND m.id=app.member(d.tenant_id)
+ AND x.valid_from<=statement_timestamp() AND (x.valid_until IS NULL OR x.valid_until>statement_timestamp())
+ AND (x.kind='owner' OR (x.kind='representative' AND EXISTS(SELECT 1 FROM app.property_relationships o
+ WHERE o.tenant_id=x.tenant_id AND o.property_id=x.property_id AND o.person_id=x.represented_person_id AND o.kind='owner'
+ AND o.valid_from<=statement_timestamp() AND (o.valid_until IS NULL OR o.valid_until>statement_timestamp()))))))))))
 $$;
 
 CREATE POLICY tenant_read ON app.tenants FOR SELECT TO enclavix_reader USING(app.member(id) IS NOT NULL OR app.supports(id));
@@ -280,6 +288,16 @@ BEGIN
  WHERE tenant_id=p_tenant AND event_type LIKE 'access.%' ORDER BY created_at DESC,id LIMIT 100) x);
 END $$;
 
+CREATE FUNCTION public.enclavix_access_directory(p_tenant uuid) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog AS $$
+BEGIN
+ IF NOT app.role_at(p_tenant,'association_admin') THEN RAISE EXCEPTION 'Not authorized' USING ERRCODE='42501'; END IF;
+ RETURN jsonb_build_object(
+ 'people',(SELECT coalesce(jsonb_agg(jsonb_build_object('id',id,'name',display_name,'linked',auth_user_id IS NOT NULL)),'[]') FROM app.people WHERE tenant_id=p_tenant AND kind='individual'),
+ 'members',(SELECT coalesce(jsonb_agg(jsonb_build_object('id',m.id,'name',p.display_name,'status',m.status)),'[]') FROM app.memberships m JOIN app.people p ON (p.tenant_id,p.id)=(m.tenant_id,m.person_id) WHERE m.tenant_id=p_tenant),
+ 'properties',(SELECT coalesce(jsonb_agg(jsonb_build_object('id',id,'code',code,'label',label)),'[]') FROM app.properties WHERE tenant_id=p_tenant AND is_active),
+ 'invitations',(SELECT coalesce(jsonb_agg(jsonb_build_object('id',i.id,'name',p.display_name,'email',i.email,'expires_at',i.expires_at)),'[]') FROM app.invitations i JOIN app.people p ON (p.tenant_id,p.id)=(i.tenant_id,i.person_id) WHERE i.tenant_id=p_tenant AND i.accepted_at IS NULL AND i.revoked_at IS NULL AND i.expires_at>statement_timestamp()));
+END $$;
+
 -- No PUBLIC default execute, and no service-role bypass of these entry points.
 DO $$ DECLARE f record; BEGIN
  FOR f IN SELECT p.oid::regprocedure AS signature FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
@@ -302,7 +320,7 @@ GRANT EXECUTE ON FUNCTION public.enclavix_document(uuid,uuid) TO authenticated;
 -- Storage is installed by Supabase, not the standalone relational test fixture.
 DO $$ BEGIN
  IF to_regclass('storage.objects') IS NOT NULL THEN
-  EXECUTE 'INSERT INTO storage.buckets(id,name,public) VALUES (''tenant-private'',''tenant-private'',false) ON CONFLICT(id) DO NOTHING';
+  EXECUTE 'INSERT INTO storage.buckets(id,name,public,file_size_limit) VALUES (''tenant-private'',''tenant-private'',false,20971520) ON CONFLICT(id) DO UPDATE SET public=false,file_size_limit=20971520';
   -- No client object policies: clients cannot mint signed URLs that outlive revocation.
   -- The web/API download gateway checks live authorization then streams with a server-only key.
  END IF;

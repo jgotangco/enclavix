@@ -7,7 +7,12 @@ export function bearerFrom(request: Request): string | undefined {
 }
 export function checkMutation(request: Request, bearer?: string): void {
   if (!request.headers.get("content-type")?.startsWith("application/json")) throw new Error("JSON required");
-  if (!bearer && request.headers.get("origin") !== new URL(request.url).origin) throw new Error("Same-origin request required");
+  const target = new URL(request.url);
+  // Next normalizes loopback addresses internally; Host retains the browser's actual authority.
+  // Do not trust X-Forwarded-Host supplied by arbitrary callers.
+  const host = request.headers.get("host");
+  if (host) target.host = host;
+  if (!bearer && request.headers.get("origin") !== target.origin) throw new Error("Same-origin request required");
 }
 export function fields(value: unknown, allowed: string[]): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value) || Object.keys(value).some(k => !allowed.includes(k))) throw new Error("Invalid request fields");
