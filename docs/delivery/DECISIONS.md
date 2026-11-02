@@ -16,6 +16,7 @@ Status is `proposed`, `approved`, `rejected` or `superseded`. A proposed default
 | D10 | Pilot and phasing | Release A core web plus resident Android; Release B guard and extended operations; one village and condo pilot | proposed | S00 planning; S11 launch | Product and pilot sponsors |
 | D11 | Subscription lifecycle | Platform fees distinct from dues; no commercial billing engine in initial scope | proposed | Before commercialization | Sponsor |
 | D12 | Supported runtime baseline | Node.js 24 LTS, Next.js 16, React 19; mock-only demos; PostgreSQL 15 local validation | proposed | S00 | Architecture and engineering leads |
+| D14 | Post-S11 candidates and commercial boundary | Future register; MIT core web; proposed post-S11 commercial mobile timing; no implementation approval | proposed | After S11 acceptance and pilot evidence | Sponsor |
 
 ## Decision record template
 ID and title / status / date / actual approver / context / options / decision / rationale / BRD IDs / affected data and compatibility / reversal plan / links to evidence.
@@ -45,3 +46,13 @@ These are engineering recommendations, not invented approvals. S01 may finish it
 ## D07 security policy approval — 2 November 2026
 
 Approved by Jerome Gotangco through the explicit response “Use this policy”: MFA for all staff and administrator roles, no shared staff accounts, immediate membership revocation, support disabled until explicitly approved and time-limited. ADR 0005 defines the reviewable implementation (8-hour resident, 1-hour staff, 30-minute guard absolute sessions; sensitive changes within 10 minutes; support at most 60 minutes, metadata only). Implementation details require engineering review; production infrastructure and deployment remain unapproved.
+
+## D14 post-S11 candidates and intended license boundary — 2 November 2026
+
+Recorded at Jerome Gotangco's explicit request: [POST_S11.md](POST_S11.md) contains future candidates only. Documentation is authorized; their implementation, vendors, commercial license and schedule are not approved. Every candidate requires S11 acceptance, pilot evidence and a separate implementation decision. No late-S04 reconciliation-engine exception is authorized. S03–S11 scope, dependencies and acceptance criteria are unchanged. Existing baseline features are not deferred by listing future extensions.
+
+The core web platform through S11 remains MIT: S00–S02 foundation/identity/authorization/audit; S03 onboarding/membership; S04 receivables/payment verification; S05 resident services/documents; core data model and S08–S09 web visitor/gate/basic parking/pet/amenity flows; S10 hardening; S11 pilot acceptance. The current LICENSE and existing MIT grants/notices are unchanged.
+
+Sponsor direction under consideration: Android (currently S06–S07) and future iOS are commercial / post-MIT decision items, intended outside the MIT core web scope and unnecessary for the initial pilot or first commercial web release. On 2 November the sponsor specifically asked for a recommendation on moving Android after S11; this is recorded as a proposed rebaseline, not permission to change the roadmap. Formal adoption must consistently update Android timing, S08 dependencies and release/pilot criteria. Existing S06–S07 definitions remain authoritative until that decision. “Post-MIT” does not revoke existing MIT permissions or automatically create a commercial exception in this repository.
+
+After pilot acceptance and before broader commercial launch, decide whether the overall offering/new differentiators continue MIT, use dual licensing, source-available terms or proprietary licensing, while respecting the core MIT boundary and existing grants. Future mobile/new differentiator licensing requires a separately documented scope and actual license before differently licensed code is introduced. Post-S11 candidates are not required for pilot acceptance. No specific pilot association, provider purchase, implementation or deployment is approved.

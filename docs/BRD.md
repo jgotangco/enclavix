@@ -60,6 +60,8 @@ Release B adds visitor and guard operations, vehicles and parking, pets, ameniti
 
 Direct barrier or RFID hardware control, automated bank feeds, payment gateway settlement, full general ledger and payroll, statutory tax filing, legally binding electronic elections, biometric identification, iOS applications, and commercial subscription billing are deferred. Manual payment verification is included; automated collection integrations require separate reconciliation and provider acceptance.
 
+Future candidates are recorded in [Post-S11 candidates](delivery/POST_S11.md). They are outside current S03–S11 implementation scope and require S11 acceptance, pilot evidence and separate approval. The register adds no current acceptance criteria; proposed mobile timing/commercial changes require an explicit rebaseline before altering the existing Android/pilot requirements.
+
 ### Scope rules
 
 SCP 01  A tenant may enable only modules accepted for production. Disabled capabilities must not appear as operational actions in either client.

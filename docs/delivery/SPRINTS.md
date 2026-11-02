@@ -29,3 +29,7 @@ Current accepted baseline: S00–S02 through PR #1, PR #2 and PR #3. S03 is next
 - accepted: actual owner approval recorded with evidence, date and identity.
 
 The planning checker validates structure, coverage and ordering. It does not execute the application or prove any acceptance statement.
+
+## Future planning beyond S11
+
+[Post-S11 candidates](POST_S11.md) records future extensions, intended commercial/mobile boundaries and an explicit S11 acceptance/pilot-evidence gate. No candidate is approved for implementation. Current sprint scope, dependency order and acceptance criteria remain unchanged; the proposed move of Android from S06–S07 to after S11 requires a separate, consistent rebaseline.
