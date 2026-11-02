@@ -6,13 +6,13 @@ Each BRD requirement has one sprint accountable for completion evidence. Earlier
 
 | Requirement | Completion sprint | Verification state |
 | --- | --- | --- |
-| AND 01 | S07 | unverified |
-| AND 02 | S07 | unverified |
-| AND 03 | S07 | unverified |
-| AND 04 | S07 | unverified |
+| AND 01 | S07 | Deferred: post-S11 commercial mobile; unverified; not a web pilot gate |
+| AND 02 | S07 | Deferred: post-S11 commercial mobile; unverified; not a web pilot gate |
+| AND 03 | S07 | Deferred: post-S11 commercial mobile; unverified; not a web pilot gate |
+| AND 04 | S07 | Deferred: post-S11 commercial mobile; unverified; not a web pilot gate |
 | ARC 01 | S01 | Schema/path and S02 account/access controls verified; later workflow/operating controls pending S03–S10 |
 | ARC 02 | S01 | Uniqueness/rollback foundation verified; posting/delivery pending S04/S05 |
-| ARC 03 | S01 | Migration/type foundation verified; client compatibility pending S06/S10 |
+| ARC 03 | S01 | Migration/type foundation verified; client compatibility web compatibility S10; mobile compatibility post-S11 S06/S07 |
 | FIN 01 | S04 | unverified |
 | FIN 02 | S04 | unverified |
 | FIN 03 | S04 | unverified |
@@ -27,7 +27,7 @@ Each BRD requirement has one sprint accountable for completion evidence. Earlier
 | IAM 04 | S02 | MFA, absolute lifetimes and live session/membership checks implemented; S02 engineering scope accepted; see evidence |
 | IAM 05 | S02 | Audited scoped role commands, no self-elevation and retry checks implemented; S02 engineering scope accepted; see evidence |
 | IAM 06 | S02 | Approved expiring metadata-only support implemented; emergency impersonation disabled |
-| IAM 07 | S02 | Context-scoped reads and state clearing implemented; Android device acceptance remains S06/S07 |
+| IAM 07 | S02 | Context-scoped reads and state clearing implemented; Android device acceptance remains post-S11 S06/S07 |
 | NFR 01 | S10 | unverified |
 | NFR 02 | S10 | unverified |
 | NFR 03 | S10 | unverified |
@@ -59,9 +59,9 @@ Each BRD requirement has one sprint accountable for completion evidence. Earlier
 | TEN 05 | S03 | unverified |
 | TEN 06 | S03 | unverified |
 | TEN 07 | S03 | unverified |
-| UX 01 | S07 | unverified |
-| UX 02 | S07 | unverified |
-| UX 03 | S07 | unverified |
+| UX 01 | S05 | Web acceptance required through S11; Android equivalent deferred to post-S11 S07; unverified |
+| UX 02 | S05 | Web acceptance required through S11; Android equivalent deferred to post-S11 S07; unverified |
+| UX 03 | S05 | Web acceptance required through S11; Android equivalent deferred to post-S11 S07; unverified |
 
 
 S01 is the architecture foundation evidence owner for ARC requirements. These requirements span later sprints; foundation verification is not full requirement completion. See [S01 evidence](evidence/S01.md) for implemented and deferred controls. No service authorization, financial posting, mobile compatibility or production rollout is marked complete here.

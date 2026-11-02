@@ -41,6 +41,24 @@ class DeliveryValidationTests(unittest.TestCase):
         self.assertTrue(any("acceptance owner" in e for e in errors))
         self.assertTrue(any("Missing file" in e for e in errors))
 
+    def test_web_first_order_keeps_mobile_after_pilot(self):
+        data = json.loads(self.status.read_text())
+        self.assertEqual(data["delivery_order"][-2:], ["S06", "S07"])
+        self.assertEqual(data["sprints"][6]["depends_on"], ["S11"])
+        self.assertEqual(data["sprints"][8]["depends_on"], ["S05"])
+        self.assertEqual(validate(self.root), [])
+
+    def test_delivery_order_rejects_missing_duplicate_and_out_of_order_sprints(self):
+        original = json.loads(self.status.read_text())
+        for order in [original["delivery_order"][:-1], original["delivery_order"][:-1] + ["S06"], [f"S{i:02d}" for i in range(12)]]:
+            data = dict(original, delivery_order=order)
+            self.status.write_text(json.dumps(data))
+            self.assertTrue(validate(self.root))
+
+    def test_mobile_cannot_start_without_pilot_acceptance(self):
+        self.change_status(6, "in_progress")
+        self.assertTrue(any("predecessor S11 not accepted" in e for e in validate(self.root)))
+
     def test_requirement_must_be_mapped(self):
         trace = self.root / "docs/delivery/TRACEABILITY.md"
         trace.write_text(re.sub(r"^\| IAM 02 \|.*\n", "", trace.read_text(), flags=re.MULTILINE))

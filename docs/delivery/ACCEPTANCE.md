@@ -4,7 +4,9 @@
 Requirement IDs and user-visible scope are explicit. Positive, unauthorized, wrong-tenant, duplicate/retry, failure and concurrency paths are tested where relevant. Data is durable and shared across clients. Private uploads remain private. Audit entries identify actor and tenant. Accessibility and support/error states work. Migration and compatibility impact is documented. Tests use synthetic data.
 
 ## Release gates
-G1 clean build/migrations/CI/rollback; G2 trusted identity and tenant isolation; G3 reconciled finance; G4 cross-channel user journeys; G5 restore, operations and privacy; G6 real village/condominium pilot acceptance; G7 gate validation if enabled. Detailed measures and named acceptance roles are in BRD section 10.
+G1 clean build/migrations/CI/rollback; G2 trusted identity and tenant isolation; G3 reconciled finance; G4 responsive-web resident/staff journeys (Android parity is post-S11); G5 restore, operations and privacy; G6 real village/condominium pilot acceptance; G7 gate validation if enabled. Detailed measures and named acceptance roles are in BRD section 10.
+
+Android build, device/TalkBack, store and cross-client parity evidence are deferred to post-S11 S06–S07. Web accessibility, current API authorization and all other enabled-module gates remain mandatory through S11.
 
 ## Minimum evidence
 Record environment, commit, commands, observed results, dates, fixtures, device and network profiles where relevant, failures and unrun checks. Link test code and sanitized output. External penetration test, real pilot sign-off, restored-file verification, privacy policy approval and store publication cannot be replaced by assertions in Markdown.
