@@ -76,3 +76,7 @@ Reviewed PR merges are authorized when their engineering checks pass. Merge of a
 ## S03 owner acceptance and next session — 2 November 2026
 
 Jerome Gotangco explicitly confirmed “Review completed and accepted,” accepting the bounded S03 delivery after PR #4/#6 and the recorded engineering checks. Record S03 as accepted with the actual approver/date, update the README and delivery records on GitHub, and include clearly labeled actual web imagery and an optional planned Android illustration. Existing MIT licensing and post-S11 mobile decisions are unchanged. S03 closes tonight; S04 is planned for 3 November 2026 (Asia/Manila) and remains not_started until then. This does not authorize live data, production deployment, a mobile release or implementation of future candidates.
+
+## Post-S11 installation candidate — 2 November 2026
+
+Jerome Gotangco asked for an easier installation experience and explicitly placed it after S11. Recorded as [P19 in POST_S11.md](POST_S11.md): simple hosted onboarding and an optional guided self-hosted package, with configuration/health checks, secure bootstrap, upgrades and database-plus-attachment recovery. Hosted-first is an engineering recommendation, not an approved deployment or vendor choice. D03, support/distribution decisions and future mobile licensing remain unresolved as recorded. Existing S10/S11 deployment/recovery obligations remain binding. Documentation only; no implementation or current sprint changes are approved. S03 remains accepted and S04 remains not_started for the planned 3 November session.

@@ -24,7 +24,7 @@ Each candidate must respect the [tenant boundary](../architecture/adr/0001-tenan
 
 ## Suggested sequencing
 
-1. After acceptance, prioritize small extensions of accepted surfaces: document acknowledgment, accountant export, dues transparency and narrow document search.
+1. After acceptance, prioritize small extensions of accepted surfaces: document acknowledgment, accountant export, dues transparency and narrow document search. Evaluate easier hosted setup/install packaging once the deployment and support model is decided.
 2. Extend resident/guard/board workflows where pilot evidence supports them: recurring passes, incident logs, reporting, booking/registry improvements, emergency acknowledgments, operator context and exit packaging.
 3. Consider external integrations and broader products only after operational capacity and explicit decisions: WhatsApp/Viber delivery, verified payment status, reconciliation import, full AI concierge and separately scoped commercial mobile apps.
 
@@ -209,6 +209,18 @@ Candidates can be reordered or declined. None is necessary for pilot acceptance 
 **Sequence:** Later external integration, after a provenance/accuracy evaluation and explicit finance/operating-owner approval. No late-S04 extension is authorized.
 
 **Scope:** Outside S03–S11. Do not start before S11 acceptance, pilot evidence and separate implementation approval.
+
+## P19 · Easy installation and guided setup
+
+**Description:** Make adoption straightforward through a hosted onboarding journey and, if approved, a guided deployment package for associations that need their own installation. With hosted delivery, association staff use the web service and configure their association rather than install a backend. A self-hosted package should provide a short quickstart, supported prerequisites, a setup wizard and readable completion/health checks. The installation model and supported platforms remain decisions, not promises of one-click production readiness.
+
+**Dependencies and boundaries:** Post-S11 packaging depends on a proven deployment topology, onboarding flow, operating runbooks and actual pilot/support evidence. Baseline reproducible deployment, recovery and release controls still belong to S10/S11; this candidate does not defer them. Respect D03 hosting/privacy decisions, the existing tenant boundary, verified identity/MFA, independent onboarding approval, effective membership, RLS/default deny, audited commands and the outbox. Installing a web front end alone must not be presented as a complete service: the approved API, database, identity, private storage and worker dependencies must be configured and checked together. No particular provider, installer technology, region or paid tier is selected.
+
+The package must guide secure configuration and runtime secrets, HTTPS/approved origins and authentication callbacks, controlled initial operator/administrator bootstrap, private storage and service health. It must not ship default privileged accounts, real credentials, client service keys, live-data seeds or production demo-role shortcuts. Setup must preserve independent association approval rather than create a self-activation bypass. Safe upgrades, migration compatibility, documented recovery/forward repair and tested backup/restore of both database and attachments are part of ease of operation. Optional diagnostic bundles must exclude secrets and unauthorized resident records. No automatic destructive teardown or data deletion is implied by uninstalling application software.
+
+**Sequence:** Early post-S11 evaluation after pilot evidence and explicit distribution/support decisions. Recommended order is simple hosted onboarding first, followed by a self-hosted package only if demand and support capacity justify it for a one-person operation. Validate installation, upgrade and restore on a clean supported environment before advertising simplicity. Future Android/iOS distribution remains separately scoped under P02 and its store/signing/privacy gates; this is not a mobile-release shortcut. Packaging must preserve existing MIT notices and the separately decided boundary for future commercial components.
+
+**Scope:** Outside S03–S11. Do not start before S11 acceptance, pilot evidence and separate implementation approval. No installer, deployment script, hosting purchase or application change is authorized by this entry.
 
 ## License posture and intended commercial boundary
 
