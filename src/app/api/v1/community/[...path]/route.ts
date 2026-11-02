@@ -29,6 +29,7 @@ async function clientFor(request: Request) {
 }
 const commands: Record<string, string[]> = {
     create: ["p_data", "p_reason"], settings: ["p_tenant", "p_data", "p_reason"], submit: ["p_tenant", "p_reason"], activate: ["p_tenant", "p_revision", "p_reason"],
+    allocation: ["p_tenant", "p_action", "p_data", "p_reason"],
     registry_command: ["p_tenant", "p_action", "p_data", "p_reason"], import_stage: ["p_tenant", "p_kind", "p_rows", "p_reason"],
     import_commit: ["p_tenant", "p_batch", "p_expected_hash", "p_reason"], import_cancel: ["p_tenant", "p_batch", "p_reason"],
     export_create: ["p_tenant", "p_reason"], offboarding: ["p_tenant", "p_export", "p_reason"],
@@ -67,9 +68,9 @@ export async function GET(request: Request) {
             throw new RequestError("Unknown route", 404);
         const [tenant, kind, id] = path;
         const args: Record<string, string> = { p_tenant: uuid(tenant) };
-        if (["setup", "registry"].includes(kind) && path.length === 2)
+        if (["setup", "registry", "allocations"].includes(kind) && path.length === 2)
             return reply({ data: result(await client.rpc(`enclavix_s03_${kind}`, args)) });
-        const names: Record<string, string> = { property: "p_property", import_view: "p_batch", export: "p_export" };
+        const names: Record<string, string> = { property: "p_property", property_allocations: "p_property", import_view: "p_batch", export: "p_export" };
         if (!Object.hasOwn(names, kind) || !id)
             throw new RequestError("Unknown route", 404);
         args[names[kind]] = uuid(id);

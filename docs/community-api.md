@@ -37,3 +37,11 @@ Import preview row objects use `row` (one-based data row), `kind`, `raw`, `valid
 Successful JSON responses use `{data: ...}`; failures use `{error:{code:...},request_id:...}`. The export route instead returns an attachment. HTTP statuses include 400 invalid request, 401 unverified/no identity, 403 insufficient authority/freshness, 409 state/idempotency conflict, 413 size limit, 415 JSON required and 503 unavailable. Error responses do not disclose database/provider details. Do not automatically repeat a changed approval or reuse another account's pending request state.
 
 See [ADR 0006](architecture/adr/0006-onboarding-and-registry.md) for independent approval, transfer, export, staging and migration limitations. These routes do not implement financial posting, full offboarding or a production data activation policy.
+
+## S03 asset allocation follow-up
+
+- POST `allocation`: exactly `p_tenant`, `p_action`, `p_data`, `p_reason`. Actions: `assign` (asset_id, property_id, kind ownership/use, optional valid_from/valid_until), `end` (id, optional valid_until), `cancel` (id only). Existing idempotency, size, MFA/freshness and reason rules apply. End can only shorten a current term; cancel applies only before its start. All rows/history remain durable.
+- GET `{tenant}/allocations`: global administrator registry/history. GET `{tenant}/property_allocations/{property}`: currently entitled caller's current non-cancelled asset records, excluding inactive assets. Each row includes asset/property labels, status and community time_zone. Neither endpoint grants property access.
+- S03 `index` contexts now include association/community time_zone, and `property` responses include their time_zone. These are additive response fields; current scope checks remain unchanged.
+
+These commands record association registry metadata. They do not implement capacity, availability, booking, financial charges or gate entry decisions. Overlapping duplicate asset/property/kind records are rejected; S09's cross-property capacity/exclusivity policy is not implied.

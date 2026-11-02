@@ -49,6 +49,7 @@ export interface DomainDatabase {
           "kind": DomainDatabase["app"]["Enums"]["allocation_kind"];
           "valid_from": string;
           "valid_until": string | null;
+          "cancelled_at": string | null;
         };
         Insert: {
           "id"?: string;
@@ -59,6 +60,7 @@ export interface DomainDatabase {
           "kind": DomainDatabase["app"]["Enums"]["allocation_kind"];
           "valid_from": string;
           "valid_until"?: string | null;
+          "cancelled_at"?: string | null;
         };
         Update: {
           "id"?: string;
@@ -69,6 +71,7 @@ export interface DomainDatabase {
           "kind"?: DomainDatabase["app"]["Enums"]["allocation_kind"];
           "valid_from"?: string;
           "valid_until"?: string | null;
+          "cancelled_at"?: string | null;
         };
       };
       "assets": {

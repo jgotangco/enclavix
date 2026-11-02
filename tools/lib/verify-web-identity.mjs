@@ -38,11 +38,6 @@ export async function verifyWebIdentity({state,owner,staff,password}) {
   const native=await fetch(endpoint+`tenants/${f.villageTenant}/applications`,{headers:{authorization:`Bearer ${token}`}});assert.equal(native.status,200);
   const tampered=await fetch(endpoint+'access/apply',{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json'},body:JSON.stringify({p_tenant:f.villageTenant,p_name:'Native caller',p_property:'Lot 1',role:'association_admin'})});assert.equal(tampered.status,400);
   assert.equal((await fetch(base+'/admin',{headers:{cookie},redirect:'manual'})).status,307,'Real identity must not reach mock business screens');
-  const roleCommand={p_tenant:f.villageTenant,p_member:f.villageMember,p_role:'finance_preparer',p_community:null,p_until:null,p_revoke:false,p_reason:'Verified native permission change retry'};
-  for(let i=0;i<2;i++){
-   const changed=await fetch(endpoint+'access/role',{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json','Idempotency-Key':'native-role-command'},body:JSON.stringify(roleCommand)});assert.equal(changed.status,200);
-  }
-  const conflict=await fetch(endpoint+'access/role',{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json','Idempotency-Key':'native-role-command'},body:JSON.stringify({...roleCommand,p_role:'association_admin'})});assert.equal(conflict.status,409);
   assert.equal((await fetch(base+'/workspace')).status,200);
   assert.equal((await fetch(endpoint+'community/index',{headers:{cookie:'demo_user_role=SUPER_ADMIN'}})).status,401);
   const registry=await fetch(endpoint+`community/${f.villageTenant}/registry`,{headers:{authorization:`Bearer ${token}`}});assert.equal(registry.status,200);
@@ -61,6 +56,22 @@ export async function verifyWebIdentity({state,owner,staff,password}) {
   const rows=await fetch(endpoint+`community/${f.villageTenant}/import_view/${preview.batch_id}`,{headers:nativeHeaders});assert.equal(rows.status,200);assert.equal((await rows.json()).data.rows[0].row,1);
   assert.equal((await fetch(endpoint+'community/import_commit',{method:'POST',headers:{...nativeHeaders,'Idempotency-Key':'web-import-commit-s03'},body:JSON.stringify({p_tenant:f.villageTenant,p_batch:preview.batch_id,p_expected_hash:preview.source_sha256,p_reason:'Confirm reviewed shared import preview'})})).status,200);
   console.log('S03 built web: workspace, authenticated shared API, native registry replay, no auth bindings, exact decimals, row preview/commit, CSRF and size limits passed');
+  const linkedAsset=registryData.assets.find(x=>x.community_id===f.village);
+  // This fixture has no village asset before S03 concurrency adds one.
+  assert.ok(linkedAsset);
+  const allocationBody={p_tenant:f.villageTenant,p_action:'assign',p_data:{asset_id:linkedAsset.id,property_id:f.secondLot,kind:'ownership'},p_reason:'Record native synthetic asset allocation'};
+  const allocatedResponse=await fetch(endpoint+'community/allocation',{method:'POST',headers:{...nativeHeaders,'Idempotency-Key':'web-allocation-s03'},body:JSON.stringify(allocationBody)});assert.equal(allocatedResponse.status,200);
+  const allocation=(await allocatedResponse.json()).data;
+  const residentAssets=await fetch(endpoint+`community/${f.villageTenant}/property_allocations/${f.secondLot}`,{headers:{cookie}});assert.equal(residentAssets.status,200);assert.ok((await residentAssets.json()).data.some(x=>x.id===allocation.id));
+  assert.equal((await fetch(endpoint+`community/${f.villageTenant}/allocations`,{headers:{cookie}})).status,403);
+  assert.equal((await fetch(endpoint+`community/${f.condoTenant}/property_allocations/${f.unit}`,{headers:{cookie}})).status,403);
+  console.log('S03 asset API: authenticated native assignment, resident property-scoped reads and wrong-scope denial passed');
+  const roleCommand={p_tenant:f.villageTenant,p_member:f.villageMember,p_role:'finance_preparer',p_community:null,p_until:null,p_revoke:false,p_reason:'Verified native permission change retry'};
+  for(let i=0;i<2;i++){
+   const changed=await fetch(endpoint+'access/role',{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json','Idempotency-Key':'native-role-command'},body:JSON.stringify(roleCommand)});assert.equal(changed.status,200);
+  }
+  const conflict=await fetch(endpoint+'access/role',{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json','Idempotency-Key':'native-role-command'},body:JSON.stringify({...roleCommand,p_role:'association_admin'})});assert.equal(conflict.status,409);
+  assert.equal((await fetch(endpoint+`community/${f.villageTenant}/property_allocations/${f.secondLot}`,{headers:{cookie}})).status,403,'New staff grants immediately require MFA for the old resident session');
   const logout=await fetch(endpoint+'auth/logout',{method:'POST',headers:{cookie,origin:base,'content-type':'application/json'},body:JSON.stringify({scope:'global'})});assert.equal(logout.status,200);
   assert.equal((await fetch(endpoint+'session',{headers:{cookie}})).status,401,'Stolen old cookie denied after logout');
   assert.equal((await fetch(endpoint+`tenants/${f.villageTenant}/documents/${f.document}`,{headers:{cookie}})).status,401);
