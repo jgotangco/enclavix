@@ -6,13 +6,13 @@ Enclavix is being rebuilt as a multi-tenant community platform with a responsive
 
 ## Delivery status
 
-As of 2 November 2026, accepted S00 and S01 are merged into `main`; S02 is ready for review on its feature branch:
+As of 2 November 2026, accepted S00 and S01 are merged into `main`; S02 review repairs are locally verified on its feature branch, with refreshed CI pending:
 
 | Sprint | Status | Delivered scope |
 | --- | --- | --- |
 | [S00](docs/delivery/evidence/S00.md) | Accepted — [PR #1](https://github.com/jgotangco/enclavix/pull/1) | Reproducible builds, mock-demo isolation, closed production portals and default-deny prototype tables |
 | [S01](docs/delivery/evidence/S01.md) | Accepted — [PR #2](https://github.com/jgotangco/enclavix/pull/2) | Private tenant domain, scoped relationships, generated types, fixtures, isolation/concurrency checks and architecture contracts |
-| [S02](docs/delivery/evidence/S02.md) | Ready for review; acceptance pending | Verified identity, MFA, scoped account services, invitations/approval, revocation and private download authorization |
+| [S02](docs/delivery/evidence/S02.md) | Local review repairs; refreshed CI pending | Verified identity, MFA, scoped account services, invitations/approval, revocation and private download authorization |
 | S03–S11 | Not started | Onboarding, durable services, Android, operating readiness and pilot acceptance |
 
 [STATUS.json](docs/delivery/STATUS.json) is the delivery-state record. Sprint acceptance does not certify production readiness or approve unresolved hosting and mobile decisions. No production deployment or hosted migration has been performed.
@@ -75,7 +75,7 @@ npm run build
 node tools/check-http.mjs
 ```
 
-The HTTP check uses the same environment mode as the build. `npm test` currently runs 44 checks, including forged-cookie containment, scoped foreign keys, rollback, immutable identities, document paths and default-deny access. After changing migrations, regenerate transport types with `npm run types:domain` and commit the result.
+The HTTP check uses the same environment mode as the build. `npm test` currently runs 58 checks, including forged-cookie containment, scoped foreign keys, rollback, immutable identities, document paths and default-deny access. After changing migrations, regenerate transport types with `npm run types:domain` and commit the result.
 
 GitHub Actions verifies production and demo web builds/runtime, a container build/runtime and disposable Supabase. The database job verifies real Auth sign-in and TOTP MFA, recovery, logout/revocation, built-web cookie and native bearer requests, private storage restrictions, migration/type agreement, restricted-role access and concurrent commands. These checks use synthetic fixtures and do not deploy or certify real-world HOA readiness. See the [S01 evidence](docs/delivery/evidence/S01.md) for results and limitations.
 

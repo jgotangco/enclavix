@@ -19,7 +19,7 @@ export async function createClient(bearer?: string) {
   });
   const jar = await cookies();
   return createServerClient(url, key, {
-    auth: { flowType: "pkce" },
+    auth: { flowType: "pkce", experimental: { appendPkceFlowIdToRedirects: true } },
     global: { fetch: noCacheFetch },
     cookieOptions: { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/" },
     cookies: {

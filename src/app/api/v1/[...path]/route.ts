@@ -1,3 +1,4 @@
+import { checkEmailResult } from "@/lib/auth/email-result";
 import { createClient as storageClient } from "@supabase/supabase-js";
 import { runtimeEnvironment } from "@/lib/env.server";
 import { NextResponse } from "next/server";
@@ -72,13 +73,15 @@ export async function POST(request: Request) {
       const email = text(b.email, 254).trim();
       if (path === "auth/recover") {
         // Fixed local redirect; never accept a caller-controlled return URL.
-        await client.auth.resetPasswordForEmail(email, { redirectTo: `${requestOrigin(request)}/auth/callback` });
+        const recovery = await client.auth.resetPasswordForEmail(email, { redirectTo: `${requestOrigin(request)}/auth/callback` });
+        checkEmailResult(recovery.error);
         return reply({ data: { message: "If eligible, check your email for recovery instructions." } });
       }
       const password = text(b.password, 128);
       if (path === "auth/register") {
         if (password.length < 12) return failed(400);
-        await client.auth.signUp({ email, password, options: { emailRedirectTo: `${requestOrigin(request)}/auth/callback` } });
+        const registration = await client.auth.signUp({ email, password, options: { emailRedirectTo: `${requestOrigin(request)}/auth/callback` } });
+        checkEmailResult(registration.error);
         return reply({ data: { message: "If eligible, check your email to verify your account. Association access requires approval." } });
       }
       const login = await client.auth.signInWithPassword({ email, password });

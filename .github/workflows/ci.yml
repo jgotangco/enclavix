@@ -38,6 +38,8 @@ jobs:
       - run: npm audit --omit=dev --audit-level=moderate
       - run: npm run build
       - run: node tools/check-http.mjs
+      - if: matrix.mode == 'production'
+        run: node tools/check-account-repairs.mjs
   supabase:
     runs-on: ubuntu-latest
     timeout-minutes: 20
