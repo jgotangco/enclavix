@@ -62,3 +62,21 @@ export const importTemplates: Record<string, string> = {
     asset: "community_code,location_code,code,label,kind,capacity\nPRIMARY,BLOCK-1,PARK-001,Sample parking,parking,1\n",
     relationship: "community_code,property_code,person_key,kind,valid_from,valid_until,primary_contact,billing_contact\nPRIMARY,P-001,PERSON-001,owner,,,false,false\n",
 };
+
+/** A late read from an earlier file/type/context must never replace the current import. */
+export function createRegistryFileReader() {
+    let selection = 0;
+    return {
+        clear() { selection++; },
+        async read(file: Pick<File, "size" | "text">, accept: (text: string) => void, reject: (message: string) => void) {
+            const current = ++selection;
+            if (file.size > 1048576) { reject("Choose a CSV file smaller than 1 MiB."); return; }
+            try {
+                const text = await file.text();
+                if (current === selection) accept(text);
+            } catch {
+                if (current === selection) reject("Could not read this file.");
+            }
+        },
+    };
+}

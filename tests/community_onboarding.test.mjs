@@ -139,3 +139,11 @@ test('terminology and contact responsibilities are configuration with bounded va
  await command(f.villageTenant,'relationship',{property_id:f.lot,person_id:second,kind:'occupant',primary_contact:true,billing_contact:true});
  const registry=await rpc('enclavix_s03_registry',[f.villageTenant]);assert.ok(registry.people.every(p=>!('auth_user_id' in p)));assert.ok(registry.properties.every(p=>p.lot_area_sqm===null||typeof p.lot_area_sqm==='string'));
 });
+test('activation requires the explicit reviewed revision, including rejection of null',async()=>{
+ const {t}=await setup('reject-null-review-revision');
+ await rpc('enclavix_s03_submit',[t,'Submit reviewed synthetic setup']);
+ await as('reviewer');await assert.rejects(rpc('enclavix_s03_activate',[t,null,'Attempt without a reviewed revision']),e=>e.code==='23505');
+ assert.equal((await db.query('SELECT status FROM app.tenants WHERE id=$1',[t])).rows[0].status,'onboarding');
+ assert.equal((await db.query("SELECT count(*)::int n FROM app.lifecycle_events WHERE tenant_id=$1 AND event_type='onboarding.activated'",[t])).rows[0].n,0);
+ const current=await rpc('enclavix_s03_setup',[t]);assert.equal((await rpc('enclavix_s03_activate',[t,current.setup.revision,'Approve the explicitly reviewed revision'])).activated,true);
+});

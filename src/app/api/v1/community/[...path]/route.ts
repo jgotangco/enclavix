@@ -38,7 +38,7 @@ export async function POST(request: Request) {
         checkMutation(request, bearerFrom(request));
         const name = new URL(request.url).pathname.slice("/api/v1/community/".length);
         const keys = commands[name];
-        if (!keys)
+        if (!Object.hasOwn(commands, name))
             throw new RequestError("Unknown command", 404);
         const body = fields(await readJson(request, name === "import_stage" ? 1048576 : 8192), keys);
         if (keys.some(k => !Object.hasOwn(body, k)))
@@ -70,7 +70,7 @@ export async function GET(request: Request) {
         if (["setup", "registry"].includes(kind) && path.length === 2)
             return reply({ data: result(await client.rpc(`enclavix_s03_${kind}`, args)) });
         const names: Record<string, string> = { property: "p_property", import_view: "p_batch", export: "p_export" };
-        if (!names[kind] || !id)
+        if (!Object.hasOwn(names, kind) || !id)
             throw new RequestError("Unknown route", 404);
         args[names[kind]] = uuid(id);
         const data = result(await client.rpc(`enclavix_s03_${kind}`, args));

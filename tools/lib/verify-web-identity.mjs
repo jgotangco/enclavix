@@ -47,6 +47,8 @@ export async function verifyWebIdentity({state,owner,staff,password}) {
   assert.equal((await fetch(endpoint+'community/index',{headers:{cookie:'demo_user_role=SUPER_ADMIN'}})).status,401);
   const registry=await fetch(endpoint+`community/${f.villageTenant}/registry`,{headers:{authorization:`Bearer ${token}`}});assert.equal(registry.status,200);
   const registryData=(await registry.json()).data;assert.ok(registryData.people.every(p=>!('auth_user_id' in p)));assert.ok(registryData.properties.every(p=>p.lot_area_sqm===null||typeof p.lot_area_sqm==='string'));
+  assert.equal((await fetch(endpoint+`community/${f.villageTenant}/constructor/${f.lot}`,{headers:{authorization:`Bearer ${token}`}})).status,404);
+  assert.equal((await fetch(endpoint+'community/constructor',{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json'},body:'{}'})).status,404);
   const command={p_tenant:f.villageTenant,p_action:'person',p_data:{external_key:'NATIVE-S03',name:'Native synthetic contact',kind:'individual'},p_reason:'Verified shared registry API command'};
   const nativeHeaders={authorization:`Bearer ${token}`,'content-type':'application/json','Idempotency-Key':'native-s03-command'};
   for(let i=0;i<2;i++)assert.equal((await fetch(endpoint+'community/registry_command',{method:'POST',headers:nativeHeaders,body:JSON.stringify(command)})).status,200);

@@ -303,7 +303,7 @@ BEGIN
  SELECT * INTO s FROM app.association_setup WHERE tenant_id=p_tenant FOR UPDATE;
  IF s.tenant_id IS NULL OR actor IN (s.created_by_operator,s.administrator_id) THEN RAISE EXCEPTION 'Independent operator approval required' USING ERRCODE='42501'; END IF;
  IF NOT app.platform_start(actor,'onboarding.activate',jsonb_build_object('tenant',p_tenant,'revision',p_revision,'reason',p_reason)) THEN RETURN app.platform_replay(actor,'onboarding.activate'); END IF;
- IF s.revision<>p_revision OR s.submitted_revision IS DISTINCT FROM s.revision OR NOT EXISTS(SELECT 1 FROM app.tenants WHERE id=p_tenant AND status='onboarding') THEN RAISE EXCEPTION 'Setup changed or not submitted' USING ERRCODE='23505'; END IF;
+ IF s.revision IS DISTINCT FROM p_revision OR s.submitted_revision IS DISTINCT FROM s.revision OR NOT EXISTS(SELECT 1 FROM app.tenants WHERE id=p_tenant AND status='onboarding') THEN RAISE EXCEPTION 'Setup changed or not submitted' USING ERRCODE='23505'; END IF;
  checks:=app.setup_checklist(p_tenant);
  IF EXISTS(SELECT 1 FROM jsonb_each(checks) x WHERE x.key<>'property_count' AND x.value<>'true'::jsonb) THEN RAISE EXCEPTION 'Incomplete activation checklist' USING ERRCODE='22023'; END IF;
  UPDATE app.association_setup SET reviewed_by_operator=actor,approved_revision=revision,approved_at=statement_timestamp() WHERE tenant_id=p_tenant;
