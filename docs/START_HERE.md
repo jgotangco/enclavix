@@ -1,6 +1,6 @@
 # Start here
 
-Enclavix is being refreshed into a production web and Android service for independent village and condominium associations. The checked-in application remains a prototype. S00 foundation repairs are accepted; the application remains a contained prototype, not a production service.
+Enclavix is being refreshed into a production web and Android service for independent village and condominium associations. The checked-in application remains a prototype. S00 foundation repairs and the S01 tenant domain are accepted; the application remains a contained prototype, not a production service.
 
 Architecture design and implementation boundaries: [S01 architecture](architecture/README.md).
 
@@ -15,7 +15,7 @@ Architecture design and implementation boundaries: [S01 architecture](architectu
 ## Development handoff
 S00 and S01 are accepted following explicit owner review and merge authorization for PR #1 and PR #2. S02 real identity and tenant authorization is next and has not started. Read `AGENTS.md`, the selected sprint and its evidence before continuing. `docs/development.md` documents local setup and containment. The Antigravity prompts remain available for any future handoff.
 
-Run `python3 tools/validate_delivery.py` from the repository root to validate planning structure. Python 3.9 or later is sufficient; no packages or application credentials are needed. App checks are added and executed by Antigravity in S00 and later sprints.
+Run `python3 tools/validate_delivery.py` from the repository root to validate planning structure. Python 3.9 or later is sufficient; no packages or application credentials are needed. Application checks are documented in `docs/development.md` and the completed sprint evidence.
 
 Run `python3 tools/test_validate_delivery.py` for the planning checker's regression tests. These tests validate documentation controls, not application behavior.
 

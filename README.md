@@ -1,106 +1,91 @@
-# 🛡️ Enclavix — HOA & Enclave Operating System
+# Enclavix — HOA & Enclave Operating System
 
-> **Production refresh planning:** The current application is a prototype and is not approved for real resident data, financial operations, or gate decisions. Start with [the delivery guide](docs/START_HERE.md), [the updated BRD](docs/BRD.md), and [the sprint roadmap](docs/delivery/SPRINTS.md). Codex has implemented the S00 foundation on the feature branch, accepted after review; see the sprint evidence and development guide for current validation.
+Enclavix is being rebuilt as a multi-tenant community platform with a responsive web front end and an Android app for independent village and condominium associations.
 
-> **The Intelligent Operating System for Boutique Residential Enclaves & Homeowners Associations.**
+**Current state: a contained prototype with an accepted engineering foundation. It is not approved for real resident data, financial operations or gate decisions.**
 
-Enclavix is a concept for a community governance platform designed specifically for private gated villages, townhouse developments, and residential subdivisions. It unifies automated formula-driven dues computation, dual-gate RFID security clearance, elevated curbside parking quota enforcement, domesticated pet health tracking, and role-based stakeholder portals.
+## Delivery status
 
----
+As of 2 November 2026, both completed sprints are merged into `main`:
 
-## 🌟 Key Features & Capabilities
+| Sprint | Status | Delivered scope |
+| --- | --- | --- |
+| [S00](docs/delivery/evidence/S00.md) | Accepted — [PR #1](https://github.com/jgotangco/enclavix/pull/1) | Reproducible builds, mock-demo isolation, closed production portals and default-deny prototype tables |
+| [S01](docs/delivery/evidence/S01.md) | Accepted — [PR #2](https://github.com/jgotangco/enclavix/pull/2) | Private tenant domain, scoped relationships, generated types, fixtures, isolation/concurrency checks and architecture contracts |
+| [S02](docs/delivery/sprints/S02.md) | Next; not started | Real identity and tenant authorization |
+| S03–S11 | Not started | Onboarding, durable services, Android, operating readiness and pilot acceptance |
 
-- 🛡️ **Dual-Tier Gate Access & RFID Barrier Clearance:**
-  - Automated boom barrier RFID verification (`RFID-GE-XXXXX`).
-  - 6-digit visitor QR pass code lookup and walk-in entry pass generator.
-  - Dedicated Guard Security Kiosk with incident citation logging.
-- 🚗 **Smart Parking & Curbside Allowance Matrix:**
-  - Enforces property slot limits (indoor garage capacity + strict 1-curb elevated parallel parking rule).
-  - Tracks vehicle types (`SUV`, `SEDAN`, `VAN`, `HATCHBACK`, `PICKUP`, `MOTORCYCLE`, `EV`, `OTHER`), driver names, and LTO OR/CR documentation.
-- 💳 **Formula-Driven Dues Engine & GCash Audit:**
-  - Transparent formula: $\text{Total Dues} = (\text{Lot Area} \times \text{Rate/m}^2) + \text{Base Maintenance Fee} + \text{Mother Village Fee}$.
-  - Resident GCash/bank transfer receipt upload with treasury verification and instant receipt generation.
-- 🐾 **Domesticated Pet Registry & Rabies Compliance:**
-  - Mandatory pet cataloging, breed registry, and anti-rabies vaccination expiry alerts.
-- 👥 **Dual-Tier Role & Officer Designation Engine:**
-  - Independent **System Access Roles** (`SUPER_ADMIN`, `TREASURER`, `GUARD`, `RESIDENT`) dictate portal views.
-  - Granular **Civic Officer Positions** (`PRESIDENT`, `VICE_PRESIDENT`, `SECRETARY`, `TREASURER_OFFICER`, `AUDITOR`, `BOARD_MEMBER`, `COMMITTEE_HEAD`, `PROPERTY_MANAGER`, `NONE`).
-  - Flexible **Affiliation Designations** (`HOMEOWNER`, `TENANT`, `HOA_EMPLOYEE`, `PROPERTY_STAFF`, `SECURITY_PERSONNEL`, `EXTERNAL_VENDOR`).
-- 🎨 **Real-Time Persona Theme Engine:**
-  - Instant CSS DOM switching: *Executive Emerald*, *Treasury Gold*, *Ocean Azure*, *Tactical Obsidian*, and *Midnight Modern*.
-- ☁️ **Cloud Native & Cloud Run Ready:**
-  - Next.js 16 App Router, Supabase PostgreSQL schemas with Row-Level Security, multi-stage Docker containerization, and Cloud Build CI/CD.
+[STATUS.json](docs/delivery/STATUS.json) is the delivery-state record. Sprint acceptance does not certify production readiness or approve unresolved hosting and mobile decisions. No production deployment or hosted migration has been performed.
 
----
+## Implemented foundation and planned product
 
-## 🚀 Technology Stack
+The S01 private PostgreSQL `app` schema contains 17 tables covering tenants, communities, village phase/block and condominium tower/floor structures, properties, assets, people, memberships, system roles, civic designations, effective-dated relationships, import staging, operations, outbox, audit and document metadata. Composite foreign keys reject cross-association references. All new tables deny client access by default, and the schema is not exposed through the Data API.
 
-- **Framework:** [Next.js 16](https://nextjs.org/) (App Router, Server Components)
-- **Language:** [TypeScript 5](https://www.typescriptlang.org/)
-- **Styling:** [Tailwind CSS](https://tailwindcss.com/) & [Lucide Icons](https://lucide.dev/)
-- **Database / Auth:** [Supabase](https://supabase.com/) / PostgreSQL
-- **Deployment:** [Google Cloud Run](https://cloud.google.com/run) / Docker
+The existing web screens demonstrate resident, administration, finance and guard experiences using synthetic data. Demo sign-in does not verify a real password. The client-controlled `demo_user_role` cookie selects a mock persona only in explicitly configured mock-demo mode; it cannot authorize production access. Production portals and both Supabase client factories remain disabled pending S02.
 
----
+Dues and payment verification, documents, visitors, parking, pets and amenities remain planned durable workflows. Prototype buttons and screens are not evidence of successful financial or gate operations. The Android app is not implemented. Kotlin/Compose and React Native are compared in the [Android ADR](docs/architecture/adr/0003-android-platform.md); the final choice is pending approval and a device spike.
 
-## ⚡ Getting Started
+## Local setup
 
-### 1. Prerequisites
-- Node.js 24 LTS (see `.nvmrc`)
-- npm / yarn / pnpm
+Use Node.js 24 (see `.nvmrc`) and npm with the committed lockfile. Python 3.9+ runs the delivery checks. Docker is required only for local Supabase and container verification.
 
-### 2. Installation
 ```bash
 git clone https://github.com/jgotangco/enclavix.git
 cd enclavix
-npm install
-```
-
-### 3. Environment Setup
-Create a `.env.local` file based on `.env.example`:
-```env
-NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
-```
-
-### 4. Development Server
-```bash
+npm ci
+cp .env.example .env.local
 npm run dev
 ```
-Visit [http://localhost:3000](http://localhost:3000) to access the application.
 
-### 5. Production Build
+Open [localhost:3000](http://localhost:3000). The example config enables the mock-only demo:
+
+```env
+ENCLAVIX_APP_ENV=demo
+NEXT_PUBLIC_APP_ENV=demo
+```
+
+Do not add Supabase URL or key values in demo mode; even partial backend configuration causes build/startup rejection. Use only synthetic data. Demo edits are page-local and are not durable transactions.
+
+For an optimized local demo build, keep the same configuration:
+
 ```bash
 npm run build
 npm start
 ```
 
----
+See [development setup and containment](docs/development.md) for the separate contained-production preview and disposable local database checks. Cloud Build builds an image only; it does not deploy. Supabase and Cloud Run remain architecture candidates, with hosting region, tier and recovery commitments unresolved.
 
-## 🔐 Default Demo Accounts
+## Verification
 
-These are bundled synthetic personas. Demo sign-in does not verify a real password; backend authentication remains disabled until S02. Never use demo access for real resident records or operations.
+```bash
+npm run lint
+npm run types:check
+npm run typecheck
+npm test
+python3 tests/s00_foundation.py
+python3 tools/validate_delivery.py
+python3 tools/test_validate_delivery.py
+npm run build
+node tools/check-http.mjs
+```
 
-| User Name | Email | System Access Role (Portal) | Community Designation | Affiliation |
-| :--- | :--- | :--- | :--- | :--- |
-| **Carlos Valdez** | `admin@enclavehoa.com` | `SUPER_ADMIN` (Admin Console) | Independent System Admin | HOA Employee |
-| **Juan Dela Cruz** | `resident@enclavehoa.com` | `RESIDENT` (Resident Portal) | HOA President | Homeowner (Blk 2 Lot 1) |
-| **Ma. Elena Cruz** | `treasurer@enclavehoa.com` | `TREASURER` (Finance Console) | HOA Treasurer | Homeowner (Blk 3 Lot 4) |
-| **Victoria Santos** | `victoria.santos@gmail.com` | `RESIDENT` (Resident Portal) | HOA Secretary | Homeowner (Blk 1 Lot 4) |
-| **Maricel Dizon** | `staff@enclavehoa.com` | `SUPER_ADMIN` (Admin Console) | Property Manager | HOA Employee |
-| **Rodrigo Bautista** | `guard@enclavehoa.com` | `GUARD` (Security Kiosk) | Gate 1 Duty Officer | Security Staff |
-| **Michael Reyes** | `mreyes@corp.ph` | `RESIDENT` (Resident Portal) | Resident Member | Tenant (Blk 2 Lot 3) |
+The HTTP check uses the same environment mode as the build. `npm test` currently runs 29 checks, including forged-cookie containment, scoped foreign keys, rollback, immutable identities, document paths and default-deny access. After changing migrations, regenerate transport types with `npm run types:domain` and commit the result.
 
----
+GitHub Actions verifies production and demo web builds/runtime, a container build/runtime and disposable Supabase. The database job verifies real Auth sign-in, migration/type agreement, restricted-role access and concurrent duplicate operation keys. These checks use synthetic fixtures and do not deploy or certify real-world HOA readiness. See the [S01 evidence](docs/delivery/evidence/S01.md) for results and limitations.
 
-## 👨‍💻 Credits & Attribution
+## Documentation
 
-Designed and product-directed by **[Jerome Gotangco](https://github.com/jgotangco)**. Developed with **Google Antigravity / Gemini**.
+- [Start here](docs/START_HERE.md): current implementation boundaries and reading order.
+- [Business requirements](docs/BRD.md): web and Android product outcomes for villages and condominiums.
+- [Sprint roadmap](docs/delivery/SPRINTS.md), [traceability](docs/delivery/TRACEABILITY.md) and [acceptance gates](docs/delivery/ACCEPTANCE.md).
+- [Architecture](docs/architecture/README.md): domain model, API compatibility, private storage, workers and decision records.
+- [Open decisions](docs/delivery/DECISIONS.md): accountable owners and pending approvals.
+- [Repository instructions](AGENTS.md) and [optional Antigravity handoff](docs/antigravity/MASTER_PROMPT.md).
 
-- **Product Lead & Design:** [Jerome Gotangco (GitHub: @jgotangco)](https://github.com/jgotangco)
-- **Source Repository:** [https://github.com/jgotangco/enclavix](https://github.com/jgotangco/enclavix)
+The historical [design specification](docs/ENCLAVIX_SDD.md) and [persona manual](docs/PERSONA_OPERATIONS_MANUAL.md) describe the prototype; they are not current operating procedures or production acceptance evidence.
 
----
+## Credits and license
 
-## 📄 License
-This project is licensed under the MIT License.
+Product direction and design: [Jerome Gotangco](https://github.com/jgotangco). The original prototype was developed with Google Antigravity / Gemini; the S00–S01 refresh was implemented and reviewed with Codex.
+
+No LICENSE file is currently included in this repository. A license must be established before claiming MIT or another license grant.

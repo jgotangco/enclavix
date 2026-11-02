@@ -1,6 +1,6 @@
 # Sprint roadmap
 
-Each sprint is a bounded delivery package, not a fixed duration. Antigravity implements one at a time; split further if its work exceeds reviewable size. Engineering ready_for_review is separate from business acceptance. Start no dependent sprint before the predecessor is accepted with actual owner approval recorded; never treat this roadmap as approval to publish or deploy.
+Each sprint is a bounded delivery package, not a fixed duration. The implementing agent works on one at a time; split further if its work exceeds reviewable size. Engineering ready_for_review is separate from business acceptance. Start no dependent sprint before the predecessor is accepted with actual owner approval recorded; never treat this roadmap as approval to publish or deploy.
 
 | Sprint | Delivery package | Depends on |
 | --- | --- | --- |
@@ -18,6 +18,8 @@ Each sprint is a bounded delivery package, not a fixed duration. Antigravity imp
 | [S11](sprints/S11.md) | Village and condominium pilot acceptance | S10 |
 
 Release A core web and Android implementation spans S00–S07. S08–S09 implement Release B. S10–S11 are shared production readiness and pilot gates. This conservative sequence validates all modules before full rollout; an earlier core-only pilot may branch after S07 only by formally re-scoping S10/S11 to disabled Release B modules and retaining all core security, recovery and finance gates. Record that change before execution.
+
+Current accepted baseline: S00 and S01 are merged through PR #1 and PR #2. S02 is next and has not started. Consult `STATUS.json` and sprint evidence for authoritative state; a documentation update does not authorize the next sprint.
 
 ## State meanings
 - not_started: no implementation evidence.
