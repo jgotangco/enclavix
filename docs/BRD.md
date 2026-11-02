@@ -1,6 +1,6 @@
 # Enclavix Business Requirements
 
-Version 1.0 | 31 October 2026
+Version 1.1 | 2 November 2026 — approved web-first pilot rebaseline
 
 Canonical repository copy of the BRD. Requirement IDs are stable. Proposed targets and assumptions require approval as recorded in `docs/delivery/DECISIONS.md`.
 
@@ -11,7 +11,7 @@ Prepared for Jerome Gotangco and the Enclavix product and delivery team
 
 ### Purpose and intended outcome
 
-Refresh Enclavix into a production-grade service that a new homeowners association or condominium management organization can configure and operate without a code fork. Deliver a responsive web front end and an Android application using the same trusted business services, permissions, records, and audit history.
+Refresh Enclavix into a production-grade service that a new homeowners association or condominium management organization can configure and operate without a code fork. Deliver the responsive web platform through S11; deliver commercial Android after accepted S11 pilot evidence, using the same trusted business services, permissions, records and audit history.
 
 This BRD defines required business outcomes, scope, controls, measurable acceptance criteria, and release gates. It is the baseline for the subsequent product specification, architecture, backlog, and operating procedures. Proposed service targets and commercial assumptions require stakeholder approval before contractual commitment.
 
@@ -52,7 +52,7 @@ Production readiness applies to every launched module. A phased release may defe
 
 ### Required production pilot scope
 
-Release A includes tenant onboarding, identity, membership and unit registry, configurable assessments, statements and payment verification, announcements, service tickets, documents, notifications, audit, reporting, and administrator web workflows. The Android app includes resident account management, community selection, balances, proof submission, tickets, announcements, and notification preferences. Responsive web provides the same essential resident journeys.
+Release A includes tenant onboarding, identity, membership and unit registry, configurable assessments, statements and payment verification, announcements, service tickets, documents, notifications, audit, reporting, and administrator web workflows. Responsive web provides all essential resident journeys for the pilot and first commercial web release. Android is deferred to post-S11 S06–S07; its future resident scope includes account management, community selection, balances, proof submission, tickets, announcements and preferences. No Android/iOS app or store release is required for web pilot acceptance.
 
 Release B adds visitor and guard operations, vehicles and parking, pets, amenities, and condominium move scheduling. These modules must meet the security and operational gates before activation. Any pilot using Enclavix for gate access requires Release B acceptance and an approved manual fallback before use.
 
@@ -60,7 +60,7 @@ Release B adds visitor and guard operations, vehicles and parking, pets, ameniti
 
 Direct barrier or RFID hardware control, automated bank feeds, payment gateway settlement, full general ledger and payroll, statutory tax filing, legally binding electronic elections, biometric identification, iOS applications, and commercial subscription billing are deferred. Manual payment verification is included; automated collection integrations require separate reconciliation and provider acceptance.
 
-Future candidates are recorded in [Post-S11 candidates](delivery/POST_S11.md). They are outside current S03–S11 implementation scope and require S11 acceptance, pilot evidence and separate approval. The register adds no current acceptance criteria; proposed mobile timing/commercial changes require an explicit rebaseline before altering the existing Android/pilot requirements.
+Future candidates are recorded in [Post-S11 candidates](delivery/POST_S11.md). They are outside current S03–S11 implementation scope and require S11 acceptance, pilot evidence and separate approval. The register adds no current acceptance criteria; Android timing was explicitly rebaselined by Jerome Gotangco on 2 November 2026: S06–S07 follow accepted S11, while mobile stack, commercial license and implementation approval remain separate decisions.
 
 ### Scope rules
 
@@ -178,12 +178,14 @@ Acceptance example: a resident-created visitor pass appears at the correct guard
 
 ### Channel responsibilities
 
+Web requirements apply through S11. The Android column and AND 01–04 are retained future requirements for post-S11 S06–S07, not web pilot gates. UX 01–03 remain mandatory for the web; Android equivalents are verified before a later mobile launch.
+
 | Capability | Responsive web | Android |
 | --- | --- | --- |
 | Resident essentials | Full essential access | Full essential access |
 | Association administration and bulk imports | Primary workspace | Deferred unless explicitly scoped |
 | Finance preparation and approval | Primary workspace | Balances and proof submission; approval deferred |
-| Guard operations | Dedicated kiosk in Release B | Managed staff mode in Release B |
+| Guard operations | Dedicated kiosk in Release B | Future managed staff mode; separate post-S11 scope |
 | Reports and configuration | Primary workspace | Resident documents and history |
 | Notifications and uploads | In-app and email; browser capabilities where supported | In-app, email, push and camera or file upload |
 
@@ -256,17 +258,17 @@ The reviewed repository is the conceptual baseline, not a deployable production 
 
 | Gate | Required evidence and acceptance owner |
 | --- | --- |
-| G1 Foundation | Engineering lead: clean checkout builds web and Android; reproducible dependencies; fresh migrations and seed; isolated environments; monitored deployment and rollback. |
-| G2 Identity and isolation | Security lead: forged demo cookies denied; tenant and role matrix passed across API, database, storage, jobs and exports; revoked memberships lose access on both clients. |
+| G1 Foundation | Engineering lead: clean checkout builds the web platform (Android build evidence is deferred until mobile delivery); reproducible dependencies; fresh migrations and seed; isolated environments; monitored deployment and rollback. |
+| G2 Identity and isolation | Security lead: forged demo cookies denied; tenant and role matrix passed across API, database, storage, jobs and exports; revoked memberships lose access on web/API; Android repeats these checks before its later launch. |
 | G3 Financial integrity | Finance owner: opening balances signed off; duplicate, partial, concurrent and reversed transactions reconciled; receipt uniqueness and period controls validated. |
-| G4 Cross-channel operations | Product owner: resident submits on Android, staff processes on web, resident sees durable outcome; retry, offline, deep-link and context-switch scenarios pass. |
-| G5 Operational readiness | Operations and privacy owners: restore drill, alerts, support rota, retention policy, incident exercise, tenant export and Android staged-release procedures accepted. |
+| G4 Resident/staff operations | Product owner: resident submits on responsive web, staff processes on web, resident sees the same durable outcome; retry, unsent/offline states, authorized links and context switching pass. Android/web parity is a separate post-S11 mobile gate. |
+| G5 Operational readiness | Operations and privacy owners: restore drill, alerts, support rota, retention policy, incident exercise, tenant export and staged web-release procedures accepted. Android signing/store/staged-release evidence is required only before its later launch. |
 | G6 Controlled pilot | Village and condominium sponsors: complete full billing cycle and user acceptance, reconcile all funds, resolve task-blocking defects and approve rollout. |
 | G7 Gate modules if enabled | Security operations owner: expired, revoked, replayed and wrong-gate credentials rejected; concurrent entries and network outage procedure tested before real gate use. |
 
 ### Mandatory test coverage
 
-Unit tests cover assessment calculation, rounding, penalty policy and state transitions. Database integration tests cover tenant policies, ownership constraints and transactions. End-to-end tests cover invitations, approval, multi-property context, collection verification and officer handover on web and Android. Contract tests preserve supported app compatibility. Load tests and restore exercises use representative tenant skew and document volumes.
+Unit tests cover assessment calculation, rounding, penalty policy and state transitions. Database integration tests cover tenant policies, ownership constraints and transactions. End-to-end tests cover invitations, approval, multi-property context, collection verification and officer handover on web through S11; post-S11 mobile delivery repeats these with Android/web parity. Contract tests preserve shared service behavior now and supported mobile compatibility once clients exist. Load tests and restore exercises use representative tenant skew and document volumes.
 
 Security regression cases include no session plus forged administrator cookie; resident requesting another tenant’s invoice or attachment; removed staff reusing a session; client-modified payment amount; repeated approval request; expired private URL; notification deep link after membership termination; and background export with mismatched tenant context.
 
@@ -280,7 +282,7 @@ Pilot rollout begins with approved staff and synthetic rehearsal, then a limited
 
 ### Delivery sequence
 
-Phase 0 establishes policy decisions, discovery with a village and condominium, a validated domain model and architecture. Phase 1 repairs the foundation and delivers tenant onboarding, identity and isolation. Phase 2 completes Release A web and resident Android workflows. Phase 3 runs the controlled pilot and recovery exercise. Phase 4 activates Release B operations after module acceptance. Estimate dates and budget only after discovery, technical spikes and staffing are agreed.
+Phase 0 establishes policy decisions, discovery with a village and condominium, a validated domain model and architecture. Phase 1 repairs the foundation and delivers tenant onboarding, identity and isolation. Phase 2 completes Release A web workflows and Release B web operations (S08–S09). Phase 3 hardens the web platform and runs the controlled S11 pilot/recovery exercise. Phase 4 evaluates commercial Android delivery in S06–S07 and other separately approved post-S11 candidates. Estimate dates and budget only after discovery, technical spikes and staffing are agreed.
 
 ### Decisions required before implementation commitment
 
@@ -289,7 +291,7 @@ Phase 0 establishes policy decisions, discovery with a village and condominium, 
 | Market and legal entity scope | Philippines first; support HOA and condominium management organizations with distinct terminology and policies. Product sponsor confirms. |
 | Commercial and hosting model | Shared multi-tenant service with strict isolation; dedicated hosting is a separately priced exception. Sponsor and architecture lead confirm. |
 | Finance policies | Manual proof verification first; exact rounding, payment allocation, approvals, receipt terminology and retention approved by each association’s finance owner. |
-| Android delivery | Resident app first; guard mode in Release B; Android 10 baseline subject to device survey. Product and engineering leads confirm stack and support window. |
+| Android delivery | Commercial resident app after S11 acceptance and pilot evidence; future mobile guard mode separately scoped; Android 10 baseline subject to device survey. Product and engineering leads confirm stack and support window. |
 | Privacy and recovery | Approve residency, subprocessors, retention periods, support access, RPO/RTO and restoration costs before real onboarding. Privacy and operations owners confirm. |
 | Pilot scope and owners | Secure one village and one condominium sponsor, finance approvers, guard leads if applicable, support capacity and acceptance signatories. Sponsor confirms. |
 

@@ -1,6 +1,6 @@
 # Post-S11 candidate features
 
-Recorded 2 November 2026 at Jerome Gotangco's request. Status: future planning only, not approved for implementation. This register adds no BRD acceptance criteria, sprint deliverables, launch promises or approved vendors. S03–S11, their dependencies, and their acceptance criteria remain unchanged.
+Recorded 2 November 2026 at Jerome Gotangco's request. Status: future planning only, not approved for implementation. This register adds no BRD acceptance criteria, sprint deliverables, launch promises or approved vendors. The sponsor approved web-first phasing on 2 November 2026: S06/S07 Android follows S11, S08 follows S05, and web pilot criteria no longer require a mobile client. Other candidate implementations remain unapproved.
 
 ## Entry gate and scope conflicts
 
@@ -8,9 +8,9 @@ Every candidate below is outside the current S03–S11 implementation scope. Sta
 
 Some candidates extend existing baseline requirements. Core documents, notifications, financial reporting, visitors, parking/pets/amenities and tenant exit controls already have obligations in the BRD and existing sprints. Their baseline obligations remain there; this register defers only the proposed extensions. It must not be used to remove required security, reporting, export or pilot controls.
 
-Android is explicitly assigned to S06–S07 in the current roadmap and BRD. The sponsor's proposed commercial direction is to move Android, along with future iOS, after S11 and make mobile unnecessary for the initial pilot or first commercial web release. That direction is recorded here as a proposed rebaseline, not an enacted scope change: removing Android from S06–S07, changing S08's dependency, and revising release/pilot acceptance require an explicit, consistent roadmap/BRD decision. Until then, existing S06–S07 definitions and acceptance gates remain authoritative. No mobile work is authorized by this register.
+Android retains its stable S06–S07 IDs but is now explicitly deferred until after actual S11 acceptance and pilot evidence. Jerome Gotangco approved the web-first rebaseline on 2 November 2026 through “OK proceed with these changes, review and merge PRs from S03 when necessary.” S08 now follows S05; S10/S11 validate the web platform. Android/iOS are unnecessary for the initial pilot or first commercial web release. Stack/device selection, actual commercial license/distribution boundary and mobile implementation approval are still separate decisions. No mobile work is authorized by this register.
 
-The reconciliation engine candidate has no late-S04 exception. Although an earlier option mentioned late S04, the current instruction places these candidates beyond S11 and leaves S03–S11 unchanged.
+The reconciliation engine candidate has no late-S04 exception. Although an earlier option mentioned late S04, the candidate remains beyond S11; D15 changes only mobile timing, related dependencies and web pilot criteria.
 
 ## Common architecture and operating boundaries
 
@@ -44,11 +44,11 @@ Candidates can be reordered or declined. None is necessary for pilot acceptance 
 
 **Description:** Future native or cross-platform Android/iOS clients must reuse the resident API and authorization model used by the web portal. Android work referenced by S06–S07 and any future iOS app are intended as commercial / post-MIT decision items, outside the intended MIT core web scope; no stack is selected.
 
-**Dependencies and boundaries:** Post-S11 commercial delivery would depend on proven web journeys, API stability and pilot evidence. Both clients must honor the same identity model, session lifetime, live revocation, tenant isolation, effective-dated membership, RLS/default deny and audited commands. A mobile client must never cache its way around revocation or acquire privileged backend credentials. Shared services remain part of the MIT core where already licensed that way. The sponsor's intended web-first release does not require Android or iOS for the initial pilot or first commercial web release; the explicit rebaseline described above is required to enact that intent without conflicting with current S06–S07 and pilot criteria.
+**Dependencies and boundaries:** Post-S11 commercial delivery would depend on proven web journeys, API stability and pilot evidence. Both clients must honor the same identity model, session lifetime, live revocation, tenant isolation, effective-dated membership, RLS/default deny and audited commands. A mobile client must never cache its way around revocation or acquire privileged backend credentials. Shared services remain part of the MIT core where already licensed that way. The sponsor's intended web-first release does not require Android or iOS for the initial pilot or first commercial web release; the approved rebaseline places stable S06–S07 after S11 and removes mobile prerequisites from the web pilot.
 
-**Sequence:** After S11, commercial/license decision and explicit roadmap rebaseline; Android first if pilot demand supports it, iOS later only if justified. No mobile implementation starts under this candidate.
+**Sequence:** After S11 and the separate commercial/license and implementation decisions; Android first if pilot demand supports it, iOS later only if justified. No mobile implementation starts under this candidate.
 
-**Scope:** This future commercial candidate is outside S03–S11. Do not start before S11 acceptance, pilot evidence and separate implementation approval. Existing S06–S07 scope is not silently rewritten.
+**Scope:** This future commercial candidate is outside S03–S11. Do not start before S11 acceptance, pilot evidence and separate implementation approval. Stable S06–S07 requirements are retained for later delivery; their timing and web pilot dependencies are explicitly updated.
 
 ## P03 · Verified payment status integration
 
@@ -214,6 +214,6 @@ Candidates can be reordered or declined. None is necessary for pilot acceptance 
 
 The existing repository license is [MIT](../../LICENSE); this planning document changes no license file or existing grant. Core web work through S11 remains MIT: S00–S02 foundation/identity/authorization/audit, S03 onboarding/membership, S04 receivables/payment verification, S05 resident services/documents, the core data model and web flows of S08–S09 (visitors/gate/basic parking/pets/amenities), S10 hardening and S11 pilot acceptance.
 
-Android work identified by S06–S07 and future iOS are intended as commercial / post-MIT decision items outside the intended MIT core web scope. “Post-MIT” describes a future commercial packaging/licensing decision; it does not mean MIT expires or that existing MIT code is automatically relicensed. This register creates no exception to the current repository license. A separately scoped mobile distribution and its actual license must be decided and recorded before code is introduced under a different license. The mobile timing/release changes remain proposed until the roadmap is explicitly rebaselined.
+Android work identified by S06–S07 and future iOS are intended as commercial / post-MIT decision items outside the intended MIT core web scope. “Post-MIT” describes a future commercial packaging/licensing decision; it does not mean MIT expires or that existing MIT code is automatically relicensed. This register creates no exception to the current repository license. A separately scoped mobile distribution and its actual license must be decided and recorded before code is introduced under a different license. The mobile timing/release rebaseline is approved; the actual future mobile license and implementation are not.
 
 After pilot acceptance and before broader commercial launch, decide the commercial model for the overall offering and future differentiators: continue MIT, dual-license, source-available or proprietary. No option is selected here. Core web MIT commitments and existing MIT notices/grants must be respected. These post-S11 differentiators are not required for pilot acceptance and may receive a different future license only through an explicit, documented decision for the affected new work. Commercialization and implementation are not approved merely by documenting a candidate.

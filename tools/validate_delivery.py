@@ -39,6 +39,11 @@ def validate(root):
         return errors + ["sprints must be a list of objects"]
     ids = [s.get("id") for s in sprints]
     check(ids == [f"S{i:02d}" for i in range(12)], "Expected ordered unique sprints S00 through S11")
+    order = data.get("delivery_order", ids)
+    valid_order = isinstance(order, list) and all(isinstance(x, str) for x in order) and len(order) == len(ids) and set(order) == set(ids)
+    check(valid_order, "Delivery order must contain every sprint exactly once")
+    if not valid_order:
+        order = ids
     by_id = {s.get("id"): s for s in sprints}
     check(data.get("current_sprint") in by_id, "Current sprint does not exist")
     for sprint in sprints:
@@ -57,7 +62,7 @@ def validate(root):
         for dep in deps:
             check(dep in by_id and dep != sid, f"{sid}: invalid dependency {dep}")
             if dep in ids and sid in ids:
-                check(ids.index(dep) < ids.index(sid), f"{sid}: dependency must precede sprint")
+                check(order.index(dep) < order.index(sid), f"{sid}: dependency must precede sprint in delivery order")
             if state in {"in_progress", "ready_for_review", "accepted"}:
                 check(by_id.get(dep, {}).get("status") == "accepted", f"{sid}: predecessor {dep} not accepted")
         if state in {"blocked", "ready_for_review", "accepted"}:

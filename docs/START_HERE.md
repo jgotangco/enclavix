@@ -1,6 +1,6 @@
 # Start here
 
-Enclavix is being refreshed into a production web and Android service for independent village and condominium associations. The checked-in application remains a prototype. S00 foundation repairs and the S01 tenant domain are accepted; S02 account and authorization services are accepted; the application remains a contained prototype, not a production service.
+Enclavix is being refreshed into a production web service, with commercial Android deferred until after S11 acceptance and pilot evidence for independent village and condominium associations. The checked-in application remains a prototype. S00 foundation repairs and the S01 tenant domain are accepted; S02 account and authorization services are accepted; the application remains a contained prototype, not a production service.
 
 Architecture design and implementation boundaries: [S01 architecture](architecture/README.md).
 
@@ -23,3 +23,5 @@ Use one reviewed change set per sprint; split large sprints further if needed. T
 
 ## Document authority
 Current approved user instructions take precedence. The new BRD defines product intent; approved decision records refine implementation; sprint instructions define the current work boundary. Conflicts require explicit resolution and a documented change. `ENCLAVIX_SDD.md` and `PERSONA_OPERATIONS_MANUAL.md` describe the historical prototype and are not proof of production capabilities.
+
+Approved 2 November 2026: execution order is S00–S05 → S08 → S09 → S10 → S11 → S06 → S07. Stable sprint IDs remain; use STATUS.json delivery_order and the updated web-first acceptance gates. Future candidates: [POST_S11.md](delivery/POST_S11.md).
