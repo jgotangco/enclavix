@@ -43,15 +43,15 @@
     {
       "id": "S03",
       "title": "Onboarding and property membership workflows",
-      "status": "ready_for_review",
+      "status": "accepted",
       "depends_on": [
         "S02"
       ],
       "prompt": "docs/delivery/sprints/S03.md",
       "evidence": "docs/delivery/evidence/S03.md",
       "blockers": [],
-      "accepted_by": null,
-      "accepted_at": null
+      "accepted_by": "Jerome Gotangco via explicit completed review and acceptance",
+      "accepted_at": "2026-11-02"
     },
     {
       "id": "S04",
