@@ -13,4 +13,4 @@ The new domain lives in the private PostgreSQL `app` schema. Existing public tab
 
 These documents distinguish implemented database constraints from future application enforcement. None of them represents regulatory certification, a production release, financial posting acceptance, or an independent security assessment.
 
-S02 local review repairs: [identity and authorization contract](adr/0005-identity-and-access.md). The S01 boundary described above is the accepted baseline; the S02 branch adds narrow account services while retaining mock portal containment.
+Accepted S02 identity and review repairs: [identity and authorization contract](adr/0005-identity-and-access.md). S02 adds accepted account/access services and review repairs while retaining mock portal containment.

@@ -1,6 +1,6 @@
 # Account and access operations — S02 development baseline
 
-This is an engineering runbook, not authorization for production deployment. S02 is pending review/acceptance. Use only synthetic data until hosting, privacy, onboarding and launch gates are approved.
+This is an engineering runbook, not authorization for production deployment. S02 engineering scope and review repairs are accepted; production use remains unapproved. Use only synthetic data until hosting, privacy, onboarding and launch gates are approved.
 
 ## Accounts and association approval
 

@@ -1,6 +1,6 @@
 # ADR 0005 S02 identity and authorization contract
 
-Date: 2 November 2026. Engineering implementation under review; production infrastructure remains unapproved. D07 policy approved by Jerome Gotangco: MFA for every staff/administrator role, no shared staff accounts, immediate membership revocation, and explicit time-limited support approval.
+Date: 2 November 2026. S02 engineering implementation accepted; production infrastructure remains unapproved. D07 policy approved by Jerome Gotangco: MFA for every staff/administrator role, no shared staff accounts, immediate membership revocation, and explicit time-limited support approval.
 
 ## Trust boundaries
 
@@ -38,7 +38,7 @@ D03 region/hosting and real onboarding remain unapproved. Before any hosted enab
 
 Sources checked 2 November 2026: [Supabase sessions](https://supabase.com/docs/guides/auth/sessions), [SSR clients](https://supabase.com/docs/guides/auth/server-side/creating-a-client), [MFA](https://supabase.com/docs/guides/auth/auth-mfa), [password recovery](https://supabase.com/docs/reference/javascript/auth-resetpasswordforemail), [sign-out](https://supabase.com/docs/guides/auth/signout), [Next.js authentication](https://nextjs.org/docs/app/guides/authentication). Permission commands use durable operation keys and canonical payload hashes; safe retries do not repeat side effects, and conflicting keys are rejected. Lost invitation plaintext is not replayed. No dependencies were added or upgraded.
 
-## S02 review repairs (uncommitted local work, 2 November 2026)
+## Accepted S02 review repairs (2 November 2026)
 
 An additive repair migration preserves active members’ independent roles, scope and membership expiry during property approval; only inactive reinstatement clears stale grants. New resident scope is limited to the approved community and existing current relationships/grants are not duplicated. A second live invitation for a contact is rejected under the tenant lock until the first is revoked, protecting reloads and lost client retry state.
 

@@ -30,15 +30,15 @@
     {
       "id": "S02",
       "title": "Real identity and tenant authorization",
-      "status": "in_progress",
+      "status": "accepted",
       "depends_on": [
         "S01"
       ],
       "prompt": "docs/delivery/sprints/S02.md",
       "evidence": "docs/delivery/evidence/S02.md",
       "blockers": [],
-      "accepted_by": null,
-      "accepted_at": null
+      "accepted_by": "Jerome Gotangco via explicit conditional commit, push and merge authorization",
+      "accepted_at": "2026-11-02"
     },
     {
       "id": "S03",
