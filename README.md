@@ -1,6 +1,6 @@
 # Enclavix — HOA & Enclave Operating System
 
-Enclavix is being rebuilt as a multi-tenant community platform with a responsive web front end and an Android app for independent village and condominium associations.
+Enclavix is being rebuilt as a multi-tenant community platform with a responsive web front end and a planned post-S11 commercial Android app for independent village and condominium associations.
 
 **Current state: a contained prototype with an accepted engineering foundation. It is not approved for real resident data, financial operations or gate decisions.**
 
@@ -13,8 +13,9 @@ Accepted engineering delivery baseline as of 2 November 2026:
 | [S00](docs/delivery/evidence/S00.md) | Accepted — [PR #1](https://github.com/jgotangco/enclavix/pull/1) | Reproducible builds, mock-demo isolation, closed production portals and default-deny prototype tables |
 | [S01](docs/delivery/evidence/S01.md) | Accepted — [PR #2](https://github.com/jgotangco/enclavix/pull/2) | Private tenant domain, scoped relationships, generated types, fixtures, isolation/concurrency checks and architecture contracts |
 | [S02](docs/delivery/evidence/S02.md) | Accepted — [PR #3](https://github.com/jgotangco/enclavix/pull/3) | Verified identity, MFA, scoped account services, invitations/approval, revocation and private download authorization |
-| [S03](docs/delivery/evidence/S03.md) | In progress — review pending | Synthetic onboarding, registry relationships, import reconciliation and export/offboarding staging |
-| S04–S11 | Not started | Finance, durable operations, Android, operating readiness and pilot acceptance |
+| [S03](docs/delivery/evidence/S03.md) | In progress — reviewed increment; completion pending | Synthetic onboarding, registry relationships, import reconciliation and export/offboarding staging |
+| S04–S05, S08–S11 | Not started | Web finance, resident/guard operations, hardening and pilot acceptance |
+| S06–S07 | Deferred — not started | Commercial Android after S11 acceptance and pilot evidence |
 
 [STATUS.json](docs/delivery/STATUS.json) is the delivery-state record. Sprint acceptance does not certify production readiness or approve unresolved hosting and mobile decisions. No production deployment or hosted migration has been performed.
 
@@ -96,3 +97,5 @@ The historical [design specification](docs/ENCLAVIX_SDD.md) and [persona manual]
 Product direction and design: [Jerome Gotangco](https://github.com/jgotangco). The original prototype was developed with Google Antigravity / Gemini; the S00–S02 refresh was implemented and reviewed with Codex.
 
 Copyright © 2026 Jerome Gotangco. Enclavix is licensed under the [MIT License](LICENSE), including permission for commercial use, modification and distribution subject to its notice requirements. Third-party dependencies retain their respective licenses.
+
+Approved delivery sequence: S00–S05 → S08 → S09 → S10 → S11 → S06 → S07. Android/iOS are not required for the initial pilot or first commercial web release. See [post-S11 candidates](docs/delivery/POST_S11.md); the core web remains MIT and future mobile licensing requires a separate decision.

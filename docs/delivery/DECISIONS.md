@@ -13,10 +13,12 @@ Status is `proposed`, `approved`, `rejected` or `superseded`. A proposed default
 | D07 | Security and staff identity | MFA for every staff/admin role; individual accounts; immediate revocation; explicitly approved time-limited support | approved | S02 | Security and operations owners |
 | D08 | Privacy and retention | Data inventory and tenant notices; explicit schedules and legal holds; specialist validation | proposed | S05 and before real onboarding | Privacy owner |
 | D09 | Service targets | BRD NFR targets are internal proposals until cost and load evidence support them | proposed | S10 | Sponsor and operations owner |
-| D10 | Pilot and phasing | Release A core web plus resident Android; Release B guard and extended operations; one village and condo pilot | proposed | S00 planning; S11 launch | Product and pilot sponsors |
+| D10 | Pilot and phasing | Web-first phasing per D15; Release B guard and extended operations; one village and condo pilot | proposed | S00 planning; S11 launch | Product and pilot sponsors |
 | D11 | Subscription lifecycle | Platform fees distinct from dues; no commercial billing engine in initial scope | proposed | Before commercialization | Sponsor |
-| D13 | Onboarding approval | Operator creates; nominated administrator completes; a different operator independently verifies and activates | approved | S03 | Sponsor |
 | D12 | Supported runtime baseline | Node.js 24 LTS, Next.js 16, React 19; mock-only demos; PostgreSQL 15 local validation | proposed | S00 | Architecture and engineering leads |
+| D13 | Onboarding approval | Operator creates; nominated administrator completes; a different operator independently verifies and activates | approved | S03 | Sponsor |
+| D14 | Post-S11 candidates and commercial boundary | Future register; MIT core web; future mobile licensing choices; no candidate implementation approval | proposed | After S11 acceptance and pilot evidence | Sponsor |
+| D15 | Web-first pilot and Android deferral | S00–S05 → S08–S11 → S06–S07; web pilot requires no mobile app | approved | Current planning baseline | Jerome Gotangco |
 
 ## Decision record template
 ID and title / status / date / actual approver / context / options / decision / rationale / BRD IDs / affected data and compatibility / reversal plan / links to evidence.
@@ -50,3 +52,23 @@ Approved by Jerome Gotangco through the explicit response “Use this policy”:
 ## D13 onboarding approval flow — 2 November 2026
 
 Approved by Jerome Gotangco through “Use this approval flow”: a registered platform operator creates the HOA setup, the nominated administrator completes it, and a different operator verifies the authority evidence and activation checklist. Neither creator nor nominee can self-activate. The implementation remains synthetic-only; approval to use real resident data, privacy/retention policy and production deployment are separate and remain pending. Any setup mutation invalidates an onboarding submission; activation binds to the reviewed revision and recomputes its checklist under the association lock. See evidence/S03.md.
+
+## D14 post-S11 candidates and intended license boundary — 2 November 2026
+
+Recorded at Jerome Gotangco's explicit request: [POST_S11.md](POST_S11.md) contains future candidates only. Documentation is authorized; their implementation, vendors, commercial license and schedule are not approved. Every candidate requires S11 acceptance, pilot evidence and a separate implementation decision. No late-S04 reconciliation-engine exception is authorized. At initial recording, S03–S11 scope, dependencies and acceptance criteria were unchanged. D15 subsequently approves the specific mobile/web-first rebaseline; existing non-mobile baseline obligations are not deferred by listing extensions.
+
+The core web platform through S11 remains MIT: S00–S02 foundation/identity/authorization/audit; S03 onboarding/membership; S04 receivables/payment verification; S05 resident services/documents; core data model and S08–S09 web visitor/gate/basic parking/pet/amenity flows; S10 hardening; S11 pilot acceptance. The current LICENSE and existing MIT grants/notices are unchanged.
+
+Initial direction (mobile timing superseded by approved D15 below): Android (currently S06–S07) and future iOS are commercial / post-MIT decision items, intended outside the MIT core web scope and unnecessary for the initial pilot or first commercial web release. On 2 November the sponsor specifically asked for a recommendation on moving Android after S11; this is recorded as a proposed rebaseline, not permission to change the roadmap. Formal adoption must consistently update Android timing, S08 dependencies and release/pilot criteria. Existing S06–S07 definitions remain authoritative until that decision. “Post-MIT” does not revoke existing MIT permissions or automatically create a commercial exception in this repository.
+
+After pilot acceptance and before broader commercial launch, decide whether the overall offering/new differentiators continue MIT, use dual licensing, source-available terms or proprietary licensing, while respecting the core MIT boundary and existing grants. Future mobile/new differentiator licensing requires a separately documented scope and actual license before differently licensed code is introduced. Post-S11 candidates are not required for pilot acceptance. No specific pilot association, provider purchase, implementation or deployment is approved.
+
+## D15 web-first pilot and Android deferral — 2 November 2026
+
+Approved by Jerome Gotangco through “OK proceed with these changes, review and merge PRs from S03 when necessary,” following the explicit recommended sequence S03 → S04 → S05 → S08 → S09 → S10 → S11, then commercial Android. This supersedes D14's pending timing proposal and D10's Android-dependent pilot phasing; D14's future feature/license choices and D04/D05 remain proposed.
+
+Retain stable sprint IDs; STATUS.json delivery_order becomes S00–S05, S08–S11, S06–S07. S08 depends on S05; S06 depends on actual accepted S11 pilot evidence; S07 depends on S06. S06/S07 remain not_started and require separate commercial/license, stack/device and implementation decisions before selection. No iOS work is authorized.
+
+Core MIT web and shared API deliverables stay in scope through S11. S05 owns web UX 01–03; S07 later verifies Android equivalents and AND 01–04. G1/G4/G5 and S10/S11 now require web build, resident/staff web workflows and web release/operating evidence; no mobile build, store package or Android/web parity is a prerequisite for the pilot or first commercial web release. API/tenant isolation, live revocation, web accessibility, reconciled finance, privacy, restore and enabled gate controls remain mandatory. No security or operating gate is waived by this timing change.
+
+Reviewed PR merges are authorized when their engineering checks pass. Merge of an S03 increment is not automatic completion of the whole sprint, owner UAT, real-data approval or production deployment. No later sprint or post-S11 candidate implementation is authorized by this decision. Reversal requires another explicit roadmap/BRD decision, not renumbering historical sprint evidence.

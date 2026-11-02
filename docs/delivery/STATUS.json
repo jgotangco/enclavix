@@ -84,13 +84,14 @@
       "title": "Android foundation and account context",
       "status": "not_started",
       "depends_on": [
-        "S05"
+        "S11"
       ],
       "prompt": "docs/delivery/sprints/S06.md",
       "evidence": "docs/delivery/evidence/S06.md",
       "blockers": [],
       "accepted_by": null,
-      "accepted_at": null
+      "accepted_at": null,
+      "delivery_phase": "post_s11_commercial"
     },
     {
       "id": "S07",
@@ -103,14 +104,15 @@
       "evidence": "docs/delivery/evidence/S07.md",
       "blockers": [],
       "accepted_by": null,
-      "accepted_at": null
+      "accepted_at": null,
+      "delivery_phase": "post_s11_commercial"
     },
     {
       "id": "S08",
       "title": "Visitor and guard operations",
       "status": "not_started",
       "depends_on": [
-        "S07"
+        "S05"
       ],
       "prompt": "docs/delivery/sprints/S08.md",
       "evidence": "docs/delivery/evidence/S08.md",
@@ -157,5 +159,19 @@
       "accepted_by": null,
       "accepted_at": null
     }
+  ],
+  "delivery_order": [
+    "S00",
+    "S01",
+    "S02",
+    "S03",
+    "S04",
+    "S05",
+    "S08",
+    "S09",
+    "S10",
+    "S11",
+    "S06",
+    "S07"
   ]
 }
