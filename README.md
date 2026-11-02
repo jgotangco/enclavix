@@ -88,4 +88,4 @@ The historical [design specification](docs/ENCLAVIX_SDD.md) and [persona manual]
 
 Product direction and design: [Jerome Gotangco](https://github.com/jgotangco). The original prototype was developed with Google Antigravity / Gemini; the S00–S01 refresh was implemented and reviewed with Codex.
 
-No LICENSE file is currently included in this repository. A license must be established before claiming MIT or another license grant.
+Copyright © 2026 Jerome Gotangco. Enclavix is licensed under the [MIT License](LICENSE), including permission for commercial use, modification and distribution subject to its notice requirements. Third-party dependencies retain their respective licenses.

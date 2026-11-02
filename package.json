@@ -13,6 +13,7 @@
     "url": "https://github.com/jgotangco/enclavix.git"
   },
   "private": true,
+  "license": "MIT",
   "scripts": {
     "dev": "next dev",
     "build": "node tools/check-environment.mjs && next build --webpack",
