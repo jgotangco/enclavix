@@ -1,7 +1,9 @@
 -- S02: JWTs enter only through the provider-verifying Data API. No client DB logins.
 -- This NOLOGIN/NOBYPASSRLS role owns read RPCs, never application tables.
 CREATE ROLE enclavix_reader NOLOGIN NOINHERIT NOBYPASSRLS;
+GRANT enclavix_reader TO postgres; -- migration owner only; never API/client roles
 GRANT USAGE ON SCHEMA public, app TO enclavix_reader;
+GRANT CREATE ON SCHEMA public TO enclavix_reader; -- temporary for function ownership transfer
 GRANT SELECT ON ALL TABLES IN SCHEMA app TO enclavix_reader;
 
 ALTER TABLE app.membership_roles ADD COLUMN revoked_at timestamptz;
@@ -305,3 +307,5 @@ DO $$ BEGIN
   -- The web/API download gateway checks live authorization then streams with a server-only key.
  END IF;
 END $$;
+
+REVOKE CREATE ON SCHEMA public FROM enclavix_reader;

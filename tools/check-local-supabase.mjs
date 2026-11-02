@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import { createClient } from '@supabase/supabase-js';
 import pg from 'pg';
 import { seedDomainFixtures } from './lib/domain-fixtures.mjs';
+import { verifyAccessConcurrency } from './lib/verify-access-concurrency.mjs';
 import { verifyWebIdentity } from './lib/verify-web-identity.mjs';
 import { verifyIdentity } from './lib/verify-identity.mjs';
 import { verifyDomainPostgres, verifyDomainConcurrency } from './lib/verify-domain.mjs';
@@ -61,6 +62,7 @@ try {
     return client;
   });
   const identity=await verifyIdentity({db,admin,sessions,state});
+  await verifyAccessConcurrency({db,admin,staff:identity.staff,connect:async()=>{const c=new pg.Client({connectionString:state.DB_URL});await c.connect();return c;}});
   await verifyWebIdentity({state,...identity});
   const unexposed=await publicClient.schema('app').from('people').select('*');
   assert.equal(unexposed.error?.code,'PGRST106','Private domain schema must not be in the exposed schema list');

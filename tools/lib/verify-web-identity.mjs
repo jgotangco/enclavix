@@ -41,6 +41,8 @@ export async function verifyWebIdentity({state,owner,staff,password}) {
   const logout=await fetch(endpoint+'auth/logout',{method:'POST',headers:{cookie,origin:base,'content-type':'application/json'},body:JSON.stringify({scope:'global'})});assert.equal(logout.status,200);
   assert.equal((await fetch(endpoint+'session',{headers:{cookie}})).status,401,'Stolen old cookie denied after logout');
   assert.equal((await fetch(endpoint+`tenants/${f.villageTenant}/documents/${f.document}`,{headers:{cookie}})).status,401);
+  const nativeLogout=await fetch(endpoint+'auth/logout',{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json'},body:JSON.stringify({scope:'local'})});assert.equal(nativeLogout.status,200);
+  assert.equal((await fetch(endpoint+'session',{headers:{authorization:`Bearer ${token}`}})).status,401);
   console.log('S02 built web: real cookie login, HttpOnly/Secure cookies, CSRF, native bearer requests, tenant/file isolation, no-store responses and stale-cookie denial after logout passed');
  }finally{
   if(child.exitCode===null&&child.signalCode===null){child.kill('SIGTERM');await once(child,'exit');}

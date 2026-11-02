@@ -58,6 +58,8 @@ export async function POST(request: Request) {
     const path = new URL(request.url).pathname.replace("/api/v1/", "");
     const body = await readJson(request);
     const client = await createClient(bearer);
+    // Native clients own provider session storage/refresh/MFA, never a cookie session here.
+    if (bearer && path.startsWith("auth/") && path !== "auth/logout" && path !== "auth/revoke-session") return failed(400);
     if (["auth/login", "auth/register", "auth/recover"].includes(path)) {
       const b = fields(body, path === "auth/recover" ? ["email"] : ["email", "password"]);
       const email = text(b.email, 254).trim();
@@ -81,7 +83,7 @@ export async function POST(request: Request) {
     if (path === "auth/logout") {
       const b = fields(body, ["scope"]);
       if (b.scope !== "global" && b.scope !== "local" && b.scope !== "others") return failed(400);
-      result(await client.auth.signOut({ scope: b.scope }));
+      result(bearer ? await client.auth.admin.signOut(bearer, b.scope) : await client.auth.signOut({ scope: b.scope }));
       return reply({ data: { message: "Sessions signed out." } });
     }
     if (path === "auth/password") {
