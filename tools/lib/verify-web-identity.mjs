@@ -36,8 +36,13 @@ export async function verifyWebIdentity({state,owner,staff,password}) {
   const badFile=await fetch(endpoint+`tenants/${f.condoTenant}/documents/${f.document}`,{headers:{cookie}});assert.equal(badFile.status,404);
   const token=(await staff.auth.getSession()).data.session.access_token;
   const native=await fetch(endpoint+`tenants/${f.villageTenant}/applications`,{headers:{authorization:`Bearer ${token}`}});assert.equal(native.status,200);
-  const tampered=await fetch(endpoint+'access/apply',{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json'},body:JSON.stringify({p_tenant:f.villageTenant,p_name:'Native caller',p_property:'Lot 1',role:'association_admin'})});assert.equal(tampered.status,403);
+  const tampered=await fetch(endpoint+'access/apply',{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json'},body:JSON.stringify({p_tenant:f.villageTenant,p_name:'Native caller',p_property:'Lot 1',role:'association_admin'})});assert.equal(tampered.status,400);
   assert.equal((await fetch(base+'/admin',{headers:{cookie},redirect:'manual'})).status,307,'Real identity must not reach mock business screens');
+  const roleCommand={p_tenant:f.villageTenant,p_member:f.villageMember,p_role:'finance_preparer',p_community:null,p_until:null,p_revoke:false,p_reason:'Verified native permission change retry'};
+  for(let i=0;i<2;i++){
+   const changed=await fetch(endpoint+'access/role',{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json','Idempotency-Key':'native-role-command'},body:JSON.stringify(roleCommand)});assert.equal(changed.status,200);
+  }
+  const conflict=await fetch(endpoint+'access/role',{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json','Idempotency-Key':'native-role-command'},body:JSON.stringify({...roleCommand,p_role:'association_admin'})});assert.equal(conflict.status,409);
   const logout=await fetch(endpoint+'auth/logout',{method:'POST',headers:{cookie,origin:base,'content-type':'application/json'},body:JSON.stringify({scope:'global'})});assert.equal(logout.status,200);
   assert.equal((await fetch(endpoint+'session',{headers:{cookie}})).status,401,'Stolen old cookie denied after logout');
   assert.equal((await fetch(endpoint+`tenants/${f.villageTenant}/documents/${f.document}`,{headers:{cookie}})).status,401);

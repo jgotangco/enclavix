@@ -1,3 +1,4 @@
+import {randomUUID} from 'node:crypto';
 import test, {before, after} from 'node:test';
 import assert from 'node:assert/strict';
 import {createDomainDatabase} from '../tools/lib/domain-database.mjs';
@@ -19,7 +20,8 @@ after(async()=>db?.close());
 async function claims(user=owner, session=ownerSession, aal='aal1',extra={}) {
  await db.query(`SELECT set_config('request.jwt.claims',$1,false)`,[JSON.stringify({role:'authenticated',sub:user,session_id:session,aal,exp:Math.floor(Date.now()/1000)+3600,...extra})]);
 }
-async function rpc(sql,args=[]) {
+async function rpc(sql,args=[],key=randomUUID()) {
+ await db.query("SELECT set_config('request.headers',$1,false)",[JSON.stringify({'idempotency-key':key})]);
  await db.exec('SET ROLE authenticated');
  try{return await db.query(sql,args);}finally{await db.exec('RESET ROLE');}
 }
@@ -123,6 +125,15 @@ test('role changes take effect on the next request without refreshing the JWT',a
  await claims(staff,staffSession,'aal2');
  await rpc('SELECT public.enclavix_set_role($1,$2,$3,$4,NULL,true,$5)',[f.villageTenant,f.villageMember,'finance_approver',f.village,'Temporary approval permission removed']);
  await claims(owner,ownerSession,'aal2');assert.equal((await db.query("SELECT app.role_at($1,'finance_approver',$2) AS allowed",[f.villageTenant,f.village])).rows[0].allowed,false);
+});
+test('permission command retries replay once and reject a reused key with different content',async()=>{
+ await claims(staff,staffSession,'aal2');
+ const sql='SELECT public.enclavix_set_role($1,$2,$3,$4,NULL,false,$5)';
+ const args=[f.villageTenant,f.villageMember,'facilities_staff',f.village,'Idempotent access change verification'];
+ await rpc(sql,args,'same-role-command');await rpc(sql,args,'same-role-command');
+ assert.equal((await db.query("SELECT count(*)::int AS n FROM app.audit_events WHERE event_type='access.role_changed' AND details->>'reason'=$1",[args[4]])).rows[0].n,1);
+ await assert.rejects(rpc(sql,[...args.slice(0,4),'Changed payload under the same key'],'same-role-command'),e=>e.code==='23505');
+ await rpc('SELECT public.enclavix_set_role($1,$2,$3,$4,NULL,true,$5)',args);
 });
 test('document access checks scan, audience, household ownership and current membership',async()=>{
  await claims(owner,ownerSession);

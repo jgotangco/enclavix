@@ -7,6 +7,7 @@ test('cookie commands require same-origin JSON; native bearer requests do not tr
  assert.throws(()=>checkMutation(req({'content-type':'application/json',origin:'https://attacker.example'})),/Same-origin/);
  assert.throws(()=>checkMutation(req({'content-type':'text/plain',origin:'https://enclavix.example'})),/JSON/);
  assert.doesNotThrow(()=>checkMutation(req({'content-type':'application/json',origin:'https://enclavix.example'})));
+ assert.doesNotThrow(()=>checkMutation(new Request('http://localhost:3000/api/v1/auth/login',{method:'POST',headers:{host:'127.0.0.1:3000',origin:'http://127.0.0.1:3000','content-type':'application/json'}})));
  assert.doesNotThrow(()=>checkMutation(req({'content-type':'application/json'}),'verified-later-by-provider'));
  assert.equal(bearerFrom(req({authorization:'Bearer ey.test.token'})),'ey.test.token');
  assert.throws(()=>bearerFrom(req({authorization:'Basic attacker'})),/Invalid/);

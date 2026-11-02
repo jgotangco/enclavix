@@ -2,13 +2,20 @@ import { createClient as storageClient } from "@supabase/supabase-js";
 import { runtimeEnvironment } from "@/lib/env.server";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { bearerFrom, checkMutation, fields, text, uuid, readJson } from "@/lib/auth/request";
+import { bearerFrom, checkMutation, fields, text, uuid, readJson, RequestError, requestOrigin } from "@/lib/auth/request";
 
 export const dynamic = "force-dynamic";
 const headers = { "Cache-Control": "private, no-store", "Vary": "Cookie, Authorization", "X-Content-Type-Options": "nosniff" };
 function reply(data: unknown, status = 200) { return NextResponse.json(data, { status, headers }); }
-function failed(status = 403) { return reply({ error: { code: status === 401 ? "unauthenticated" : status === 503 ? "unavailable" : "request_denied" }, request_id: crypto.randomUUID() }, status); }
-function result<T>(value: { data?: T; error: unknown }): NonNullable<T> { if (value.error) throw new Error("Provider denied request"); return value.data as NonNullable<T>; }
+function failed(status = 403) {
+  const codes: Record<number,string> = {400:"invalid_request",401:"unauthenticated",403:"forbidden",404:"not_found",409:"conflict",413:"too_large",415:"json_required",429:"rate_limited",503:"unavailable"};
+  return reply({error:{code:codes[status]||"request_denied"},request_id:crypto.randomUUID()},status);
+}
+function result<T>(value: { data?: T; error: unknown }): NonNullable<T> { if (value.error) {
+  const e = value.error as {code?:string;status?:number};
+  const status=e.status===429?429:e.status===401?401:e.status===403?403:(e.status && e.status>=400 && e.status<500)?400:e.code==="42501"?403:e.code==="23505"?409:["23503","23514","22P02","22023"].includes(e.code||"")?400:503;
+  throw new RequestError("Provider denied request",status);
+} return value.data as NonNullable<T>; }
 
 export async function GET(request: Request) {
   try {
@@ -46,7 +53,7 @@ export async function GET(request: Request) {
       return reply({ data: result(await client.rpc(match[2] === "properties" ? "enclavix_properties" : match[2] === "applications" ? "enclavix_applications" : match[2] === "access-audit" ? "enclavix_access_audit" : "enclavix_access_directory", { p_tenant: tenant })) });
     }
     return failed(404);
-  } catch { return failed(503); }
+  } catch (error) { return failed(error instanceof RequestError ? error.status : 503); }
 }
 
 export async function POST(request: Request) {
@@ -65,17 +72,17 @@ export async function POST(request: Request) {
       const email = text(b.email, 254).trim();
       if (path === "auth/recover") {
         // Fixed local redirect; never accept a caller-controlled return URL.
-        await client.auth.resetPasswordForEmail(email, { redirectTo: `${new URL(request.url).origin}/auth/callback` });
+        await client.auth.resetPasswordForEmail(email, { redirectTo: `${requestOrigin(request)}/auth/callback` });
         return reply({ data: { message: "If eligible, check your email for recovery instructions." } });
       }
       const password = text(b.password, 128);
       if (path === "auth/register") {
         if (password.length < 12) return failed(400);
-        await client.auth.signUp({ email, password, options: { emailRedirectTo: `${new URL(request.url).origin}/auth/callback` } });
+        await client.auth.signUp({ email, password, options: { emailRedirectTo: `${requestOrigin(request)}/auth/callback` } });
         return reply({ data: { message: "If eligible, check your email to verify your account. Association access requires approval." } });
       }
       const login = await client.auth.signInWithPassword({ email, password });
-      if (login.error || !login.data.user?.email_confirmed_at) return failed(401);
+      if (login.error || !login.data.user?.email_confirmed_at) return failed(login.error?.status===429?429:401);
       return reply({ data: { message: "Signed in." } });
     }
     const verified = await client.auth.getUser();
@@ -126,6 +133,8 @@ export async function POST(request: Request) {
     const command = commands[path]; if (!command) return failed(404);
     const args = fields(body, command.keys);
     if (command.keys.some(k => !(k in args))) return failed(400);
-    return reply({ data: result(await client.rpc(command.rpc, args)) });
-  } catch { return failed(); }
+    const key = request.headers.get("idempotency-key");
+    if (!key || !/^[A-Za-z0-9._:-]{1,128}$/.test(key)) return failed(400);
+    return reply({ data: result(await client.rpc(command.rpc, args).setHeader("Idempotency-Key", key)) });
+  } catch (error) { return failed(error instanceof RequestError ? error.status : error instanceof SyntaxError ? 400 : 503); }
 }

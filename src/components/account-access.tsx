@@ -13,7 +13,7 @@ function Choice({name,label,options,optional=false}:{name:string;label:string;op
 type Property = { id:string; community_id:string; code:string;label:string;kind:string };
 async function api(path:string, body?:unknown) {
   const response = await fetch(`/api/v1/${path}`, body === undefined ? { cache:"no-store" } : {
-    method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body), cache:"no-store",
+    method:"POST", headers:{"Content-Type":"application/json","Idempotency-Key":crypto.randomUUID()}, body:JSON.stringify(body), cache:"no-store",
   });
   const payload = await response.json();
   if (!response.ok) throw new Error(response.status === 401 ? "Sign in with a verified email address to continue." : "Request unavailable or not permitted. Staff actions require a recent MFA sign-in. Check your details and try again.");

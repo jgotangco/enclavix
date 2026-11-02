@@ -158,9 +158,28 @@ BEGIN
  THEN RAISE EXCEPTION 'Not authorized; recent MFA sign-in and reason required' USING ERRCODE='42501'; END IF;
  RETURN actor;
 END $$;
-CREATE FUNCTION app.record_access(t uuid, actor uuid, event text, details jsonb) RETURNS void LANGUAGE sql SECURITY DEFINER SET search_path=pg_catalog AS $$
- INSERT INTO app.audit_events(tenant_id,actor_membership_id,event_type,outcome,details) VALUES(t,actor,event,'succeeded',details)
-$$;
+CREATE FUNCTION app.start_access(t uuid,actor uuid,event text,payload jsonb) RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog AS $$
+DECLARE key text:=nullif(current_setting('request.headers',true),'')::jsonb->>'idempotency-key';
+ hash text:=encode(sha256(convert_to(payload::text,'UTF8')),'hex'); op app.operation_requests;
+BEGIN
+ IF key IS NULL OR key !~ '^[A-Za-z0-9._:-]{1,128}$' THEN RAISE EXCEPTION 'Idempotency-Key required' USING ERRCODE='22023'; END IF;
+ SELECT * INTO op FROM app.operation_requests WHERE tenant_id=t AND operation=event AND idempotency_key=key FOR UPDATE;
+ IF op.id IS NOT NULL THEN
+  IF op.actor_membership_id<>actor OR op.request_sha256<>hash THEN RAISE EXCEPTION 'Idempotency conflict' USING ERRCODE='23505'; END IF;
+  IF op.status='succeeded' THEN RETURN false; END IF;
+  RAISE EXCEPTION 'Operation not complete' USING ERRCODE='23505';
+ END IF;
+ INSERT INTO app.operation_requests(tenant_id,actor_membership_id,operation,idempotency_key,request_sha256)
+ VALUES(t,actor,event,key,hash) RETURNING * INTO op;
+ PERFORM set_config('enclavix.operation_id',op.id::text,true);
+ RETURN true;
+END $$;
+CREATE FUNCTION app.record_access(t uuid, actor uuid, event text, details jsonb) RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog AS $$
+DECLARE op uuid:=nullif(current_setting('enclavix.operation_id',true),'')::uuid;
+BEGIN
+ INSERT INTO app.audit_events(tenant_id,actor_membership_id,operation_id,event_type,outcome,details) VALUES(t,actor,op,event,'succeeded',details);
+ IF op IS NOT NULL THEN UPDATE app.operation_requests SET status='succeeded',result='{"completed":true}' WHERE tenant_id=t AND id=op; END IF;
+END $$;
 CREATE FUNCTION public.enclavix_apply(p_tenant uuid,p_name text,p_property text) RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog AS $$
 DECLARE u uuid:=app.principal(); result uuid;
 BEGIN
@@ -200,6 +219,7 @@ END $$;
 CREATE FUNCTION public.enclavix_invite(p_tenant uuid,p_person uuid,p_email text,p_reason text) RETURNS text LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog AS $$
 DECLARE actor uuid:=app.require_admin(p_tenant,p_reason); token text:=gen_random_uuid()::text||gen_random_uuid()::text; i uuid;
 BEGIN
+ IF NOT app.start_access(p_tenant,actor,'access.invited',jsonb_build_object('person',p_person,'email',lower(btrim(p_email)),'reason',p_reason)) THEN RAISE EXCEPTION 'Invitation already issued; revoke and reissue if token lost' USING ERRCODE='23505'; END IF;
  IF NOT EXISTS(SELECT 1 FROM app.people WHERE tenant_id=p_tenant AND id=p_person AND kind='individual' AND auth_user_id IS NULL)
  THEN RAISE EXCEPTION 'Invalid invitation target' USING ERRCODE='42501'; END IF;
  INSERT INTO app.invitations(tenant_id,person_id,email,token_hash,created_by_membership_id,expires_at)
@@ -233,6 +253,8 @@ END $$;
 CREATE FUNCTION public.enclavix_set_role(p_tenant uuid,p_member uuid,p_role app.system_role,p_community uuid,p_until timestamptz,p_revoke boolean,p_reason text) RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog AS $$
 DECLARE actor uuid:=app.require_admin(p_tenant,p_reason);
 BEGIN
+ IF p_revoke IS NULL THEN RAISE EXCEPTION 'Explicit action required' USING ERRCODE='22023'; END IF;
+ IF NOT app.start_access(p_tenant,actor,'access.role_changed',jsonb_build_object('member',p_member,'role',p_role,'community',p_community,'until',p_until,'revoke',p_revoke,'reason',p_reason)) THEN RETURN; END IF;
  IF p_member=actor OR NOT EXISTS(SELECT 1 FROM app.memberships WHERE tenant_id=p_tenant AND id=p_member AND status='active') THEN RAISE EXCEPTION 'Invalid role target' USING ERRCODE='42501'; END IF;
  IF p_until IS NOT NULL AND p_until<=statement_timestamp() THEN RAISE EXCEPTION 'Invalid expiry' USING ERRCODE='22023'; END IF;
  UPDATE app.membership_roles SET revoked_at=statement_timestamp()
@@ -247,6 +269,7 @@ END $$;
 CREATE FUNCTION public.enclavix_revoke_membership(p_tenant uuid,p_member uuid,p_reason text) RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog AS $$
 DECLARE actor uuid:=app.require_admin(p_tenant,p_reason);
 BEGIN
+ IF NOT app.start_access(p_tenant,actor,'access.membership_revoked',jsonb_build_object('member',p_member,'reason',p_reason)) THEN RETURN; END IF;
  IF p_member=actor THEN RAISE EXCEPTION 'Self action denied' USING ERRCODE='42501'; END IF;
  UPDATE app.memberships SET status='revoked' WHERE tenant_id=p_tenant AND id=p_member;
  IF NOT FOUND THEN RAISE EXCEPTION 'Invalid target' USING ERRCODE='42501'; END IF;
@@ -256,6 +279,8 @@ END $$;
 CREATE FUNCTION public.enclavix_support(p_tenant uuid,p_operator uuid,p_minutes integer,p_revoke boolean,p_reason text) RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog AS $$
 DECLARE actor uuid:=app.require_admin(p_tenant,p_reason);
 BEGIN
+ IF p_revoke IS NULL THEN RAISE EXCEPTION 'Explicit action required' USING ERRCODE='22023'; END IF;
+ IF NOT app.start_access(p_tenant,actor,'access.support_changed',jsonb_build_object('operator',p_operator,'minutes',p_minutes,'revoke',p_revoke,'reason',p_reason)) THEN RETURN; END IF;
  IF p_operator=app.principal() OR p_minutes NOT BETWEEN 1 AND 60 OR NOT EXISTS(SELECT 1 FROM app.platform_operators WHERE auth_user_id=p_operator AND enabled)
  THEN RAISE EXCEPTION 'Invalid support request' USING ERRCODE='42501'; END IF;
  UPDATE app.support_access SET revoked_at=statement_timestamp() WHERE tenant_id=p_tenant AND operator_id=p_operator AND revoked_at IS NULL;
@@ -278,6 +303,7 @@ DECLARE i app.invitations; actor uuid;
 BEGIN
  SELECT * INTO i FROM app.invitations WHERE id=p_invitation;
  actor:=app.require_admin(i.tenant_id,p_reason);
+ IF NOT app.start_access(i.tenant_id,actor,'access.invitation_revoked',jsonb_build_object('invitation',p_invitation,'reason',p_reason)) THEN RETURN; END IF;
  UPDATE app.invitations SET revoked_at=statement_timestamp() WHERE id=i.id AND accepted_at IS NULL;
  PERFORM app.record_access(i.tenant_id,actor,'access.invitation_revoked',jsonb_build_object('invitation_id',i.id,'reason',p_reason));
 END $$;
@@ -301,7 +327,7 @@ END $$;
 -- No PUBLIC default execute, and no service-role bypass of these entry points.
 DO $$ DECLARE f record; BEGIN
  FOR f IN SELECT p.oid::regprocedure AS signature FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
- WHERE (n.nspname='public' AND p.proname LIKE 'enclavix_%') OR (n.nspname='app' AND p.proname IN ('principal','assured','member','role_at','property_access','supports','document_access','require_admin','record_access')) LOOP
+ WHERE (n.nspname='public' AND p.proname LIKE 'enclavix_%') OR (n.nspname='app' AND p.proname IN ('principal','assured','member','role_at','property_access','supports','document_access','require_admin','record_access','start_access')) LOOP
  EXECUTE format('REVOKE ALL ON FUNCTION %s FROM PUBLIC,anon,authenticated,service_role',f.signature);
  IF f.signature::text LIKE 'enclavix_%' OR f.signature::text LIKE 'public.enclavix_%' THEN EXECUTE format('GRANT EXECUTE ON FUNCTION %s TO authenticated',f.signature); END IF;
  END LOOP;

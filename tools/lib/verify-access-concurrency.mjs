@@ -26,7 +26,7 @@ export async function verifyAccessConcurrency({connect,db,staff,admin}) {
   const [a,b]=clients;
   await a.query('BEGIN');await a.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))',[f.villageTenant]);
   await a.query("UPDATE app.memberships SET status='revoked' WHERE id=$1",[f.coownerMember]);
-  await b.query('BEGIN');await b.query('SET LOCAL ROLE authenticated');await b.query("SELECT set_config('request.jwt.claims',$1,true)",[JSON.stringify(claims)]);
+  await b.query('BEGIN');await b.query('SET LOCAL ROLE authenticated');await b.query("SELECT set_config('request.headers',$1,true)",[JSON.stringify({'idempotency-key':'queued-role-command'})]);await b.query("SELECT set_config('request.jwt.claims',$1,true)",[JSON.stringify(claims)]);
   const pid=(await b.query('SELECT pg_backend_pid() AS pid')).rows[0].pid;
   const pending=b.query('SELECT public.enclavix_set_role($1,$2,$3,NULL,NULL,false,$4)',[f.villageTenant,f.villageMember,'finance_approver','Queued action must not outlive actor revocation']);
   const observed=pending.then(()=>({accepted:true}),e=>({accepted:false,code:e.code}));
