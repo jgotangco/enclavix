@@ -212,7 +212,7 @@ The following are proposed internal launch targets. Validate them against pilot 
 | Requirement | Acceptance target |
 | --- | --- |
 | NFR 01 Availability | 99.9 percent monthly availability for core authenticated services, measured externally; maintenance and exclusions must be documented before contracting. |
-| NFR 02 Performance | At the approved load profile, p95 core API reads within 1 second and writes within 2 seconds excluding uploads and external providers; primary resident screens usable within 3 seconds on the agreed midrange Android and 4G test profile. |
+| NFR 02 Performance | At the approved load profile, p95 core API reads within 1 second and writes within 2 seconds excluding uploads and external providers; primary responsive-web resident screens usable within 3 seconds in a browser on the agreed midrange Android device and 4G test profile; native-app performance is verified during post-S11 mobile delivery. |
 | NFR 03 Capacity | Validate at least 100 associations, 50,000 units and 1,000 concurrent active sessions, with uneven tenant load; no authorization leakage or unexplained financial divergence. |
 | NFR 04 Recovery | Core database RPO at most 15 minutes and RTO at most 4 hours; document separate attachment recovery targets and test complete restore before pilot, then quarterly. |
 | NFR 05 Security | Threat model, independent penetration test, secrets scanning, dependency scanning, MFA, rate limits, secure sessions and private file access; zero open critical or high findings at launch. |

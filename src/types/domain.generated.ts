@@ -109,6 +109,71 @@ export interface DomainDatabase {
           "created_at"?: string;
         };
       };
+      "association_setup": {
+        Row: {
+          "tenant_id": string;
+          "created_by_operator": string;
+          "administrator_id": string;
+          "reviewed_by_operator": string | null;
+          "sandbox": boolean;
+          "address": string;
+          "brand_name": string;
+          "accent_color": string;
+          "billing_day": number;
+          "notification_contact": string;
+          "support_contact": string;
+          "privacy_notice_ref": string;
+          "authority_ref": string;
+          "opening_balance_state": string;
+          "revision": number;
+          "submitted_revision": number | null;
+          "approved_revision": number | null;
+          "approved_at": string | null;
+          "created_at": string;
+        };
+        Insert: {
+          "tenant_id": string;
+          "created_by_operator": string;
+          "administrator_id": string;
+          "reviewed_by_operator"?: string | null;
+          "sandbox"?: boolean;
+          "address"?: string;
+          "brand_name"?: string;
+          "accent_color"?: string;
+          "billing_day"?: number;
+          "notification_contact"?: string;
+          "support_contact"?: string;
+          "privacy_notice_ref"?: string;
+          "authority_ref"?: string;
+          "opening_balance_state"?: string;
+          "revision"?: number;
+          "submitted_revision"?: number | null;
+          "approved_revision"?: number | null;
+          "approved_at"?: string | null;
+          "created_at"?: string;
+        };
+        Update: {
+          "tenant_id"?: string;
+          "created_by_operator"?: string;
+          "administrator_id"?: string;
+          "reviewed_by_operator"?: string | null;
+          "sandbox"?: boolean;
+          "address"?: string;
+          "brand_name"?: string;
+          "accent_color"?: string;
+          "billing_day"?: number;
+          "notification_contact"?: string;
+          "support_contact"?: string;
+          "privacy_notice_ref"?: string;
+          "authority_ref"?: string;
+          "opening_balance_state"?: string;
+          "revision"?: number;
+          "submitted_revision"?: number | null;
+          "approved_revision"?: number | null;
+          "approved_at"?: string | null;
+          "created_at"?: string;
+        };
+      };
       "audit_events": {
         Row: {
           "id": string;
@@ -357,6 +422,32 @@ export interface DomainDatabase {
           "created_at"?: string;
         };
       };
+      "lifecycle_events": {
+        Row: {
+          "id": string;
+          "tenant_id": string;
+          "actor_id": string;
+          "event_type": string;
+          "details": DomainJson;
+          "created_at": string;
+        };
+        Insert: {
+          "id"?: string;
+          "tenant_id": string;
+          "actor_id": string;
+          "event_type": string;
+          "details"?: DomainJson;
+          "created_at"?: string;
+        };
+        Update: {
+          "id"?: string;
+          "tenant_id"?: string;
+          "actor_id"?: string;
+          "event_type"?: string;
+          "details"?: DomainJson;
+          "created_at"?: string;
+        };
+      };
       "locations": {
         Row: {
           "id": string;
@@ -456,6 +547,35 @@ export interface DomainDatabase {
           "created_at"?: string;
         };
       };
+      "offboarding_requests": {
+        Row: {
+          "id": string;
+          "tenant_id": string;
+          "requested_by_membership_id": string;
+          "export_id": string;
+          "reason": string;
+          "status": string;
+          "created_at": string;
+        };
+        Insert: {
+          "id"?: string;
+          "tenant_id": string;
+          "requested_by_membership_id": string;
+          "export_id": string;
+          "reason": string;
+          "status"?: string;
+          "created_at"?: string;
+        };
+        Update: {
+          "id"?: string;
+          "tenant_id"?: string;
+          "requested_by_membership_id"?: string;
+          "export_id"?: string;
+          "reason"?: string;
+          "status"?: string;
+          "created_at"?: string;
+        };
+      };
       "operation_requests": {
         Row: {
           "id": string;
@@ -544,6 +664,7 @@ export interface DomainDatabase {
           "contact_email": string | null;
           "auth_user_id": string | null;
           "created_at": string;
+          "external_key": string | null;
         };
         Insert: {
           "id"?: string;
@@ -553,6 +674,7 @@ export interface DomainDatabase {
           "contact_email"?: string | null;
           "auth_user_id"?: string | null;
           "created_at"?: string;
+          "external_key"?: string | null;
         };
         Update: {
           "id"?: string;
@@ -562,6 +684,7 @@ export interface DomainDatabase {
           "contact_email"?: string | null;
           "auth_user_id"?: string | null;
           "created_at"?: string;
+          "external_key"?: string | null;
         };
       };
       "platform_operators": {
@@ -576,6 +699,35 @@ export interface DomainDatabase {
         Update: {
           "auth_user_id"?: string;
           "enabled"?: boolean;
+        };
+      };
+      "platform_requests": {
+        Row: {
+          "id": string;
+          "actor_id": string;
+          "operation": string;
+          "idempotency_key": string;
+          "request_sha256": string;
+          "result": DomainJson | null;
+          "created_at": string;
+        };
+        Insert: {
+          "id"?: string;
+          "actor_id": string;
+          "operation": string;
+          "idempotency_key": string;
+          "request_sha256": string;
+          "result"?: DomainJson | null;
+          "created_at"?: string;
+        };
+        Update: {
+          "id"?: string;
+          "actor_id"?: string;
+          "operation"?: string;
+          "idempotency_key"?: string;
+          "request_sha256"?: string;
+          "result"?: DomainJson | null;
+          "created_at"?: string;
         };
       };
       "properties": {
@@ -663,6 +815,32 @@ export interface DomainDatabase {
           "is_billing_responsible"?: boolean;
           "valid_from"?: string;
           "valid_until"?: string | null;
+          "created_at"?: string;
+        };
+      };
+      "registry_exports": {
+        Row: {
+          "id": string;
+          "tenant_id": string;
+          "created_by_membership_id": string;
+          "snapshot": DomainJson;
+          "expires_at": string;
+          "created_at": string;
+        };
+        Insert: {
+          "id"?: string;
+          "tenant_id": string;
+          "created_by_membership_id": string;
+          "snapshot": DomainJson;
+          "expires_at"?: string;
+          "created_at"?: string;
+        };
+        Update: {
+          "id"?: string;
+          "tenant_id"?: string;
+          "created_by_membership_id"?: string;
+          "snapshot"?: DomainJson;
+          "expires_at"?: string;
           "created_at"?: string;
         };
       };

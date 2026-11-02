@@ -40,3 +40,11 @@ Integration tooling opts into `ENCLAVIX_LOCAL_AUTH_TEST=1` only for the exact `h
 ## S02 review regression checks
 
 `npm test` includes the four review regressions and their negative cases (58 total checks). After a production-mode build, `node tools/check-account-repairs.mjs` starts a temporary built app and a synthetic Auth server at `127.0.0.1:54321`, using the actual SDK and cookie adapter. It checks provider 429/503 handling, enumeration-safe responses and overlapping email/PKCE callbacks. It refuses an occupied provider port and never stops an existing local stack. This test is also wired into the production web CI job; it is separate from actual Supabase/GoTrue verification. Do not run it while the local Supabase stack owns that port. No real email or hosted endpoint is used.
+
+## S03 workspace and synthetic onboarding
+
+Open `/workspace` after signing in through `/account`. The workspace shares authenticated `/api/v1/community/*` services with future native clients. Staff must verify MFA and sign in within ten minutes for sensitive changes. All setup remains sandbox-only. Pre-register enabled platform operators through a separately controlled development bootstrap; no UI creates operators. Nominate a different verified account, complete its setup, and use another operator to review and activate. See ADR 0006 for state, scopes, import ceilings and restrictions.
+
+Import templates support properties, contacts, assets and effective relationships. Use existing source codes and review row details, totals and the fingerprint before committing. Opening balances, account memberships and vehicles are not supported import kinds yet. Offboarding is staging only; downloads expire after 24 hours and exclude file contents and financial balances.
+
+`npm test` includes S03 service/CSV regression tests. Disposable Supabase verification includes two-connection import/revocation races and built-server cookie/native API checks. Never point these tools at hosted data. The additive S03 migration creates canonical code indexes: existing case/whitespace collisions must be reviewed before any real migration.

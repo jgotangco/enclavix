@@ -13,7 +13,7 @@ Architecture design and implementation boundaries: [S01 architecture](architectu
 6. `docs/delivery/TRACEABILITY.md` and `docs/delivery/ACCEPTANCE.md`.
 
 ## Development handoff
-S00–S02 are accepted following explicit owner review and merge authorization for PR #1, PR #2 and PR #3. S03 onboarding and property membership workflows is next and has not started. Read `AGENTS.md`, the selected sprint and its evidence before continuing. `docs/development.md` documents local setup and containment. The Antigravity prompts remain available for any future handoff.
+S00–S02 are accepted following explicit owner review and merge authorization for PR #1, PR #2 and PR #3. S03 onboarding and property membership workflows is in progress on its dedicated branch. Synthetic setup and registry services are implemented for review; no S03 acceptance is claimed. Read `AGENTS.md`, the selected sprint and its evidence before continuing. `docs/development.md` documents local setup and containment. The Antigravity prompts remain available for any future handoff.
 
 Run `python3 tools/validate_delivery.py` from the repository root to validate planning structure. Python 3.9 or later is sufficient; no packages or application credentials are needed. Application checks are documented in `docs/development.md` and the completed sprint evidence.
 

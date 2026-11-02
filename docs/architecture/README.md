@@ -14,3 +14,5 @@ The new domain lives in the private PostgreSQL `app` schema. Existing public tab
 These documents distinguish implemented database constraints from future application enforcement. None of them represents regulatory certification, a production release, financial posting acceptance, or an independent security assessment.
 
 Accepted S02 identity and review repairs: [identity and authorization contract](adr/0005-identity-and-access.md). S02 adds accepted account/access services and review repairs while retaining mock portal containment.
+
+S03 work in progress: [onboarding and registry contract](adr/0006-onboarding-and-registry.md). The current private schema contains 26 tables; synthetic sandbox activation does not approve real resident data or deployment.

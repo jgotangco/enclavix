@@ -21,7 +21,7 @@ Approved web-first sequence (Jerome Gotangco, 2 November 2026): S00–S05 → S0
 
 Release A core web spans S00–S05. S08–S09 implement Release B web/guard operations; S10–S11 harden and pilot the web platform. Android and any future iOS app are unnecessary for the initial pilot or first commercial web release. Enabled gate modules still require G7. All security, finance, recovery, privacy and web usability gates remain binding. No rollout is authorized by the sequence change.
 
-Current accepted baseline: S00–S02 through PR #1, PR #2 and PR #3. S03 is next and has not started. Consult `STATUS.json` and sprint evidence for authoritative state; a documentation update does not authorize the next sprint.
+Current accepted baseline: S00–S02 through PR #1, PR #2 and PR #3. S03 is in progress; its reviewed increment does not complete all sprint acceptance. Consult `STATUS.json` and sprint evidence for authoritative state; a documentation update does not authorize the next sprint.
 
 ## State meanings
 - not_started: no implementation evidence.

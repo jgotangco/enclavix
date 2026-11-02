@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "baseline_commit": "d150f8b3a84b77a53c9f1136434481ed544d4067",
-  "current_sprint": "S02",
+  "current_sprint": "S03",
   "sprints": [
     {
       "id": "S00",
@@ -43,7 +43,7 @@
     {
       "id": "S03",
       "title": "Onboarding and property membership workflows",
-      "status": "not_started",
+      "status": "in_progress",
       "depends_on": [
         "S02"
       ],

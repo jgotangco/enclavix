@@ -23,3 +23,9 @@ test('chunked bodies are bounded before JSON parsing',async()=>{
  await assert.rejects(readJson(large),/too large/);
  assert.deepEqual(await readJson(new Request('https://enclavix.example',{method:'POST',body:'{"email":"test@example.test"}'})),{email:'test@example.test'});
 });
+test('larger import requests have a specific bounded allowance without expanding ordinary command limits',async()=>{
+ const body=JSON.stringify({rows:['x'.repeat(9000)]});
+ await assert.rejects(readJson(new Request('https://enclavix.example',{method:'POST',body})),/too large/);
+ assert.deepEqual(await readJson(new Request('https://enclavix.example',{method:'POST',body}),1048576),JSON.parse(body));
+ await assert.rejects(readJson(new Request('https://enclavix.example',{method:'POST',body:'x'.repeat(1048577)}),1048576),/too large/);
+});
