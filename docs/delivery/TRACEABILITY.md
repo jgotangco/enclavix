@@ -53,7 +53,7 @@ Each BRD requirement has one sprint accountable for completion evidence. Earlier
 | SCP 02 | S03 | In progress: Configurable sandbox structure, terminology and branding implemented; assessment policies remain S04; see evidence/S03.md |
 | SCP 03 | S10 | unverified |
 | TEN 01 | S03 | In progress: Synthetic operator/nominee/reviewer flow implemented; real-data authority/privacy acceptance pending; see evidence/S03.md |
-| TEN 02 | S03 | In progress: Village/condo hierarchy, lot/townhouse/unit and asset registry implemented; allocation journeys pending; see evidence/S03.md |
+| TEN 02 | S03 | In progress: Village/condo hierarchy, lot/townhouse/unit and asset registry and audited effective-dated allocation journeys implemented; owner acceptance pending; see evidence/S03.md |
 | TEN 03 | S03 | In progress: Contacts, co-ownership, representation, temporal primary/billing relationships implemented; evidence files S05; see evidence/S03.md |
 | TEN 04 | S03 | In progress: Effective relationship/transfer and derived-access regression verified; ledger cutover remains S04; see evidence/S03.md |
 | TEN 05 | S03 | In progress: Property/person/asset/relationship preview and atomic commit implemented; memberships/balances/vehicles deferred to owning workflows; see evidence/S03.md |

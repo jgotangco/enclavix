@@ -43,7 +43,7 @@
     {
       "id": "S03",
       "title": "Onboarding and property membership workflows",
-      "status": "in_progress",
+      "status": "ready_for_review",
       "depends_on": [
         "S02"
       ],
