@@ -1,6 +1,6 @@
 # ADR 0007: Receivables and manual payment verification
 
-Status: S04 implementation design in progress, 3 November 2026. The initial calculator and subsequent private ledger, proof/report services and responsive workspace are implemented and under verification; see [finance contract](../../finance-api.md). D06 synthetic defaults are approved; association production policies remain pending.
+Status: S04 engineering implementation ready_for_review, 3 November 2026; owner acceptance pending. The initial calculator and subsequent private ledger, proof/report services and responsive workspace are implemented and verified for synthetic engineering review; see [finance contract](../../finance-api.md). D06 synthetic defaults are approved; association production policies remain pending.
 
 ## Calculation contract
 
@@ -33,4 +33,4 @@ Serialize tenant mutations with the existing advisory-lock discipline, then rech
 3. Private payment evidence, duplicate review, independent approval, acknowledgment sequences and opening-balance cutover staging.
 4. Shared authenticated API, responsive finance/resident workflows, reconciliation/aging/exports and built-provider concurrency/browser checks.
 
-S04 remains in progress across increments. FIN 01–08 are not complete until their full acceptance evidence passes. No deployment, tax certification, gateway, full general ledger or post-S11 feature is included.
+S04 is ready_for_review after the increments and recorded checks; actual owner acceptance remains pending. FIN 01–08 are not complete until their full acceptance evidence passes. No deployment, tax certification, gateway, full general ledger or post-S11 feature is included.

@@ -12,4 +12,4 @@ Check current official documentation for selected dependencies and APIs. Add mea
 
 At completion update the sprint evidence file, STATUS.json and traceability; record real decisions and unresolved risks. Run the planning validator and all relevant application checks. Mark ready_for_review only when engineering acceptance is demonstrated, accepted only after real owner approval. Report changed files, tested behavior, exact check results, limitations and the next suggested sprint. Stop at the sprint boundary; do not start later sprints automatically or mark other sprints complete.
 
-Selected sprint: specify an unaccepted eligible sprint before implementation. S00–S03 are accepted; S04 is selected and in progress as of 3 November 2026. Consult STATUS.json for subsequent changes.
+Selected sprint: specify an unaccepted eligible sprint before implementation. S00–S03 are accepted; S04 is selected and ready_for_review as of 3 November 2026; owner acceptance is pending and S05 has not started. Consult STATUS.json for subsequent changes.

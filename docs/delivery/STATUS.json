@@ -56,7 +56,7 @@
     {
       "id": "S04",
       "title": "Receivables and payment verification",
-      "status": "in_progress",
+      "status": "ready_for_review",
       "depends_on": [
         "S03"
       ],

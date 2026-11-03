@@ -17,4 +17,4 @@ Accepted S02 identity and review repairs: [identity and authorization contract](
 
 Accepted S03 scope: [onboarding and registry contract](adr/0006-onboarding-and-registry.md). Its historical migration baseline contained 26 tables; synthetic sandbox activation does not approve real resident data or deployment.
 
-S04 finance implementation under verification: [ADR 0007](adr/0007-receivables-and-verification.md) and [finance API](../finance-api.md). The current S04 schema has 36 private app tables; accepted S03 evidence retains its historical 26-table count. No production finance, scanner or deployment approval is implied.
+S04 finance implementation ready_for_review: [ADR 0007](adr/0007-receivables-and-verification.md) and [finance API](../finance-api.md). The current S04 schema has 36 private app tables; accepted S03 evidence retains its historical 26-table count. No production finance, scanner or deployment approval is implied.
