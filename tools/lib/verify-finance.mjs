@@ -67,7 +67,14 @@ export async function verifyFinance({db,admin,owner,staff,approver,connect}) {
   let waiting=false;for(let i=0;i<100;i++){if((await db.query('SELECT wait_event_type FROM pg_stat_activity WHERE pid=$1',[pid])).rows[0]?.wait_event_type==='Lock'){waiting=true;break;}await new Promise(r=>setTimeout(r,20));}
   assert.ok(waiting);await a.query('COMMIT');assert.deepEqual(await queued,{accepted:false,code:'42501'});
   await db.query("UPDATE app.memberships SET status='active' WHERE id=$1",[f.coownerMember]);
+  // Expiry during a lock wait must use the clock after acquiring the lock, not statement start.
+  await a.query('BEGIN');await a.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))',[f.villageTenant]);
+  await a.query("UPDATE app.membership_roles SET valid_until=clock_timestamp()+interval '1 second' WHERE tenant_id=$1 AND membership_id=$2 AND role='finance_preparer'",[f.villageTenant,f.coownerMember]);
+  const expiring=call(b,'preparer','prepare',[f.villageTenant,f.village,'policy',JSON.stringify({approval_limit:'50'}),reason]).then(()=>({accepted:true}),e=>({accepted:false,code:e.code}));
+  waiting=false;for(let i=0;i<100;i++){if((await db.query('SELECT wait_event_type FROM pg_stat_activity WHERE pid=$1',[pid])).rows[0]?.wait_event_type==='Lock'){waiting=true;break;}await new Promise(r=>setTimeout(r,20));}
+  assert.ok(waiting);await a.query('SELECT pg_sleep(1.2)');await a.query('COMMIT');assert.deepEqual(await expiring,{accepted:false,code:'42501'});
+  await db.query("UPDATE app.membership_roles SET valid_until=NULL WHERE tenant_id=$1 AND membership_id=$2 AND role='finance_preparer'",[f.villageTenant,f.coownerMember]);
   console.log('S04 real provider/Postgres/storage: independent MFA, resumable concurrent generation, payment/receipt replay, allocation race, reversal and close-vs-post passed');
   return {approver,proof,submission};
- }finally{await Promise.all(clients.map(async c=>{try{await c.query('ROLLBACK');}finally{await c.end();}}));await db.query("UPDATE app.memberships SET status='active' WHERE id=$1",[f.coownerMember]);}
+ }finally{await Promise.all(clients.map(async c=>{try{await c.query('ROLLBACK');}finally{await c.end();}}));await db.query("UPDATE app.memberships SET status='active' WHERE id=$1",[f.coownerMember]);await db.query("UPDATE app.membership_roles SET valid_until=NULL WHERE tenant_id=$1 AND membership_id=$2 AND role='finance_preparer'",[f.villageTenant,f.coownerMember]);}
 }

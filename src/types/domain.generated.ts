@@ -509,6 +509,7 @@ export interface DomainDatabase {
           "id": string;
           "tenant_id": string;
           "community_id": string;
+          "revision": number;
           "approval_limit": string;
           "created_at": string;
         };
@@ -516,6 +517,7 @@ export interface DomainDatabase {
           "id": string;
           "tenant_id": string;
           "community_id": string;
+          "revision": number;
           "approval_limit": string;
           "created_at"?: string;
         };
@@ -523,6 +525,7 @@ export interface DomainDatabase {
           "id"?: string;
           "tenant_id"?: string;
           "community_id"?: string;
+          "revision"?: number;
           "approval_limit"?: string;
           "created_at"?: string;
         };

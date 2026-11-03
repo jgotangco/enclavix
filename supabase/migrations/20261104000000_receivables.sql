@@ -13,8 +13,9 @@ CREATE TABLE app.finance_requests (
 );
 CREATE TABLE app.finance_policies (
  id uuid PRIMARY KEY, tenant_id uuid NOT NULL, community_id uuid NOT NULL,
+ revision integer NOT NULL CHECK(revision>0),
  approval_limit numeric(14,2) NOT NULL CHECK(approval_limit>0 AND approval_limit<>'NaN'),
- created_at timestamptz NOT NULL DEFAULT now(), UNIQUE(tenant_id,id),
+ created_at timestamptz NOT NULL DEFAULT clock_timestamp(), UNIQUE(tenant_id,id), UNIQUE(tenant_id,community_id,revision),
  FOREIGN KEY(tenant_id,community_id,id) REFERENCES app.finance_requests(tenant_id,community_id,id)
 );
 CREATE TABLE app.finance_rules (
@@ -127,11 +128,14 @@ CREATE FUNCTION app.finance_staff(t uuid,c uuid) RETURNS boolean LANGUAGE sql ST
  SELECT app.role_at(t,'finance_preparer',c) OR app.role_at(t,'finance_approver',c) OR app.role_at(t,'board_reviewer',c)
 $$;
 CREATE FUNCTION app.require_finance(t uuid,c uuid,r app.system_role,reason text) RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog AS $$
-DECLARE actor uuid; BEGIN
- PERFORM pg_advisory_xact_lock(hashtextextended(t::text,0)); actor:=app.member(t);
+DECLARE actor uuid; at timestamptz; BEGIN
+ PERFORM pg_advisory_xact_lock(hashtextextended(t::text,0)); at:=clock_timestamp(); actor:=app.member(t);
  IF actor IS NULL OR NOT app.assured() OR NOT app.role_at(t,r,c) OR reason IS NULL OR length(btrim(reason)) NOT BETWEEN 10 AND 1000
  OR NOT EXISTS(SELECT 1 FROM app.communities WHERE tenant_id=t AND id=c)
- OR NOT EXISTS(SELECT 1 FROM auth.sessions WHERE id=(nullif(current_setting('request.jwt.claims',true),'')::jsonb->>'session_id')::uuid AND created_at>statement_timestamp()-interval '10 minutes')
+ OR coalesce((nullif(current_setting('request.jwt.claims',true),'')::jsonb->>'exp')::numeric,0)<=extract(epoch FROM at)
+ OR NOT EXISTS(SELECT 1 FROM app.memberships m WHERE m.tenant_id=t AND m.id=actor AND m.valid_from<=at AND (m.valid_until IS NULL OR m.valid_until>at))
+ OR NOT EXISTS(SELECT 1 FROM app.membership_roles x WHERE x.tenant_id=t AND x.membership_id=actor AND x.role=r AND x.revoked_at IS NULL AND (x.community_id IS NULL OR x.community_id=c) AND x.valid_from<=at AND (x.valid_until IS NULL OR x.valid_until>at))
+ OR NOT EXISTS(SELECT 1 FROM auth.sessions WHERE id=(nullif(current_setting('request.jwt.claims',true),'')::jsonb->>'session_id')::uuid AND created_at>at-interval '10 minutes' AND (not_after IS NULL OR not_after>at))
  THEN RAISE EXCEPTION 'Recent finance MFA and reason required' USING ERRCODE='42501'; END IF;
  RETURN actor;
 END $$;
@@ -317,14 +321,14 @@ DECLARE req app.finance_requests; actor uuid; data jsonb; event text:='finance.d
   x:=jsonb_build_object('id',req.id,'status',req.status,'already_decided',true); PERFORM app.finance_finish(p_tenant,actor,event,x,p_reason); RETURN x; END IF;
  data:=req.payload;
  IF p_approve THEN
-  SELECT approval_limit INTO limit_amount FROM app.finance_policies WHERE tenant_id=p_tenant AND community_id=req.community_id ORDER BY created_at DESC,id DESC LIMIT 1;
+  SELECT approval_limit INTO limit_amount FROM app.finance_policies WHERE tenant_id=p_tenant AND community_id=req.community_id ORDER BY revision DESC LIMIT 1;
   amount:=CASE WHEN req.kind='generation' THEN (SELECT coalesce(sum(abs(lim.amount)),0) FROM app.finance_lines lim WHERE lim.tenant_id=p_tenant AND lim.batch_id=req.id) WHEN req.kind='opening' THEN (SELECT coalesce(sum((v->>'amount')::numeric),0) FROM jsonb_array_elements(data->'rows') v) ELSE coalesce((data->>'amount')::numeric,0) END;
   IF req.kind<>'policy' AND (limit_amount IS NULL OR amount>limit_amount) THEN RAISE EXCEPTION 'Approved policy limit required' USING ERRCODE='23514'; END IF;
   d:=coalesce((data->>'posted_on')::date,(data->>'period')::date);
   IF d>(statement_timestamp() AT TIME ZONE (SELECT time_zone FROM app.communities WHERE tenant_id=p_tenant AND id=req.community_id))::date THEN RAISE EXCEPTION 'Future financial posting denied' USING ERRCODE='22023'; END IF;
   IF d IS NOT NULL AND req.kind NOT IN ('reopen','close') THEN PERFORM app.finance_open(p_tenant,req.community_id,d); END IF;
   CASE req.kind
-  WHEN 'policy' THEN INSERT INTO app.finance_policies(id,tenant_id,community_id,approval_limit) VALUES(req.id,p_tenant,req.community_id,app.finance_decimal(data->>'approval_limit'));
+  WHEN 'policy' THEN INSERT INTO app.finance_policies(id,tenant_id,community_id,revision,approval_limit) VALUES(req.id,p_tenant,req.community_id,(SELECT coalesce(max(fp.revision),0)+1 FROM app.finance_policies fp WHERE fp.tenant_id=p_tenant AND fp.community_id=req.community_id),app.finance_decimal(data->>'approval_limit'));
   WHEN 'rule' THEN
    IF EXISTS(SELECT 1 FROM app.finance_batches WHERE tenant_id=p_tenant AND community_id=req.community_id AND NOT cancelled AND period>=date_trunc('month',(data->>'effective_from')::date)::date) THEN RAISE EXCEPTION 'Snapshotted period cannot change' USING ERRCODE='23514'; END IF;
    INSERT INTO app.finance_rules(id,tenant_id,community_id,code,label,basis,rate,effective_from,effective_until,recurring,category,asset_kind,grace_days,cap,due_days) VALUES(req.id,p_tenant,req.community_id,data->>'code',data->>'label',data->>'basis',app.finance_decimal(data->>'rate',8),(data->>'effective_from')::date,(data->>'effective_until')::date,(data->>'recurring')::boolean,data->>'category',(data->>'asset_kind')::app.asset_kind,coalesce((data->>'grace_days')::integer,0),(data->>'cap')::numeric,coalesce((data->>'due_days')::integer,0));

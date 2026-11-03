@@ -161,3 +161,9 @@ test('rejection reasons reach the resident, re-review is explicit, and a posted 
  assert.equal((await db.query('SELECT app.finance_available($1,$2)::text amount',[f.villageTenant,charge])).rows[0].amount,'1000.00');
  await as('resident');const confirmed=await rpc('report',[f.villageTenant,f.village,f.lot,'2026-01-01','2026-12-31']);assert.equal(confirmed.submissions.find(s=>s.id===sub.id).status,'approved');assert.equal(confirmed.submissions.find(s=>s.id===sub.id).rejection_reason,null);
 });
+test('approved policy revisions are monotonic and the latest limit governs older pending requests',async()=>{
+ await as('preparer');const staged=await prepare('charge',{property_id:f.lot,amount:'101',posted_on:'2026-11-03',due_on:'2026-11-03',label:'Limit lowered before approval'});
+ await approved('policy',{approval_limit:'100'});
+ const versions=(await db.query('SELECT revision FROM app.finance_policies WHERE tenant_id=$1 AND community_id=$2 ORDER BY revision',[f.villageTenant,f.village])).rows.map(r=>r.revision);assert.deepEqual(versions,[1,2]);
+ await as('approver');await assert.rejects(decide(staged.id),e=>e.code==='23514');
+});
