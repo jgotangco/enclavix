@@ -1,6 +1,7 @@
 import test,{before,after} from 'node:test';
 import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
+import {createJiti} from 'jiti';
 import {createDomainDatabase} from '../tools/lib/domain-database.mjs';
 import {seedDomainFixtures,FIXTURE as f,id} from '../tools/lib/domain-fixtures.mjs';
 let db,batch;
@@ -8,6 +9,7 @@ const user={preparer:'c0000000-0000-0000-0000-000000000003',approver:'c0000000-0
 const member={preparer:f.coownerMember,approver:id(9401),resident:f.villageMember};
 const session={preparer:id(9411),approver:id(9412),resident:id(9413)};
 const reason='Synthetic finance control verification';
+const {calculateAssessment}=await createJiti(import.meta.url).import('../src/lib/finance/assessment.ts');
 before(async()=>{
  db=await createDomainDatabase();await seedDomainFixtures(db);await db.exec("UPDATE app.tenants SET status='active'");
  await db.query('INSERT INTO app.people(id,tenant_id,display_name,auth_user_id) VALUES($1,$2,$3,$4)',[id(9400),f.villageTenant,'Synthetic finance approver',user.approver]);
@@ -111,7 +113,10 @@ test('limits, fine source keys, final decisions and period boundary rules fail s
  const high=await prepare('charge',{property_id:f.lot,amount:'1000001',posted_on:'2026-11-03',due_on:'2026-11-03',label:'Exceeds approved limit'});await as('approver');await assert.rejects(decide(high.id),e=>e.code==='23514');await decide(high.id,undefined,false);
  await assert.rejects(decide(high.id),e=>e.code==='23505');
  const fine={property_id:f.lot,amount:'25',posted_on:'2026-11-03',due_on:'2026-11-03',label:'Independently reviewed fine',fine_key:'APPROVED-VIOLATION-001'};
- await approved('charge',fine);await as('preparer');const repeated=await prepare('charge',fine);await as('approver');await assert.rejects(decide(repeated.id),e=>e.code==='23505');
+ const original=await approved('charge',fine);await as('preparer');const repeated=await prepare('charge',fine);await as('approver');await assert.rejects(decide(repeated.id),e=>e.code==='23505');
+ await approved('reverse',{entry_id:original.entry_id,posted_on:'2026-11-03'});
+ await approved('charge',{...fine,fine_key:'APPROVED-VIOLATION-001-REASSESS',reassessment_of:original.entry_id});
+ await as('preparer');const reassess=await prepare('charge',{...fine,fine_key:'APPROVED-VIOLATION-001-REASSESS-TWICE',reassessment_of:original.entry_id});await as('approver');await assert.rejects(decide(reassess.id),e=>e.code==='23505');
  await assert.rejects(db.query("UPDATE app.finance_requests SET payload='{}' WHERE id=$1",[high.id]),e=>e.code==='23514');
 });
 test('approved penalty rules honor grace and caps, skip disputed charges, and preserve discount snapshots',async()=>{
@@ -128,4 +133,18 @@ test('approved penalty rules honor grace and caps, skip disputed charges, and pr
  const next=await inCommunity('generation',{period:'2026-03-01'});assert.ok(!next.preview.lines.some(l=>l.rule_id===rule.id));
  await inCommunity('resolve',{dispute_id:dispute.id});
  const restored=await inCommunity('generation',{period:'2026-04-01'});assert.equal(restored.preview.lines.find(l=>l.rule_id===rule.id).amount,'100.00');
+});
+test('trusted database snapshots match exact preview golden cases for every dimensional basis',async()=>{
+ const c=id(9610),p=id(9611),a=id(9612);
+ await db.query("INSERT INTO app.communities(id,tenant_id,code,name,kind) VALUES($1,$2,'EXACT-FIN','Exact calculation cases','village')",[c,f.villageTenant]);
+ await db.query("INSERT INTO app.properties(id,tenant_id,community_id,code,label,kind,lot_area_sqm,floor_area_sqm,ownership_share) VALUES($1,$2,$3,'EXACT-P','Exact property','lot',100.25,50.05,0.33333333)",[p,f.villageTenant,c]);
+ await db.query("INSERT INTO app.assets(id,tenant_id,community_id,code,label,kind) VALUES($1,$2,$3,'EXACT-ASSET','Exact parking','parking')",[a,f.villageTenant,c]);
+ await db.query("INSERT INTO app.asset_allocations(tenant_id,community_id,asset_id,property_id,kind,valid_from) VALUES($1,$2,$3,$4,'use','2026-01-01T00:00:00Z')",[f.villageTenant,c,a,p]);
+ await as('preparer');const policy=await rpc('prepare',[f.villageTenant,c,'policy','{"approval_limit":"1000000"}',reason]);await as('approver');await decide(policy.id);
+ const cases=[['fixed','1.005',undefined],['lot_area','12.345','100.25'],['floor_area','0.1','50.05'],['ownership_share','3000','0.33333333'],['asset_quantity','125.005','1']];
+ for(const [basis,rate] of cases){
+  await as('preparer');const r=await rpc('prepare',[f.villageTenant,c,'rule',JSON.stringify({code:basis.toUpperCase(),label:basis,basis,rate,effective_from:'2026-01-01',category:'dues',recurring:true,...(basis==='asset_quantity'?{asset_kind:'parking'}:{})}),reason]);await as('approver');await decide(r.id);
+ }
+ await as('preparer');const plan=await rpc('prepare',[f.villageTenant,c,'generation','{"period":"2026-11-01"}',reason]);
+ for(const [basis,rate,quantity] of cases)assert.equal(plan.preview.lines.find(l=>l.snapshot.basis===basis).amount,calculateAssessment({basis,rate,...(quantity?{quantity}:{})}));
 });

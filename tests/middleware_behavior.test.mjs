@@ -22,6 +22,13 @@ test('all production portals remain closed even with a forged administrator cook
     assert.equal(res.status, 307); assert.equal(new URL(res.headers.get('location')).pathname, '/login');
   }
 });
+test('production finance shell is reachable while its API independently enforces identity', async () => {
+ process.env.ENCLAVIX_APP_ENV='production';process.env.NEXT_PUBLIC_APP_ENV='production';
+ assert.equal((await request('/finance')).status,200);
+ assert.equal((await request('/finance','demo_user_role=SUPER_ADMIN')).status,200);
+ assert.equal((await request('/finance/invented')).status,307);
+ demo();assert.equal((await request('/finance','demo_user_role=SUPER_ADMIN')).status,307);
+});
 test('public flag and legacy isolation declaration do not authorize a demo', async () => {
   process.env.NEXT_PUBLIC_ENABLE_DEMO_SWITCHER = 'true'; process.env.ENCLAVIX_DEMO_DATABASE_ISOLATED = 'true';
   assert.equal((await request('/admin', 'demo_user_role=SUPER_ADMIN')).status, 307);

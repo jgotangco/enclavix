@@ -26,6 +26,8 @@ try {
   }
   assert.ok(ready, `Server did not become ready: ${output}`);
   const demo = process.env.ENCLAVIX_APP_ENV === 'demo';
+  const finance = await fetch(base + '/finance', { redirect: 'manual' });
+  assert.equal(finance.status, demo ? 307 : 200, 'finance shell must be reachable only in production mode');
   for (const pathname of ['/admin', '/admin/billing', '/guard', '/resident', '/resident/billing']) {
     const response = await fetch(base + pathname, { redirect: 'manual', headers: { cookie: 'demo_user_role=SUPER_ADMIN' } });
     assert.equal(response.status, demo ? 200 : 307, pathname);

@@ -29,6 +29,8 @@ export async function verifyFinance({db,admin,owner,staff,approver,connect}) {
   await Promise.all(clients.map(c=>call(c,'preparer','generate',[f.villageTenant,batch.id,1,reason])));
   const completed=ok(await staff.rpc('enclavix_finance_generate',{p_tenant:f.villageTenant,p_batch:batch.id,p_limit:100,p_reason:reason}));assert.equal(completed.remaining,0);
   assert.equal((await db.query('SELECT count(*)::int n FROM app.finance_entries WHERE request_id=$1',[batch.id])).rows[0].n,batch.preview.lines.length);
+  const duplicateBatch=await Promise.allSettled(clients.map(c=>call(c,'preparer','prepare',[f.villageTenant,f.village,'generation',JSON.stringify({period:'2026-10-01'}),reason])));
+  assert.equal(duplicateBatch.filter(r=>r.status==='fulfilled').length,1);assert.equal(duplicateBatch.filter(r=>r.status==='rejected'&&r.reason.code==='23505').length,1);
   const charge=(await db.query("SELECT id FROM app.finance_entries WHERE tenant_id=$1 AND property_id=$2 AND kind='charge'",[f.villageTenant,f.secondLot])).rows[0].id;
   const bytes=Buffer.from('%PDF-1.4\nDisposable finance proof');
   const {createHash}=await import('node:crypto');const hash=createHash('sha256').update(bytes).digest('hex');
@@ -58,7 +60,14 @@ export async function verifyFinance({db,admin,owner,staff,approver,connect}) {
   assert.ok((await approver.rpc('enclavix_finance_decide',{p_tenant:f.villageTenant,p_request:locked.id,p_approve:true,p_reason:reason})).error);
   const report=ok(await owner.rpc('enclavix_finance_report',{p_tenant:f.villageTenant,p_community:f.village,p_property:f.secondLot,p_from:'2026-01-01',p_until:'2026-12-31'}));
   assert.equal(report.requests.length,0);assert.equal(Number(report.outstanding_debits)-Number(report.unapplied_credit),Number(report.closing_balance));
+  const [a,b]=clients;await a.query('BEGIN');await a.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))',[f.villageTenant]);
+  await a.query("UPDATE app.memberships SET status='revoked' WHERE id=$1",[f.coownerMember]);
+  const pid=(await b.query('SELECT pg_backend_pid() pid')).rows[0].pid;
+  const queued=call(b,'preparer','prepare',[f.villageTenant,f.village,'policy',JSON.stringify({approval_limit:'100'}),reason]).then(()=>({accepted:true}),e=>({accepted:false,code:e.code}));
+  let waiting=false;for(let i=0;i<100;i++){if((await db.query('SELECT wait_event_type FROM pg_stat_activity WHERE pid=$1',[pid])).rows[0]?.wait_event_type==='Lock'){waiting=true;break;}await new Promise(r=>setTimeout(r,20));}
+  assert.ok(waiting);await a.query('COMMIT');assert.deepEqual(await queued,{accepted:false,code:'42501'});
+  await db.query("UPDATE app.memberships SET status='active' WHERE id=$1",[f.coownerMember]);
   console.log('S04 real provider/Postgres/storage: independent MFA, resumable concurrent generation, payment/receipt replay, allocation race, reversal and close-vs-post passed');
   return {approver,proof,submission};
- }finally{await Promise.all(clients.map(async c=>{try{await c.query('ROLLBACK');}finally{await c.end();}}));}
+ }finally{await Promise.all(clients.map(async c=>{try{await c.query('ROLLBACK');}finally{await c.end();}}));await db.query("UPDATE app.memberships SET status='active' WHERE id=$1",[f.coownerMember]);}
 }

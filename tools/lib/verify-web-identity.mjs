@@ -75,7 +75,7 @@ export async function verifyWebIdentity({state,owner,staff,password,finance}) {
   assert.equal((await fetch(endpoint+`community/${f.villageTenant}/allocations`,{headers:{cookie}})).status,403);
   assert.equal((await fetch(endpoint+`community/${f.condoTenant}/property_allocations/${f.unit}`,{headers:{cookie}})).status,403);
   console.log('S03 asset API: authenticated native assignment, resident property-scoped reads and wrong-scope denial passed');
-  assert.equal((await fetch(base+'/finance')).status,200);
+  assert.equal((await fetch(base+'/finance',{redirect:'manual'})).status,200);
   assert.equal((await fetch(endpoint+'finance/index',{headers:{cookie:'demo_user_role=SUPER_ADMIN'}})).status,401);
   const fq=new URLSearchParams({tenant:f.villageTenant,community:f.village,property:f.secondLot,from:'2026-01-01',until:'2026-12-31'});
   const finReport=await fetch(endpoint+'finance/report?'+fq,{headers:{cookie}});assert.equal(finReport.status,200);assert.match(finReport.headers.get('cache-control'),/no-store/);assert.equal((await finReport.json()).data.requests.length,0);

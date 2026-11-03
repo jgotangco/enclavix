@@ -21,7 +21,7 @@ export default function RootLayout({
         <p role="note" className="bg-amber-100 text-amber-950 px-4 py-3 text-sm text-center">
           {process.env.NEXT_PUBLIC_APP_ENV === "demo"
             ? "Synthetic demo only. Changes are temporary. Do not use for payments, resident records, or gate decisions."
-            : "Development preview. Use synthetic data only; finance and gate operations are disabled."}
+            : "Development preview. Use synthetic data only; finance requires approved roles. Gate operations remain disabled."}
         </p>
         <CommunitySettingsProvider>
           {children}

@@ -91,6 +91,7 @@ CREATE TABLE app.finance_submissions (
 CREATE INDEX finance_duplicate_reference ON app.finance_submissions(tenant_id,reference);
 CREATE UNIQUE INDEX finance_one_submission_review ON app.finance_requests(tenant_id,(payload->>'submission_id')) WHERE kind='payment' AND status<>'rejected';
 CREATE UNIQUE INDEX finance_one_fine ON app.finance_entries(tenant_id,(snapshot->>'fine_key')) WHERE snapshot->>'fine_key' IS NOT NULL;
+CREATE UNIQUE INDEX finance_one_reassessment ON app.finance_entries(tenant_id,(snapshot->>'reassessment_of')) WHERE snapshot->>'reassessment_of' IS NOT NULL;
 CREATE UNIQUE INDEX finance_opening_source ON app.finance_entries(tenant_id,(snapshot->>'source_key'),property_id) WHERE kind='opening';
 
 DO $$ DECLARE t text; BEGIN
@@ -244,10 +245,14 @@ DECLARE actor uuid:=app.require_finance(p_tenant,p_community,'finance_preparer',
   IF NOT EXISTS(SELECT 1 FROM app.document_objects WHERE tenant_id=p_tenant AND id=sub.document_id AND scan_status='clean') THEN RAISE EXCEPTION 'Clean private proof required' USING ERRCODE='23514'; END IF;
   p_data:=p_data||jsonb_build_object('property_id',sub.property_id,'amount',sub.amount::text,'posted_on',sub.paid_on,'document_id',sub.document_id);
  WHEN 'charge','credit' THEN
-  PERFORM app.only_keys(p_data,ARRAY['property_id','amount','posted_on','due_on','label','allocations','fine_key']);
+  PERFORM app.only_keys(p_data,ARRAY['property_id','amount','posted_on','due_on','label','allocations','fine_key','reassessment_of']);
   amount:=app.finance_decimal(p_data->>'amount'); IF amount<=0 THEN RAISE EXCEPTION 'Positive amount required' USING ERRCODE='22023'; END IF;
   IF coalesce(length(btrim(p_data->>'label')),0) NOT BETWEEN 1 AND 200 THEN RAISE EXCEPTION 'Label required' USING ERRCODE='22023'; END IF;
   IF p_data ? 'fine_key' AND coalesce(p_data->>'fine_key','') !~ '^[A-Za-z0-9._:-]{1,120}$' THEN RAISE EXCEPTION 'Durable fine key required' USING ERRCODE='22023'; END IF;
+  IF p_data ? 'reassessment_of' THEN
+   SELECT * INTO e FROM app.finance_entries WHERE tenant_id=p_tenant AND community_id=p_community AND property_id=(p_data->>'property_id')::uuid AND id=(p_data->>'reassessment_of')::uuid AND snapshot->>'fine_key' IS NOT NULL;
+   IF p_kind<>'charge' OR p_data->>'fine_key' IS NULL OR e.id IS NULL OR NOT EXISTS(SELECT 1 FROM app.finance_entries WHERE tenant_id=p_tenant AND reversal_of=e.id) THEN RAISE EXCEPTION 'Reassessment requires a formally reversed fine on this property' USING ERRCODE='23514'; END IF;
+  END IF;
   IF p_kind='credit' AND p_data->>'fine_key' IS NOT NULL THEN RAISE EXCEPTION 'Fine requires a reviewed debit' USING ERRCODE='22023'; END IF;
   PERFORM app.finance_date(p_data->>'due_on'); PERFORM app.finance_date(p_data->>'posted_on');
  WHEN 'allocate' THEN
