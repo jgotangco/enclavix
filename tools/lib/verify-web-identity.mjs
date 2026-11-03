@@ -1,3 +1,5 @@
+import {createServer as createHttpServer} from 'node:http';
+import {createHash,randomUUID} from 'node:crypto';
 import {spawn} from 'node:child_process';
 import {once} from 'node:events';
 import {createServer} from 'node:net';
@@ -5,12 +7,19 @@ import assert from 'node:assert/strict';
 import {FIXTURE as f} from './domain-fixtures.mjs';
 
 /** Built production server + disposable loopback provider, synthetic accounts only. */
-export async function verifyWebIdentity({state,owner,staff,password}) {
+export async function verifyWebIdentity({state,owner,staff,password,finance}) {
  const listener=createServer();listener.listen(0,'127.0.0.1');await once(listener,'listening');
  const port=listener.address().port;await new Promise(resolve=>listener.close(resolve));
  const base=`http://127.0.0.1:${port}`;
+ const scannerToken=randomUUID();
+ const scanner=createHttpServer(async(req,res)=>{
+  if(req.headers.authorization!==`Bearer ${scannerToken}`){res.writeHead(403);res.end();return;}
+  const chunks=[];for await(const bytes of req)chunks.push(bytes);const bytes=Buffer.concat(chunks);
+  res.setHeader('Content-Type','application/json');res.end(JSON.stringify({sha256:createHash('sha256').update(bytes).digest('hex'),verdict:bytes.includes(Buffer.from('EICAR'))?'infected':'clean'}));
+ });
+ scanner.listen(0,'127.0.0.1');await once(scanner,'listening');
  const child=spawn(process.execPath,['node_modules/next/dist/bin/next','start','--hostname','127.0.0.1','--port',String(port)],{
-  env:{...process.env,NODE_ENV:'production',ENCLAVIX_APP_ENV:'production',NEXT_PUBLIC_APP_ENV:'production',ENCLAVIX_LOCAL_AUTH_TEST:'1',NEXT_PUBLIC_SUPABASE_URL:state.API_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY:state.ANON_KEY,SUPABASE_SERVICE_ROLE_KEY:state.SERVICE_ROLE_KEY},
+  env:{...process.env,NODE_ENV:'production',ENCLAVIX_APP_ENV:'production',NEXT_PUBLIC_APP_ENV:'production',ENCLAVIX_LOCAL_AUTH_TEST:'1',NEXT_PUBLIC_SUPABASE_URL:state.API_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY:state.ANON_KEY,SUPABASE_SERVICE_ROLE_KEY:state.SERVICE_ROLE_KEY,ENCLAVIX_SCANNER_URL:`http://127.0.0.1:${scanner.address().port}/scan`,ENCLAVIX_SCANNER_TOKEN:scannerToken},
   stdio:['ignore','pipe','pipe'],
  });
  let output='';child.stdout.on('data',d=>{output+=d;});child.stderr.on('data',d=>{output+=d;});
@@ -66,6 +75,24 @@ export async function verifyWebIdentity({state,owner,staff,password}) {
   assert.equal((await fetch(endpoint+`community/${f.villageTenant}/allocations`,{headers:{cookie}})).status,403);
   assert.equal((await fetch(endpoint+`community/${f.condoTenant}/property_allocations/${f.unit}`,{headers:{cookie}})).status,403);
   console.log('S03 asset API: authenticated native assignment, resident property-scoped reads and wrong-scope denial passed');
+  assert.equal((await fetch(base+'/finance')).status,200);
+  assert.equal((await fetch(endpoint+'finance/index',{headers:{cookie:'demo_user_role=SUPER_ADMIN'}})).status,401);
+  const fq=new URLSearchParams({tenant:f.villageTenant,community:f.village,property:f.secondLot,from:'2026-01-01',until:'2026-12-31'});
+  const finReport=await fetch(endpoint+'finance/report?'+fq,{headers:{cookie}});assert.equal(finReport.status,200);assert.match(finReport.headers.get('cache-control'),/no-store/);assert.equal((await finReport.json()).data.requests.length,0);
+  assert.equal((await fetch(endpoint+`finance/${f.villageTenant}/proof/${finance.proof.id}`,{headers:{cookie}})).status,200);
+  assert.equal((await fetch(endpoint+`tenants/${f.villageTenant}/documents/${finance.proof.id}`,{headers:{cookie}})).status,404);
+  const uploadBody={p_tenant:f.villageTenant,p_property:f.secondLot,content_type:'application/pdf',base64:Buffer.from('%PDF-1.4\nBuilt API scanner fixture').toString('base64')};
+  const fh={cookie,origin:base,'content-type':'application/json','Idempotency-Key':'web-finance-upload'};
+  assert.equal((await fetch(endpoint+'finance/upload',{method:'POST',headers:{...fh,origin:'https://attacker.invalid'},body:JSON.stringify(uploadBody)})).status,403);
+  const uploaded=await fetch(endpoint+'finance/upload',{method:'POST',headers:fh,body:JSON.stringify(uploadBody)});assert.equal(uploaded.status,200);const proofId=(await uploaded.json()).data.id;
+  const repeated=await fetch(endpoint+'finance/upload',{method:'POST',headers:fh,body:JSON.stringify(uploadBody)});assert.equal(repeated.status,200);assert.equal((await repeated.json()).data.id,proofId);
+  const nativeBody={p_tenant:f.villageTenant,p_property:f.secondLot,p_data:{amount:'123',paid_on:'2026-11-03',method:'Bank',reference:'WEB-PROOF-CHECK',document_id:proofId}};
+  const submitted=await fetch(endpoint+'finance/submit',{method:'POST',headers:{...fh,'Idempotency-Key':'web-finance-submit'},body:JSON.stringify(nativeBody)});assert.equal(submitted.status,200);assert.equal((await submitted.json()).data.status,'pending');
+  const infected=await fetch(endpoint+'finance/upload',{method:'POST',headers:{...fh,'Idempotency-Key':'web-infected-proof'},body:JSON.stringify({...uploadBody,base64:Buffer.from('%PDF-1.4\nEICAR synthetic rejection marker').toString('base64')})});assert.equal(infected.status,400);
+  assert.equal((await fetch(endpoint+'finance/decide',{method:'POST',headers:fh,body:JSON.stringify({p_tenant:f.villageTenant,p_request:finance.submission.id,p_approve:true,p_reason:'Resident approval must be denied'})})).status,403);
+  assert.equal((await fetch(endpoint+'finance/constructor',{method:'POST',headers:fh,body:'{}'})).status,404);
+  assert.equal((await fetch(endpoint+'finance/index',{headers:{authorization:`Bearer ${token}`}})).status,200);
+  console.log('S04 built cookie/native API: private scanner/upload/download, rejected proof, replay, pending submission, tenant controls and no resident approval passed');
   const roleCommand={p_tenant:f.villageTenant,p_member:f.villageMember,p_role:'finance_preparer',p_community:null,p_until:null,p_revoke:false,p_reason:'Verified native permission change retry'};
   for(let i=0;i<2;i++){
    const changed=await fetch(endpoint+'access/role',{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json','Idempotency-Key':'native-role-command'},body:JSON.stringify(roleCommand)});assert.equal(changed.status,200);
@@ -80,6 +107,7 @@ export async function verifyWebIdentity({state,owner,staff,password}) {
   console.log('S02 built web: real cookie login, HttpOnly/Secure cookies, CSRF, native bearer requests, tenant/file isolation, no-store responses and stale-cookie denial after logout passed');
  }finally{
   if(child.exitCode===null&&child.signalCode===null){child.kill('SIGTERM');await once(child,'exit');}
+  await new Promise(resolve=>scanner.close(resolve));
   // Never dump captured server output: it may contain cookies or request secrets.
   output='';
  }

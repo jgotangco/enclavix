@@ -283,6 +283,7 @@ export interface DomainDatabase {
           "scan_status": DomainDatabase["app"]["Enums"]["scan_status"];
           "created_at": string;
           "audience": string;
+          "purpose": string;
         };
         Insert: {
           "id"?: string;
@@ -299,6 +300,7 @@ export interface DomainDatabase {
           "scan_status"?: DomainDatabase["app"]["Enums"]["scan_status"];
           "created_at"?: string;
           "audience"?: string;
+          "purpose"?: string;
         };
         Update: {
           "id"?: string;
@@ -315,6 +317,366 @@ export interface DomainDatabase {
           "scan_status"?: DomainDatabase["app"]["Enums"]["scan_status"];
           "created_at"?: string;
           "audience"?: string;
+          "purpose"?: string;
+        };
+      };
+      "finance_allocations": {
+        Row: {
+          "id": string;
+          "tenant_id": string;
+          "community_id": string;
+          "property_id": string;
+          "debit_id": string;
+          "credit_id": string;
+          "amount": string;
+          "request_id": string;
+          "reversal_of": string | null;
+          "created_at": string;
+        };
+        Insert: {
+          "id"?: string;
+          "tenant_id": string;
+          "community_id": string;
+          "property_id": string;
+          "debit_id": string;
+          "credit_id": string;
+          "amount": string;
+          "request_id": string;
+          "reversal_of"?: string | null;
+          "created_at"?: string;
+        };
+        Update: {
+          "id"?: string;
+          "tenant_id"?: string;
+          "community_id"?: string;
+          "property_id"?: string;
+          "debit_id"?: string;
+          "credit_id"?: string;
+          "amount"?: string;
+          "request_id"?: string;
+          "reversal_of"?: string | null;
+          "created_at"?: string;
+        };
+      };
+      "finance_batches": {
+        Row: {
+          "id": string;
+          "tenant_id": string;
+          "community_id": string;
+          "period": string;
+          "total": string;
+          "line_count": number;
+          "fingerprint": string;
+          "cancelled": boolean;
+        };
+        Insert: {
+          "id": string;
+          "tenant_id": string;
+          "community_id": string;
+          "period": string;
+          "total": string;
+          "line_count": number;
+          "fingerprint": string;
+          "cancelled"?: boolean;
+        };
+        Update: {
+          "id"?: string;
+          "tenant_id"?: string;
+          "community_id"?: string;
+          "period"?: string;
+          "total"?: string;
+          "line_count"?: number;
+          "fingerprint"?: string;
+          "cancelled"?: boolean;
+        };
+      };
+      "finance_entries": {
+        Row: {
+          "id": string;
+          "tenant_id": string;
+          "community_id": string;
+          "property_id": string;
+          "request_id": string;
+          "line_id": string | null;
+          "kind": string;
+          "amount": string;
+          "posted_on": string;
+          "due_on": string;
+          "label": string;
+          "snapshot": DomainJson;
+          "reversal_of": string | null;
+          "receipt_number": string | null;
+          "created_at": string;
+        };
+        Insert: {
+          "id"?: string;
+          "tenant_id": string;
+          "community_id": string;
+          "property_id": string;
+          "request_id": string;
+          "line_id"?: string | null;
+          "kind": string;
+          "amount": string;
+          "posted_on": string;
+          "due_on": string;
+          "label": string;
+          "snapshot": DomainJson;
+          "reversal_of"?: string | null;
+          "receipt_number"?: string | null;
+          "created_at"?: string;
+        };
+        Update: {
+          "id"?: string;
+          "tenant_id"?: string;
+          "community_id"?: string;
+          "property_id"?: string;
+          "request_id"?: string;
+          "line_id"?: string | null;
+          "kind"?: string;
+          "amount"?: string;
+          "posted_on"?: string;
+          "due_on"?: string;
+          "label"?: string;
+          "snapshot"?: DomainJson;
+          "reversal_of"?: string | null;
+          "receipt_number"?: string | null;
+          "created_at"?: string;
+        };
+      };
+      "finance_lines": {
+        Row: {
+          "id": string;
+          "tenant_id": string;
+          "community_id": string;
+          "batch_id": string;
+          "property_id": string;
+          "rule_id": string;
+          "amount": string;
+          "snapshot": DomainJson;
+          "due_on": string;
+        };
+        Insert: {
+          "id"?: string;
+          "tenant_id": string;
+          "community_id": string;
+          "batch_id": string;
+          "property_id": string;
+          "rule_id": string;
+          "amount": string;
+          "snapshot": DomainJson;
+          "due_on": string;
+        };
+        Update: {
+          "id"?: string;
+          "tenant_id"?: string;
+          "community_id"?: string;
+          "batch_id"?: string;
+          "property_id"?: string;
+          "rule_id"?: string;
+          "amount"?: string;
+          "snapshot"?: DomainJson;
+          "due_on"?: string;
+        };
+      };
+      "finance_periods": {
+        Row: {
+          "id": string;
+          "tenant_id": string;
+          "community_id": string;
+          "period": string;
+          "closed": boolean;
+          "changed_by_request": string;
+        };
+        Insert: {
+          "id"?: string;
+          "tenant_id": string;
+          "community_id": string;
+          "period": string;
+          "closed"?: boolean;
+          "changed_by_request": string;
+        };
+        Update: {
+          "id"?: string;
+          "tenant_id"?: string;
+          "community_id"?: string;
+          "period"?: string;
+          "closed"?: boolean;
+          "changed_by_request"?: string;
+        };
+      };
+      "finance_policies": {
+        Row: {
+          "id": string;
+          "tenant_id": string;
+          "community_id": string;
+          "approval_limit": string;
+          "created_at": string;
+        };
+        Insert: {
+          "id": string;
+          "tenant_id": string;
+          "community_id": string;
+          "approval_limit": string;
+          "created_at"?: string;
+        };
+        Update: {
+          "id"?: string;
+          "tenant_id"?: string;
+          "community_id"?: string;
+          "approval_limit"?: string;
+          "created_at"?: string;
+        };
+      };
+      "finance_requests": {
+        Row: {
+          "id": string;
+          "tenant_id": string;
+          "community_id": string;
+          "kind": string;
+          "payload": DomainJson;
+          "prepared_by": string;
+          "reason": string;
+          "status": string;
+          "decided_by": string | null;
+          "decision_reason": string | null;
+          "created_at": string;
+          "decided_at": string | null;
+        };
+        Insert: {
+          "id"?: string;
+          "tenant_id": string;
+          "community_id": string;
+          "kind": string;
+          "payload": DomainJson;
+          "prepared_by": string;
+          "reason": string;
+          "status"?: string;
+          "decided_by"?: string | null;
+          "decision_reason"?: string | null;
+          "created_at"?: string;
+          "decided_at"?: string | null;
+        };
+        Update: {
+          "id"?: string;
+          "tenant_id"?: string;
+          "community_id"?: string;
+          "kind"?: string;
+          "payload"?: DomainJson;
+          "prepared_by"?: string;
+          "reason"?: string;
+          "status"?: string;
+          "decided_by"?: string | null;
+          "decision_reason"?: string | null;
+          "created_at"?: string;
+          "decided_at"?: string | null;
+        };
+      };
+      "finance_rules": {
+        Row: {
+          "id": string;
+          "tenant_id": string;
+          "community_id": string;
+          "code": string;
+          "label": string;
+          "basis": string;
+          "rate": string;
+          "effective_from": string;
+          "effective_until": string | null;
+          "recurring": boolean;
+          "category": string;
+          "asset_kind": DomainDatabase["app"]["Enums"]["asset_kind"] | null;
+          "grace_days": number;
+          "cap": string | null;
+          "due_days": number;
+        };
+        Insert: {
+          "id": string;
+          "tenant_id": string;
+          "community_id": string;
+          "code": string;
+          "label": string;
+          "basis": string;
+          "rate": string;
+          "effective_from": string;
+          "effective_until"?: string | null;
+          "recurring": boolean;
+          "category": string;
+          "asset_kind"?: DomainDatabase["app"]["Enums"]["asset_kind"] | null;
+          "grace_days"?: number;
+          "cap"?: string | null;
+          "due_days"?: number;
+        };
+        Update: {
+          "id"?: string;
+          "tenant_id"?: string;
+          "community_id"?: string;
+          "code"?: string;
+          "label"?: string;
+          "basis"?: string;
+          "rate"?: string;
+          "effective_from"?: string;
+          "effective_until"?: string | null;
+          "recurring"?: boolean;
+          "category"?: string;
+          "asset_kind"?: DomainDatabase["app"]["Enums"]["asset_kind"] | null;
+          "grace_days"?: number;
+          "cap"?: string | null;
+          "due_days"?: number;
+        };
+      };
+      "finance_sequences": {
+        Row: {
+          "tenant_id": string;
+          "next_number": string;
+        };
+        Insert: {
+          "tenant_id": string;
+          "next_number"?: string;
+        };
+        Update: {
+          "tenant_id"?: string;
+          "next_number"?: string;
+        };
+      };
+      "finance_submissions": {
+        Row: {
+          "id": string;
+          "tenant_id": string;
+          "community_id": string;
+          "property_id": string;
+          "submitted_by": string;
+          "amount": string;
+          "paid_on": string;
+          "method": string;
+          "reference": string;
+          "document_id": string;
+          "created_at": string;
+        };
+        Insert: {
+          "id"?: string;
+          "tenant_id": string;
+          "community_id": string;
+          "property_id": string;
+          "submitted_by": string;
+          "amount": string;
+          "paid_on": string;
+          "method": string;
+          "reference": string;
+          "document_id": string;
+          "created_at"?: string;
+        };
+        Update: {
+          "id"?: string;
+          "tenant_id"?: string;
+          "community_id"?: string;
+          "property_id"?: string;
+          "submitted_by"?: string;
+          "amount"?: string;
+          "paid_on"?: string;
+          "method"?: string;
+          "reference"?: string;
+          "document_id"?: string;
+          "created_at"?: string;
         };
       };
       "import_batches": {

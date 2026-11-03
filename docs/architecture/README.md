@@ -16,3 +16,5 @@ These documents distinguish implemented database constraints from future applica
 Accepted S02 identity and review repairs: [identity and authorization contract](adr/0005-identity-and-access.md). S02 adds accepted account/access services and review repairs while retaining mock portal containment.
 
 S03 work in progress: [onboarding and registry contract](adr/0006-onboarding-and-registry.md). The current private schema contains 26 tables; synthetic sandbox activation does not approve real resident data or deployment.
+
+S04 finance implementation under verification: [ADR 0007](adr/0007-receivables-and-verification.md) and [finance API](../finance-api.md). The current S04 schema has 36 private app tables; accepted S03 evidence retains its historical 26-table count. No production finance, scanner or deployment approval is implied.

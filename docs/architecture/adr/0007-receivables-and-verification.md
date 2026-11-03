@@ -1,6 +1,6 @@
 # ADR 0007: Receivables and manual payment verification
 
-Status: S04 implementation design in progress, 3 November 2026. Only the standalone calculation primitive is implemented in this initial increment. The services and records below are planned, not available capabilities. D06 synthetic defaults are approved; association production policies remain pending.
+Status: S04 implementation design in progress, 3 November 2026. The initial calculator and subsequent private ledger, proof/report services and responsive workspace are implemented and under verification; see [finance contract](../../finance-api.md). D06 synthetic defaults are approved; association production policies remain pending.
 
 ## Calculation contract
 
@@ -8,7 +8,7 @@ Transport money, rates and dimensions as decimal strings. Never use JavaScript f
 
 This helper is not an authorization boundary. Future posting must load approved effective rule revisions and property/asset dimensions in trusted SQL, recompute the same result with PostgreSQL numeric arithmetic and persist formula/version/input snapshots. Client previews cannot supply final posted amounts. Golden test cases must cover both implementations before posting is exposed. Discounts/penalties require their own explicit policy and calculation tests; they are not implemented by passing signed rates into this helper.
 
-## Planned durable boundary
+## Durable boundary implemented for verification
 
 - Add private app-schema finance tables with composite association/community/property references and default-deny grants. Existing public prototype invoices are not a migration source or ledger.
 - Effective-dated policy/rule revisions carry preparer, independent approval, reason and audit. Tenant-set monetary limits are explicit; no implicit unlimited approval or small-association self-approval exception.
@@ -28,7 +28,7 @@ Serialize tenant mutations with the existing advisory-lock discipline, then rech
 
 ## Reviewable S04 increments
 
-1. Exact calculation primitives, approved synthetic-default record and explicit design boundary (current increment).
+1. Exact calculation primitives, approved synthetic-default record and explicit design boundary (completed foundation increment).
 2. Private policy/rule/period/subledger schema and trusted commands, snapshots, generation recovery, allocation/reversal/close tests.
 3. Private payment evidence, duplicate review, independent approval, acknowledgment sequences and opening-balance cutover staging.
 4. Shared authenticated API, responsive finance/resident workflows, reconciliation/aging/exports and built-provider concurrency/browser checks.
