@@ -96,7 +96,7 @@ npm run build
 node tools/check-http.mjs
 ```
 
-The HTTP check uses the same environment mode as the build. `npm test` currently runs 102 checks, including forged-cookie containment, scoped foreign keys, rollback, immutable identities, document paths, asset allocation/retry controls, community date presentation and default-deny access. After changing migrations, regenerate transport types with `npm run types:domain` and commit the result.
+The HTTP check uses the same environment mode as the build. `npm test` currently runs 103 checks, including forged-cookie containment, scoped foreign keys, rollback, immutable identities, document paths, asset allocation/retry controls, community date presentation and default-deny access. After changing migrations, regenerate transport types with `npm run types:domain` and commit the result.
 
 GitHub Actions verifies production and demo web builds/runtime, a container build/runtime and disposable Supabase. The database job verifies real Auth sign-in and TOTP MFA, recovery, logout/revocation, built-web cookie and native bearer requests, private storage restrictions, migration/type agreement, restricted-role access and concurrent commands. These checks use synthetic fixtures and do not deploy or certify real-world HOA readiness. See the [S04 evidence](docs/delivery/evidence/S04.md), [finance operating contract](docs/finance-api.md) and earlier sprint evidence for results and limitations.
 

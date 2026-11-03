@@ -1,8 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createJiti} from 'jiti';
-const {proofBytes,proofHash,scanProof}=await createJiti(import.meta.url).import('../src/lib/finance/proof.server.ts');
+const {assertCurrentProof,proofBytes,proofHash,scanProof}=await createJiti(import.meta.url).import('../src/lib/finance/proof.server.ts');
 const pdf=Buffer.from('%PDF-1.4\nSynthetic test evidence');
+test('download reauthorization refuses a clean-to-rejected transition during storage I/O',()=>{
+ const expected={object_path:'tenant/document',sha256:proofHash(pdf),size_bytes:String(pdf.length)};
+ assert.doesNotThrow(()=>assertCurrentProof(expected,{...expected,status:'clean'}));
+ for(const current of [{status:'rejected'},{...expected,status:'rejected'},{...expected,status:'pending'},{...expected,status:'clean',sha256:'changed'}])assert.throws(()=>assertCurrentProof(expected,current),e=>e.status===403);
+});
 test('proof accepts bounded type-matched bytes and rejects ambiguous encoding',()=>{
  assert.deepEqual(proofBytes(pdf.toString('base64'),'application/pdf'),pdf);
  for(const [value,type] of [['abcd','application/pdf'],[pdf.toString('base64')+'\n','application/pdf'],[pdf.toString('base64'),'text/html'],['','image/png'],['A'.repeat(7000000),'image/jpeg']])assert.throws(()=>proofBytes(value,type));

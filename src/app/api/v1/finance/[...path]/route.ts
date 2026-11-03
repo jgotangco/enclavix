@@ -3,7 +3,7 @@ import { createClient as privilegedClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { runtimeEnvironment } from "@/lib/env.server";
 import { bearerFrom, checkMutation, fields, readJson, RequestError, uuid } from "@/lib/auth/request";
-import { proofBytes, proofHash, scanProof } from "@/lib/finance/proof.server";
+import { assertCurrentProof, proofBytes, proofHash, scanProof } from "@/lib/finance/proof.server";
 export const dynamic = "force-dynamic";
 const headers = { "Cache-Control": "private, no-store", Vary: "Cookie, Authorization", "X-Content-Type-Options": "nosniff" };
 const reply = (data: unknown, status = 200) => NextResponse.json(data, { status, headers });
@@ -63,7 +63,8 @@ export async function GET(request: Request) {
       if (file.error || file.data.size > 5242880) throw new RequestError("Proof unavailable", 503);
       const bytes = new Uint8Array(await file.data.arrayBuffer());
       if (String(bytes.length) !== doc.size_bytes || proofHash(bytes) !== doc.sha256) throw new RequestError("Proof integrity failure", 503);
-      result(await client.rpc("enclavix_finance_proof", args)); // live authorization again after storage I/O
+      const current = result(await client.rpc("enclavix_finance_proof", args)) as { status?: string; object_path?: string; sha256?: string; size_bytes?: string };
+      assertCurrentProof(doc, current); // A successful RPC may still report a newly withdrawn scan status.
       return new Response(bytes, { headers: { ...headers, "Content-Type": "application/octet-stream", "Content-Disposition": 'attachment; filename="payment-evidence"', "Content-Security-Policy": "sandbox; default-src 'none'" } });
     }
     if (path !== "report" && path !== "export") throw new RequestError("Unknown route", 404);

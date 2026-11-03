@@ -13,6 +13,9 @@ export function proofBytes(encoded: unknown, type: unknown): Buffer {
   return bytes;
 }
 export function proofHash(bytes: Uint8Array): string { return createHash("sha256").update(bytes).digest("hex"); }
+export function assertCurrentProof(expected: { object_path?: string; sha256: string; size_bytes: string }, current: { status?: string; object_path?: string; sha256?: string; size_bytes?: string }): void {
+  if (current.status !== "clean" || !current.object_path || current.object_path !== expected.object_path || current.sha256 !== expected.sha256 || current.size_bytes !== expected.size_bytes) throw new RequestError("Proof access withdrawn", 403);
+}
 
 /** Operator-configured internal scanner, no user URL or redirect. No scanner means no upload success. */
 export async function scanProof(bytes: Buffer, type: string, fetcher: typeof fetch = fetch): Promise<boolean> {
