@@ -68,8 +68,9 @@ export async function GET(request: Request) {
       return new Response(bytes, { headers: { ...headers, "Content-Type": "application/octet-stream", "Content-Disposition": 'attachment; filename="payment-evidence"', "Content-Security-Policy": "sandbox; default-src 'none'" } });
     }
     if (path !== "report" && path !== "export") throw new RequestError("Unknown route", 404);
-    if ([...url.searchParams.keys()].some(k => !["tenant", "community", "property", "from", "until"].includes(k)) || [...url.searchParams.keys()].some(k => url.searchParams.getAll(k).length !== 1)) throw new RequestError("Invalid query");
-    const data = result(await client.rpc("enclavix_finance_report", { p_tenant: uuid(url.searchParams.get("tenant")), p_community: uuid(url.searchParams.get("community")), p_property: url.searchParams.get("property") ? uuid(url.searchParams.get("property")) : null, p_from: url.searchParams.get("from"), p_until: url.searchParams.get("until") })) as { truncated: boolean };
+    if ([...url.searchParams.keys()].some(k => !["tenant", "community", "property", "from", "until", "page"].includes(k)) || [...url.searchParams.keys()].some(k => url.searchParams.getAll(k).length !== 1)) throw new RequestError("Invalid query");
+    const page = url.searchParams.get("page") || "0"; if (!/^(0|[1-9][0-9]{0,5})$/.test(page) || Number(page) > 100000) throw new RequestError("Invalid page");
+    const data = result(await client.rpc("enclavix_finance_report", { p_tenant: uuid(url.searchParams.get("tenant")), p_community: uuid(url.searchParams.get("community")), p_property: url.searchParams.get("property") ? uuid(url.searchParams.get("property")) : null, p_from: url.searchParams.get("from"), p_until: url.searchParams.get("until"), p_page: Number(page) })) as { truncated: boolean };
     if (path === "export") {
       if (data.truncated) throw new RequestError("Narrow report range before export", 413);
       return new Response(JSON.stringify(data, null, 2), { headers: { ...headers, "Content-Type": "application/json", "Content-Disposition": 'attachment; filename="enclavix-reconciliation.json"', "Content-Security-Policy": "sandbox; default-src 'none'" } });

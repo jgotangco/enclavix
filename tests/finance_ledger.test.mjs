@@ -178,3 +178,9 @@ test('a later infected verdict withdraws an earlier clean proof without erasing 
  const report=await rpc('report',[f.villageTenant,f.village,f.lot,'2026-01-01','2026-12-31']);assert.equal(report.submissions.find(s=>s.document_id===doc).proof_status,'rejected');
  assert.equal((await db.query('SELECT count(*)::int n FROM app.finance_entries')).rows[0].n,before);
 });
+test('review queues remain bounded and older pending decisions are reachable by explicit pages',async()=>{
+ await db.query("INSERT INTO app.finance_requests(tenant_id,community_id,kind,payload,prepared_by,reason) SELECT $1,$2,'policy','{\"approval_limit\":\"100\"}',$3,'Synthetic pagination fixture' FROM generate_series(1,105)",[f.villageTenant,f.village,member.preparer]);
+ await as('preparer');const first=await rpc('report',[f.villageTenant,f.village,null,'2026-01-01','2026-12-31',0]);const next=await rpc('report',[f.villageTenant,f.village,null,'2026-01-01','2026-12-31',1]);
+ assert.equal(first.requests.length,100);assert.ok(next.requests.length>0);assert.ok(first.request_count>105);assert.ok(!next.requests.some(r=>first.requests.some(a=>a.id===r.id)));assert.equal(first.requests[0].status,'pending');
+ await assert.rejects(rpc('report',[f.villageTenant,f.village,null,'2026-01-01','2026-12-31',-1]),e=>e.code==='22023');
+});

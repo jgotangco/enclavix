@@ -22,9 +22,9 @@ Residents need current ownership, a current valid owner representation or an exp
 | POST `upload` | `p_tenant,p_property,content_type,base64`; server authorizes, scans and writes private proof; maximum 5 MiB decoded |
 | POST `submit` | `p_tenant,p_property,p_data`; amount/date/method/reference/clean own document; pending only |
 | GET `{tenant}/proof/{document}` | Reauthorize private proof; hash/size verify, audit and attachment stream; no signed URLs |
-| GET `report` / `export` | Query `tenant,community,property?,from,until`; JSON report/export, ISO dates, maximum 367 inclusive days |
+| GET `report` / `export` | Query `tenant,community,property?,from,until,page?`; JSON report/export, ISO dates, maximum 367 inclusive days |
 
-`prepare` kinds: policy, rule, generation, payment review, charge, credit, allocate, refund, reverse, dispute, resolve, close, reopen and opening import. The database independently allowlists each kind's payload keys. Monetary fields are decimal strings. Report entry list is capped at 1,000 with explicit truncation and an exact full summary; export refuses truncated entries, so narrow the date/property range. Request review shows the latest 100 proposals; older finance/audit history remains retained in the database. No retention or deletion schedule is approved by S04.
+`prepare` kinds: policy, rule, generation, payment review, charge, credit, allocate, refund, reverse, dispute, resolve, close, reopen and opening import. The database independently allowlists each kind's payload keys. Monetary fields are decimal strings. Report entry list is capped at 1,000 with explicit truncation and an exact full summary; export refuses truncated entries, so narrow the date/property range. Request and submission review are paged in groups of 100, with explicit total counts and previous/next controls; pending proposals sort first. Older finance/audit history remains retained and reachable. Supplemental review arrays in a reconciliation export correspond to the selected review page; they are not a full tenant archive. No retention or deletion schedule is approved by S04.
 
 ## Ledger and assessment semantics
 
