@@ -167,3 +167,14 @@ test('approved policy revisions are monotonic and the latest limit governs older
  const versions=(await db.query('SELECT revision FROM app.finance_policies WHERE tenant_id=$1 AND community_id=$2 ORDER BY revision',[f.villageTenant,f.village])).rows.map(r=>r.revision);assert.deepEqual(versions,[1,2]);
  await as('approver');await assert.rejects(decide(staged.id),e=>e.code==='23514');
 });
+test('a later infected verdict withdraws an earlier clean proof without erasing financial history',async()=>{
+ const doc=(await db.query("SELECT document_id FROM app.finance_submissions WHERE reference='PARTIAL-2000'")).rows[0].document_id;
+ const before=(await db.query('SELECT count(*)::int n FROM app.finance_entries')).rows[0].n;
+ await db.exec('SET ROLE service_role');try{
+  assert.equal((await db.query('SELECT public.enclavix_finance_proof_complete($1,$2,$3,false) result',[f.villageTenant,doc,'d'.repeat(64)])).rows[0].result,false);
+  assert.equal((await db.query('SELECT public.enclavix_finance_proof_complete($1,$2,$3,true) result',[f.villageTenant,doc,'d'.repeat(64)])).rows[0].result,false);
+ }finally{await db.exec('RESET ROLE');}
+ await as('resident');const proof=await rpc('proof',[f.villageTenant,doc]);assert.equal(proof.status,'rejected');assert.equal(proof.object_path,undefined);
+ const report=await rpc('report',[f.villageTenant,f.village,f.lot,'2026-01-01','2026-12-31']);assert.equal(report.submissions.find(s=>s.document_id===doc).proof_status,'rejected');
+ assert.equal((await db.query('SELECT count(*)::int n FROM app.finance_entries')).rows[0].n,before);
+});
