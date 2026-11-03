@@ -202,8 +202,8 @@ DECLARE q app.properties; r app.finance_rules; n numeric; qty numeric; base nume
    IF r.basis='asset_quantity' THEN SELECT count(DISTINCT x.asset_id) INTO qty FROM app.asset_allocations x JOIN app.assets a ON (a.tenant_id,a.community_id,a.id)=(x.tenant_id,x.community_id,x.asset_id)
     JOIN app.communities com ON com.tenant_id=t AND com.id=c WHERE x.tenant_id=t AND x.property_id=q.id AND a.kind=r.asset_kind AND a.is_active AND x.cancelled_at IS NULL AND x.valid_from<=d::timestamp AT TIME ZONE com.time_zone AND (x.valid_until IS NULL OR x.valid_until>d::timestamp AT TIME ZONE com.time_zone); END IF;
    IF r.basis='outstanding_percent' THEN
-    SELECT coalesce(sum(app.finance_available(t,e.id)),0) INTO base FROM app.finance_entries e WHERE e.tenant_id=t AND e.property_id=q.id AND e.amount>0 AND e.kind<>'reversal' AND e.posted_on<d AND e.due_on<d-r.grace_days
-    AND NOT EXISTS(SELECT 1 FROM app.finance_requests z WHERE z.tenant_id=t AND z.kind='dispute' AND z.status='approved' AND z.payload->>'entry_id'=e.id::text AND NOT EXISTS(SELECT 1 FROM app.finance_requests y WHERE y.tenant_id=t AND y.kind='resolve' AND y.status='approved' AND y.payload->>'dispute_id'=z.id::text));
+    SELECT coalesce(sum(app.finance_available_at(t,e.id,d-1)),0) INTO base FROM app.finance_entries e WHERE e.tenant_id=t AND e.property_id=q.id AND e.amount>0 AND e.kind<>'reversal' AND e.posted_on<d AND e.due_on<d-r.grace_days
+    AND NOT EXISTS(SELECT 1 FROM app.finance_requests z WHERE z.tenant_id=t AND z.kind='dispute' AND z.status='approved' AND z.payload->>'entry_id'=e.id::text AND (z.payload->>'posted_on')::date<d AND NOT EXISTS(SELECT 1 FROM app.finance_requests y WHERE y.tenant_id=t AND y.kind='resolve' AND y.status='approved' AND y.payload->>'dispute_id'=z.id::text AND (y.payload->>'posted_on')::date<d));
     qty:=base/100;
    END IF;
    IF qty IS NULL THEN RAISE EXCEPTION 'Missing assessment dimension for property %',q.code USING ERRCODE='22023'; END IF;
@@ -269,14 +269,15 @@ DECLARE actor uuid:=app.require_finance(p_tenant,p_community,'finance_preparer',
  WHEN 'reverse','dispute' THEN
   PERFORM app.only_keys(p_data,ARRAY['entry_id','posted_on']); SELECT * INTO e FROM app.finance_entries WHERE tenant_id=p_tenant AND community_id=p_community AND id=(p_data->>'entry_id')::uuid AND kind<>'reversal';
   IF e.id IS NULL THEN RAISE EXCEPTION 'Unknown entry' USING ERRCODE='42501'; END IF;
-  PERFORM app.finance_date(p_data->>'posted_on'); p_data:=p_data||jsonb_build_object('property_id',e.property_id,'amount',abs(e.amount)::text);
+  IF app.finance_date(p_data->>'posted_on')<e.posted_on THEN RAISE EXCEPTION 'Action cannot precede original entry' USING ERRCODE='23514'; END IF; p_data:=p_data||jsonb_build_object('property_id',e.property_id,'amount',abs(e.amount)::text);
  WHEN 'resolve' THEN
-  PERFORM app.only_keys(p_data,ARRAY['dispute_id']); IF NOT EXISTS(SELECT 1 FROM app.finance_requests WHERE tenant_id=p_tenant AND community_id=p_community AND kind='dispute' AND status='approved' AND id=(p_data->>'dispute_id')::uuid) THEN RAISE EXCEPTION 'Unknown dispute' USING ERRCODE='42501'; END IF;
+  PERFORM app.only_keys(p_data,ARRAY['dispute_id','posted_on']); PERFORM app.finance_date(p_data->>'posted_on'); IF NOT EXISTS(SELECT 1 FROM app.finance_requests WHERE tenant_id=p_tenant AND community_id=p_community AND kind='dispute' AND status='approved' AND id=(p_data->>'dispute_id')::uuid AND (payload->>'posted_on')::date<=(p_data->>'posted_on')::date) THEN RAISE EXCEPTION 'Unknown dispute' USING ERRCODE='42501'; END IF;
  WHEN 'close','reopen' THEN
   PERFORM app.only_keys(p_data,ARRAY['period']); d:=app.finance_date(p_data->>'period'); IF extract(day FROM d)<>1 THEN RAISE EXCEPTION 'Period must start on day one' USING ERRCODE='22023'; END IF;
  WHEN 'opening' THEN
   PERFORM app.only_keys(p_data,ARRAY['source_key','source_sha256','source_file_sha256','posted_on','rows','expected_total','signoff']);
   IF coalesce(p_data->>'source_key','') !~ '^[A-Za-z0-9._:-]{1,120}$' OR coalesce(p_data->>'source_sha256','') !~ '^[a-f0-9]{64}$' OR coalesce(length(btrim(p_data->>'signoff')),0)<10 OR jsonb_typeof(p_data->'rows') IS DISTINCT FROM 'array' OR jsonb_array_length(p_data->'rows') NOT BETWEEN 1 AND 1000 THEN RAISE EXCEPTION 'Opening provenance and rows required' USING ERRCODE='22023'; END IF;
+  IF p_data ? 'source_file_sha256' AND coalesce(p_data->>'source_file_sha256','') !~ '^[a-f0-9]{64}$' THEN RAISE EXCEPTION 'Invalid file fingerprint' USING ERRCODE='22023'; END IF;
   PERFORM app.finance_date(p_data->>'posted_on');
   x:=app.finance_opening_preview(p_tenant,p_community,p_data->'rows');
   IF NOT (x->>'valid')::boolean OR p_data->>'source_sha256' IS DISTINCT FROM x->>'source_sha256' THEN RAISE EXCEPTION 'Opening preview invalid or fingerprint changed' USING ERRCODE='23514'; END IF;

@@ -131,7 +131,8 @@ test('approved penalty rules honor grace and caps, skip disputed charges, and pr
  const batch=await inCommunity('generation',{period:'2026-02-01'});assert.equal(batch.preview.lines.find(l=>l.rule_id===rule.id).amount,'100.00');assert.equal(batch.preview.total,'89.99');
  const dispute=await inCommunity('dispute',{entry_id:charge.entry_id,posted_on:'2026-02-02'});
  const next=await inCommunity('generation',{period:'2026-03-01'});assert.ok(!next.preview.lines.some(l=>l.rule_id===rule.id));
- await inCommunity('resolve',{dispute_id:dispute.id});
+ await inCommunity('resolve',{dispute_id:dispute.id,posted_on:'2026-03-02'});
+ const paidLater=await inCommunity('credit',{property_id:p,amount:'3000',posted_on:'2026-05-01',due_on:'2026-05-01',label:'Later credit must not alter April penalty',allocations:[{charge_id:charge.entry_id,amount:'3000'}]});assert.ok(paidLater.entry_id);
  const restored=await inCommunity('generation',{period:'2026-04-01'});assert.equal(restored.preview.lines.find(l=>l.rule_id===rule.id).amount,'100.00');
 });
 test('trusted database snapshots match exact preview golden cases for every dimensional basis',async()=>{
@@ -147,4 +148,16 @@ test('trusted database snapshots match exact preview golden cases for every dime
  }
  await as('preparer');const plan=await rpc('prepare',[f.villageTenant,c,'generation','{"period":"2026-11-01"}',reason]);
  for(const [basis,rate,quantity] of cases)assert.equal(plan.preview.lines.find(l=>l.snapshot.basis===basis).amount,calculateAssessment({basis,rate,...(quantity?{quantity}:{})}));
+});
+test('rejection reasons reach the resident, re-review is explicit, and a posted 2000 payment leaves 1000 on a 3000 charge',async()=>{
+ await as('resident');const proof=await rpc('proof_reserve',[f.villageTenant,f.lot,'d'.repeat(64),100,'application/pdf']);
+ await db.exec('SET ROLE service_role');try{await db.query('SELECT public.enclavix_finance_proof_complete($1,$2,$3,true)',[f.villageTenant,proof.id,'d'.repeat(64)]);}finally{await db.exec('RESET ROLE');}
+ const sub=await rpc('submit',[f.villageTenant,f.lot,JSON.stringify({amount:'2000',paid_on:'2026-11-03',method:'Bank transfer',reference:'PARTIAL-2000',document_id:proof.id})]);
+ await as('preparer');const review=await prepare('payment',{submission_id:sub.id,allocations:[],duplicate_review:'Initial reference requires a correction before approval'});
+ await as('approver');await rpc('decide',[f.villageTenant,review.id,false,'Reference needs independent bank confirmation']);
+ await as('resident');const rejected=await rpc('report',[f.villageTenant,f.village,f.lot,'2026-01-01','2026-12-31']);assert.equal(rejected.submissions.find(s=>s.id===sub.id).rejection_reason,'Reference needs independent bank confirmation');
+ const charge=(await db.query("SELECT id FROM app.finance_entries WHERE tenant_id=$1 AND property_id=$2 AND kind='charge' AND line_id IS NOT NULL",[f.villageTenant,f.lot])).rows[0].id;
+ const posted=await approved('payment',{submission_id:sub.id,allocations:[{charge_id:charge,amount:'2000'}],duplicate_review:'Corrected source independently confirmed without creating another submission'});assert.ok(posted.acknowledgment);
+ assert.equal((await db.query('SELECT app.finance_available($1,$2)::text amount',[f.villageTenant,charge])).rows[0].amount,'1000.00');
+ await as('resident');const confirmed=await rpc('report',[f.villageTenant,f.village,f.lot,'2026-01-01','2026-12-31']);assert.equal(confirmed.submissions.find(s=>s.id===sub.id).status,'approved');assert.equal(confirmed.submissions.find(s=>s.id===sub.id).rejection_reason,null);
 });
