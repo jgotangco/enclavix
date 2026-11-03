@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "baseline_commit": "d150f8b3a84b77a53c9f1136434481ed544d4067",
-  "current_sprint": "S03",
+  "current_sprint": "S04",
   "sprints": [
     {
       "id": "S00",
@@ -56,7 +56,7 @@
     {
       "id": "S04",
       "title": "Receivables and payment verification",
-      "status": "not_started",
+      "status": "in_progress",
       "depends_on": [
         "S03"
       ],

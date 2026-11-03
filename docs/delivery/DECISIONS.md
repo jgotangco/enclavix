@@ -80,3 +80,7 @@ Jerome Gotangco explicitly confirmed “Review completed and accepted,” accept
 ## Post-S11 installation candidate — 2 November 2026
 
 Jerome Gotangco asked for an easier installation experience and explicitly placed it after S11. Recorded as [P19 in POST_S11.md](POST_S11.md): simple hosted onboarding and an optional guided self-hosted package, with configuration/health checks, secure bootstrap, upgrades and database-plus-attachment recovery. Hosted-first is an engineering recommendation, not an approved deployment or vendor choice. D03, support/distribution decisions and future mobile licensing remain unresolved as recorded. Existing S10/S11 deployment/recovery obligations remain binding. Documentation only; no implementation or current sprint changes are approved. S03 remains accepted and S04 remains not_started for the planned 3 November session.
+
+## D06 synthetic implementation defaults — 3 November 2026
+
+Jerome Gotangco explicitly approved “Use these synthetic defaults”: exact decimals, half-up rounding to two places per charge; explicit payment allocations and unapplied overpayments held as credit; different preparer and approver with no self-approval; tenant-set approval limits; numbered “payment acknowledgments”, without official tax receipt claims. This approves configurable synthetic S04 implementation, not any association's production accounting policy. D06 remains proposed for each association finance owner's real-use approval. No monetary approval limit, real funds, tax treatment, hosting or deployment is approved by this decision.

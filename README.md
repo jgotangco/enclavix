@@ -14,10 +14,11 @@ Accepted engineering delivery baseline as of 2 November 2026:
 | [S01](docs/delivery/evidence/S01.md) | Accepted — [PR #2](https://github.com/jgotangco/enclavix/pull/2) | Private tenant domain, scoped relationships, generated types, fixtures, isolation/concurrency checks and architecture contracts |
 | [S02](docs/delivery/evidence/S02.md) | Accepted — [PR #3](https://github.com/jgotangco/enclavix/pull/3) | Verified identity, MFA, scoped account services, invitations/approval, revocation and private download authorization |
 | [S03](docs/delivery/evidence/S03.md) | Accepted — [PR #4](https://github.com/jgotangco/enclavix/pull/4), [PR #6](https://github.com/jgotangco/enclavix/pull/6) | Synthetic onboarding, property/asset relationships, import reconciliation and export/offboarding staging |
-| S04–S05, S08–S11 | Not started | Web finance, resident/guard operations, hardening and pilot acceptance |
+| S04 | In progress | Receivables and payment verification; synthetic finance calculation foundation underway |
+| S05, S08–S11 | Not started | Resident/guard operations, hardening and pilot acceptance |
 | S06–S07 | Deferred — not started | Commercial Android after S11 acceptance and pilot evidence |
 
-S03 was reviewed and accepted by Jerome Gotangco on 2 November 2026. S04 (receivables and payment verification) is planned for 3 November 2026, Asia/Manila, and has not started.
+S03 was reviewed and accepted by Jerome Gotangco on 2 November 2026. S04 (receivables and payment verification) started on 3 November 2026, Asia/Manila. It remains in progress; no financial posting or payment approval is enabled by the initial calculation increment.
 
 [STATUS.json](docs/delivery/STATUS.json) is the delivery-state record. Sprint acceptance does not certify production readiness or approve unresolved hosting and mobile decisions. No production deployment or hosted migration has been performed.
 

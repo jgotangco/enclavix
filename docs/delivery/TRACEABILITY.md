@@ -13,8 +13,8 @@ Each BRD requirement has one sprint accountable for completion evidence. Earlier
 | ARC 01 | S01 | Schema/path and S02 account/access controls verified; later workflow/operating controls pending S03–S10 |
 | ARC 02 | S01 | Uniqueness/rollback foundation verified; posting/delivery pending S04/S05 |
 | ARC 03 | S01 | Migration/type foundation verified; client compatibility web compatibility S10; mobile compatibility post-S11 S06/S07 |
-| FIN 01 | S04 | unverified |
-| FIN 02 | S04 | unverified |
+| FIN 01 | S04 | Initial exact-decimal calculation primitive tested; approved rules and posting remain unverified; see evidence/S04.md |
+| FIN 02 | S04 | Per-charge rounding and exact totals tested; transactional generation/recovery remain unverified; see evidence/S04.md |
 | FIN 03 | S04 | unverified |
 | FIN 04 | S04 | unverified |
 | FIN 05 | S04 | unverified |
@@ -69,4 +69,4 @@ S01 is the architecture foundation evidence owner for ARC requirements. These re
 
 S02 engineering acceptance includes the four PR #3 review repairs and successful 58-test, web/demo, real Supabase and container verification. It does not accept later modules, production email/hosting configuration, independent security assessment or Android device behavior.
 
-Jerome Gotangco explicitly accepted the bounded S03 engineering delivery on 2 November 2026 after completed review (PR #4/#6). Later finance, document, vehicle/gate and exit/retention obligations within the TEN requirements remain open in their owning workflows; this is not full-product or production acceptance. S04 is planned for 3 November 2026 and remains not_started.
+Jerome Gotangco explicitly accepted the bounded S03 engineering delivery on 2 November 2026 after completed review (PR #4/#6). Later finance, document, vehicle/gate and exit/retention obligations within the TEN requirements remain open in their owning workflows; this is not full-product or production acceptance. S04 was selected on 3 November 2026 and is in progress; finance completion remains unverified.
