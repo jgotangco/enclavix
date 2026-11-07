@@ -29,7 +29,12 @@ test('privacy intake replays safely and restricts staff review and cross-tenant 
     assert.equal(await write(submission,'privacy-submit'),item);
     const review = [f.villageTenant,null,null,item,'Synthetic review opened'];
     await assert.rejects(write(review,'privacy-review'),e=>e.code==='42501');
+    const settings = () => db.query("SELECT public.enclavix_privacy_controls($1,30,true,'Synthetic hold verification') AS result",[f.villageTenant]);
+    await assert.rejects(settings(),e=>e.code==='42501');
     await signIn(admin,id(9501));
+    await db.query("SELECT set_config('request.headers',$1,false)",[JSON.stringify({'idempotency-key':'privacy-controls'})]);
+    assert.deepEqual((await settings()).rows[0].result,{document_retention_days:30,legal_hold:true});
+    assert.deepEqual((await settings()).rows[0].result,{document_retention_days:30,legal_hold:true});
     assert.equal(await write(review,'privacy-review'),item);
     await signIn(resident,id(9502));
     const list = async tenant => (await db.query('SELECT * FROM public.enclavix_privacy_list($1)',[tenant])).rows;

@@ -25,6 +25,7 @@ export async function GET(request: Request) {
     return reply({ data: result(await client.rpc("enclavix_documents", {
       p_tenant: uuid(query.get("tenant")),
       p_community: uuid(query.get("community")),
+      p_ticket: query.has("ticket") ? uuid(query.get("ticket")) : null,
     })) });
   } catch (error) {
     return fail(error);
@@ -37,7 +38,7 @@ export async function POST(request: Request) {
     const key = request.headers.get("idempotency-key");
     if (!key || !/^[A-Za-z0-9._:-]{1,128}$/.test(key)) throw new RequestError("Request key required");
     const body = fields(await readJson(request, 7_000_000), [
-      "tenant", "community", "property", "previous", "title", "audience", "reason", "base64", "content_type",
+      "tenant", "community", "property", "previous", "title", "audience", "reason", "base64", "content_type", "ticket",
     ]);
     const tenant = uuid(body.tenant);
     const type = body.content_type;
@@ -55,6 +56,7 @@ export async function POST(request: Request) {
       p_previous: body.previous === null ? null : uuid(body.previous),
       p_title: body.title, p_audience: body.audience, p_reason: body.reason,
       p_hash: hash, p_size: bytes.length, p_type: type,
+      p_ticket: body.ticket == null ? null : uuid(body.ticket),
     }).setHeader("Idempotency-Key", key)) as { id: string; object_path: string };
     const clean = await scanProof(bytes, type);
     if (clean) {

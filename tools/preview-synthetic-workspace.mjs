@@ -58,14 +58,19 @@ const provider=createServer((req,res)=>{
   if(url.pathname==='/auth/v1/logout'){await db.query('DELETE FROM auth.sessions WHERE user_id=$1',[session.user.id]);res.end('{}');return;}
   const name=url.pathname.match(/^\/rest\/v1\/rpc\/(enclavix_[a-z0-9_]+)$/)?.[1];
   if(!name){res.writeHead(404);res.end('{}');return;}
-  const signature=(await db.query("SELECT proargnames FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND proname=$1",[name])).rows[0];
-  const args=signature?.proargnames||[];
+  const signature=(await db.query("SELECT proargnames,pronargs,proretset FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND proname=$1",[name])).rows[0];
+  const args=(signature?.proargnames||[]).slice(0,signature?.pronargs);
   if(!signature||Object.keys(body).some(k=>!args.includes(k))){res.writeHead(400);res.end(JSON.stringify({code:'22023'}));return;}
   await db.exec('BEGIN');
   try{
    await db.query("SELECT set_config('request.jwt.claims',$1,true),set_config('request.headers',$2,true)",[JSON.stringify(session.claims),JSON.stringify({'idempotency-key':req.headers['idempotency-key']})]);
    await db.exec('SET LOCAL ROLE authenticated');
-   const result=(await db.query(`SELECT public.${name}(${args.map((_,i)=>'$'+(i+1)).join(',')}) result`,args.map(k=>typeof body[k]==='object'&&body[k]!==null?JSON.stringify(body[k]):body[k]??null))).rows[0].result;
+   const placeholders=args.map((_,i)=>'$'+(i+1)).join(',');
+   const values=args.map(k=>typeof body[k]==='object'&&body[k]!==null?JSON.stringify(body[k]):body[k]??null);
+   const rows=(await db.query(signature.proretset
+    ? `SELECT * FROM public.${name}(${placeholders})`
+    : `SELECT public.${name}(${placeholders}) result`,values)).rows;
+   const result=signature.proretset?rows:rows[0].result;
    await db.exec('COMMIT');res.end(JSON.stringify(result));
   }catch(error){await db.exec('ROLLBACK');res.writeHead(400);res.end(JSON.stringify({code:error.code||'22023',message:'Synthetic command denied'}));}
  }).catch(()=>{if(!res.headersSent)res.writeHead(500);res.end('{}');});

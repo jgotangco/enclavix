@@ -172,11 +172,12 @@ type Ticket = {
     created_at: string;
     assigned: boolean;
     escalated: boolean;
+    response_due_at: string | null;
     history: { action: string; at: string }[];
 };
 const ticketActions: Record<string, string> = {
     open: "Submitted", in_progress: "Work started", resolved: "Resolved",
-    assign_self: "Assigned to staff", escalate: "Escalated", reopen: "Reopened",
+    assign_self: "Assigned to staff", assign: "Reassigned to staff", set_due: "Response deadline set", escalate: "Escalated", reopen: "Reopened",
 };
 
 function TicketQueue({ tenant, community, api, administrator, properties, timeZone }: {
@@ -188,6 +189,7 @@ function TicketQueue({ tenant, community, api, administrator, properties, timeZo
     timeZone: string;
 }) {
     const [tickets, setTickets] = useState<Ticket[] | null>(null);
+    const [assignees, setAssignees] = useState<{ id: string; name: string }[]>([]);
     const [error, setError] = useState(false);
     const [busy, setBusy] = useState(false);
     const [message, setMessage] = useState("");
@@ -199,6 +201,14 @@ function TicketQueue({ tenant, community, api, administrator, properties, timeZo
             .catch(() => { if (active) setError(true); });
         return () => { active = false; };
     }, [api, tenant, community, revision]);
+    useEffect(() => {
+        if (!administrator) return;
+        let active = true;
+        api(`tickets?tenant=${tenant}&view=assignees`)
+            .then(data => { if (active) setAssignees(data); })
+            .catch(() => { if (active) setMessage("Staff assignment directory is unavailable."); });
+        return () => { active = false; };
+    }, [api, tenant, administrator]);
     async function save(fields: Record<string, string | null>) {
         setBusy(true);
         setMessage("");
@@ -225,11 +235,17 @@ function TicketQueue({ tenant, community, api, administrator, properties, timeZo
                 <p className="whitespace-pre-wrap break-words">{ticket.description}</p>
                 <p className="break-all text-sm">Reference {ticket.id}</p>
                 <p>{ticket.assigned ? "Assigned to staff" : "Awaiting assignment"}{ticket.escalated && " · Escalated"}</p>
+                {ticket.response_due_at && <p>Response due {formatWorkspaceDate(ticket.response_due_at, timeZone)}</p>}
                 <details className="mt-2">
                     <summary>Ticket history</summary>
                     <ol>{ticket.history.map((event, index) => <li key={index}>
                         {ticketActions[event.action]} · {formatWorkspaceDate(event.at, timeZone)}
                     </li>)}</ol>
+                </details>
+                <details className="my-2">
+                    <summary>Private attachments</summary>
+                    <DocumentLibrary tenant={tenant} community={community} api={api}
+                        administrator={administrator} properties={properties} ticket={ticket}/>
                 </details>
                 {administrator && <ActionForm
                     title="Update ticket" busy={busy}
@@ -239,8 +255,18 @@ function TicketQueue({ tenant, community, api, administrator, properties, timeZo
                             { id: ticket.status === "open" ? "in_progress" : "resolved", label: ticket.status === "open" ? "Start work" : "Resolve ticket" },
                             { id: "assign_self", label: "Assign to me" },
                             ...(!ticket.escalated ? [{ id: "escalate", label: "Escalate" }] : []),
-                        ] }, reason]}
-                    submit={values => save({ ...values, p_ticket: ticket.id })}/>}
+                        ] }, ...(ticket.status === "in_progress"
+                            ? [{ name: "p_evidence", label: "Clean attachment reference for closure", optional: true }]
+                            : []), reason]}
+                    submit={values => save({ ...values, p_ticket: ticket.id, p_evidence: values.p_evidence || null })}/>}
+                {administrator && ticket.status !== "resolved" && <>
+                    {assignees.length > 0 && <ActionForm title="Assign to staff" busy={busy}
+                        inputs={[{ name: "p_assignee", label: "Administrator", options: assignees.map(person => ({ id: person.id, label: person.name })) }, reason]}
+                        submit={values => save({ ...values, p_ticket: ticket.id, p_status: "assign" })}/>}
+                    <ActionForm title="Set response deadline" busy={busy}
+                        inputs={[{ name: "p_due", label: "Response deadline with time zone (ISO 8601)" }, reason]}
+                        submit={values => save({ ...values, p_ticket: ticket.id, p_status: "set_due" })}/>
+                </>}
             </li>)}</ul>}
         <button type="button" className="my-3 underline" onClick={() => { setError(false); refresh(n => n + 1); }}>Refresh tickets</button>
         {!administrator && properties.length > 0 && <ActionForm title="Submit service ticket" busy={busy}
@@ -258,24 +284,28 @@ type PrivateDocument = {
     previous_version_id: string | null;
 };
 
-function DocumentLibrary({ tenant, community, api, administrator, properties }: {
+function DocumentLibrary({ tenant, community, api, administrator, properties, ticket }: {
     tenant: string;
     community: string;
     api: ReturnType<typeof createAccountApi>["api"];
     administrator: boolean;
     properties: Entry[];
+    ticket?: Ticket;
 }) {
     const [documents, setDocuments] = useState<PrivateDocument[]>([]);
-    const [message, setMessage] = useState("Loading documents…");
+    const [message, setMessage] = useState(ticket ? "Select Load attachments to view files." : "Loading documents…");
     const [busy, setBusy] = useState(false);
     const [revision, refresh] = useState(0);
     useEffect(() => {
+        if (ticket && revision === 0) return;
         let active = true;
-        api(`documents?tenant=${tenant}&community=${community}`).then(data => {
+        const query = new URLSearchParams({ tenant, community });
+        if (ticket) query.set("ticket", ticket.id);
+        api(`documents?${query}`).then(data => {
             if (active) { setDocuments(data); setMessage(data.length ? "" : "No documents available."); }
         }).catch(() => { if (active) setMessage("Documents are unavailable."); });
         return () => { active = false; };
-    }, [api, tenant, community, revision]);
+    }, [api, tenant, community, revision, ticket]);
 
     async function upload(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -297,8 +327,10 @@ function DocumentLibrary({ tenant, community, api, administrator, properties }: 
             });
             await api("documents", {
                 tenant, community, title: fields.get("title"), reason: fields.get("reason"),
-                audience: fields.get("audience"), property: fields.get("property") || null,
-                previous: fields.get("previous") || null, base64, content_type: file.type,
+                audience: ticket ? "association_admin" : fields.get("audience"),
+                property: ticket?.property_id ?? (fields.get("property") || null),
+                previous: ticket ? null : fields.get("previous") || null,
+                ticket: ticket?.id ?? null, base64, content_type: file.type,
             });
             form.reset();
         } catch (error) {
@@ -310,17 +342,18 @@ function DocumentLibrary({ tenant, community, api, administrator, properties }: 
         refresh(n => n + 1);
     }
 
-    return <Panel title="Private documents">
+    return <Panel title={ticket ? "Ticket files" : "Private documents"}>
+        {ticket && <button type="button" className="underline" disabled={busy} onClick={() => refresh(n => n + 1)}>Load attachments</button>}
         <ul className="space-y-2">{documents.map(doc => <li key={doc.id}>
             {doc.scan_status === "clean" ? <a className="underline"
                 href={`/api/v1/tenants/${tenant}/documents/${doc.id}`}>{doc.display_name}</a> : doc.display_name}
             {" · "}{doc.scan_status}{doc.previous_version_id && " · revised version"}
             {administrator && <p className="break-all text-sm">Reference {doc.id}</p>}
         </li>)}</ul>
-        {administrator && <form onSubmit={upload} className="mt-4 grid gap-3 md:grid-cols-2">
+        {(administrator || ticket) && <form onSubmit={upload} className="mt-4 grid gap-3 md:grid-cols-2">
             <label>Title<input name="title" className={control} required maxLength={255}/></label>
             <label>File<input name="file" type="file" className={control} required accept="application/pdf,image/png,image/jpeg"/></label>
-            <label>Audience<select name="audience" className={control}>
+            {!ticket && <><label>Audience<select name="audience" className={control}>
                 <option value="association_admin">Association administrators</option>
                 <option value="property_owners">Property owners</option>
                 <option value="property_occupants">Property occupants</option>
@@ -331,6 +364,7 @@ function DocumentLibrary({ tenant, community, api, administrator, properties }: 
             <label>Previous version<select name="previous" className={control}><option value="">New document</option>
                 {documents.filter(doc => doc.scan_status === "clean").map(doc => <option key={doc.id} value={doc.id}>{doc.display_name}</option>)}
             </select></label>
+            </>}
             <label>Reason<input name="reason" className={control} required minLength={10} maxLength={1000}/></label>
             <button type="submit" className="rounded bg-emerald-900 px-3 py-2 text-white" disabled={busy}>Upload private document</button>
         </form>}
@@ -407,12 +441,31 @@ function PrivacyRequests({ tenant, api, administrator }: {
             setBusy(false);
         }
     }
+    async function configure(values: Record<string, string>) {
+        setBusy(true);
+        try {
+            const settings = await api("privacy-controls", {
+                p_tenant: tenant, p_days: Number(values.p_days),
+                p_hold: values.p_hold === "active", p_reason: values.p_reason,
+            });
+            setMessage(`Recorded ${settings.document_retention_days} days and a ${settings.legal_hold ? "held" : "clear"} association hold state.`);
+        } catch (error) {
+            setMessage(error instanceof Error ? error.message : "Unable to save controls.");
+        } finally {
+            setBusy(false);
+        }
+    }
     return <Panel title="Privacy requests">
         <p>Requests go to association review. Include only the information needed to identify the request.</p>
         <ActionForm title="Submit privacy request" busy={busy} inputs={[
             { name: "p_kind", label: "Request type", options: ["access","correction","export","deletion"].map(id => ({ id, label: id })) },
             { name: "p_detail", label: "What would you like the association to review?" },
         ]} submit={save}/>
+        {administrator && <ActionForm title="Record retention and hold settings" busy={busy} inputs={[
+            { name: "p_days", label: "Document retention in days", type: "number" },
+            { name: "p_hold", label: "Association legal hold", options: [{ id: "active", label: "Active" }, { id: "clear", label: "Clear" }] },
+            reason,
+        ]} submit={configure}/>}
         {requests?.length === 0 && <p>No privacy requests.</p>}
         {requests?.map(request => <div key={request.id} className="my-3 border-b pb-3">
             <p>{request.kind} · {request.status}</p>

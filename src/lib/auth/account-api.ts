@@ -22,7 +22,7 @@ export function createAccountApi(fetcher: typeof fetch = fetch, newKey = () => c
   }
   async function api(path: string, body?: unknown) {
     const mutation = body !== undefined;
-    const tracked = mutation && (path.startsWith("access/") || path.startsWith("community/") || path.startsWith("finance/") || path === "announcements" || path === "tickets" || path === "documents" || path === "privacy");
+    const tracked = mutation && (path.startsWith("access/") || path.startsWith("community/") || path.startsWith("finance/") || path === "announcements" || path === "tickets" || path === "documents" || path === "privacy" || path === "privacy-controls");
     const fingerprint = `${path}:${JSON.stringify(canonical(body))}`;
     const key = tracked ? pending.get(fingerprint) ?? newKey() : mutation ? newKey() : undefined;
     if (tracked) pending.set(fingerprint, key!);

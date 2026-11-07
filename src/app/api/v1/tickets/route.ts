@@ -27,6 +27,11 @@ export async function GET(request: Request) {
   try {
     const query = new URL(request.url).searchParams;
     const client = await authorizedClient(request);
+    if (query.get("view") === "assignees") {
+      const { data, error } = await client.rpc("enclavix_ticket_assignees", { p_tenant: uuid(query.get("tenant")) });
+      if (error) throw new RequestError("Assignees unavailable", 503);
+      return reply({ data });
+    }
     const { data, error } = await client.rpc("enclavix_ticket_list", {
       p_tenant: uuid(query.get("tenant")),
       p_community: uuid(query.get("community")),
@@ -44,12 +49,15 @@ export async function POST(request: Request) {
     const key = request.headers.get("idempotency-key");
     if (!key || !/^[A-Za-z0-9._:-]{1,128}$/.test(key)) throw new RequestError("Request key required");
     const keys = ["p_tenant", "p_community", "p_property", "p_description", "p_ticket", "p_status", "p_reason"];
-    const args = fields(await readJson(request, 65536), keys);
+    const args = fields(await readJson(request, 65536), [...keys, "p_assignee", "p_due", "p_evidence"]);
     if (keys.some(key => !Object.hasOwn(args, key))) throw new RequestError("Missing fields");
     uuid(args.p_tenant);
     uuid(args.p_community);
     if (args.p_property !== null) uuid(args.p_property);
     if (args.p_ticket !== null) uuid(args.p_ticket);
+    if (args.p_assignee != null) uuid(args.p_assignee);
+    if (args.p_evidence != null) uuid(args.p_evidence);
+    if (args.p_due != null && typeof args.p_due !== "string") throw new RequestError("Invalid response deadline");
     for (const key of ["p_description", "p_status", "p_reason"]) {
       if (args[key] !== null && typeof args[key] !== "string") throw new RequestError("Invalid field");
     }

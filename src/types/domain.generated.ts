@@ -304,6 +304,7 @@ export interface DomainDatabase {
           "created_at": string;
           "audience": string;
           "purpose": string;
+          "ticket_id": string | null;
           "previous_version_id": string | null;
         };
         Insert: {
@@ -322,6 +323,7 @@ export interface DomainDatabase {
           "created_at"?: string;
           "audience"?: string;
           "purpose"?: string;
+          "ticket_id"?: string | null;
           "previous_version_id"?: string | null;
         };
         Update: {
@@ -340,6 +342,7 @@ export interface DomainDatabase {
           "created_at"?: string;
           "audience"?: string;
           "purpose"?: string;
+          "ticket_id"?: string | null;
           "previous_version_id"?: string | null;
         };
       };
@@ -1124,6 +1127,29 @@ export interface DomainDatabase {
           "created_at"?: string;
         };
       };
+      "privacy_controls": {
+        Row: {
+          "tenant_id": string;
+          "document_retention_days": number;
+          "legal_hold": boolean;
+          "updated_by": string;
+          "updated_at": string;
+        };
+        Insert: {
+          "tenant_id": string;
+          "document_retention_days": number;
+          "legal_hold": boolean;
+          "updated_by": string;
+          "updated_at"?: string;
+        };
+        Update: {
+          "tenant_id"?: string;
+          "document_retention_days"?: number;
+          "legal_hold"?: boolean;
+          "updated_by"?: string;
+          "updated_at"?: string;
+        };
+      };
       "privacy_requests": {
         Row: {
           "id": string;
@@ -1322,6 +1348,7 @@ export interface DomainDatabase {
           "status": string;
           "assignee_id": string | null;
           "escalated_at": string | null;
+          "response_due_at": string | null;
           "created_at": string;
         };
         Insert: {
@@ -1334,6 +1361,7 @@ export interface DomainDatabase {
           "status"?: string;
           "assignee_id"?: string | null;
           "escalated_at"?: string | null;
+          "response_due_at"?: string | null;
           "created_at"?: string;
         };
         Update: {
@@ -1346,6 +1374,7 @@ export interface DomainDatabase {
           "status"?: string;
           "assignee_id"?: string | null;
           "escalated_at"?: string | null;
+          "response_due_at"?: string | null;
           "created_at"?: string;
         };
       };
