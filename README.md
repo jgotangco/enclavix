@@ -25,7 +25,7 @@ S03 was reviewed and accepted by Jerome Gotangco on 2 November 2026. S04 (receiv
 
 ## Implemented foundation and planned product
 
-The current private PostgreSQL `app` schema contains 38 tables. S01 established the tenant domain; S02–S03 added identity/access controls, onboarding approval, registry operations and export/offboarding staging. S04 adds ten private finance tables and narrowly authorized services under review. Village phase/block and condominium tower/floor structures, people, properties, assets and effective-dated relationships share scoped identities. Composite foreign keys reject cross-association references. Ordinary clients have no direct table access; named services enforce authorization, and the schema is not exposed through the Data API.
+The current private PostgreSQL `app` schema contains 40 tables. S01 established the tenant domain; S02–S03 added identity/access controls, onboarding approval, registry operations and export/offboarding staging. S04 adds ten private finance tables and narrowly authorized services under review. Village phase/block and condominium tower/floor structures, people, properties, assets and effective-dated relationships share scoped identities. Composite foreign keys reject cross-association references. Ordinary clients have no direct table access; named services enforce authorization, and the schema is not exposed through the Data API.
 
 The existing web screens demonstrate resident, administration, finance and guard experiences using synthetic data. Demo sign-in does not verify a real password. The client-controlled `demo_user_role` cookie selects a mock persona only in explicitly configured mock-demo mode; it cannot authorize production access. Legacy mock business portals remain unavailable in production; the delivered account, registry and finance journeys use trusted services. S02 adds real server-side authentication through `/account` and `/api/v1`; direct browser backend access remains disabled.
 
@@ -97,7 +97,7 @@ npm run build
 node tools/check-http.mjs
 ```
 
-The HTTP check uses the same environment mode as the build. `npm test` currently runs 106 checks, including forged-cookie containment, scoped foreign keys, rollback, immutable identities, document paths, asset allocation/retry controls, community date presentation and default-deny access. After changing migrations, regenerate transport types with `npm run types:domain` and commit the result.
+The HTTP check uses the same environment mode as the build. `npm test` currently runs 108 checks, including forged-cookie containment, scoped foreign keys, rollback, immutable identities, document paths, asset allocation/retry controls, community date presentation and default-deny access. After changing migrations, regenerate transport types with `npm run types:domain` and commit the result.
 
 GitHub Actions verifies production and demo web builds/runtime, a container build/runtime and disposable Supabase. The database job verifies real Auth sign-in and TOTP MFA, recovery, logout/revocation, built-web cookie and native bearer requests, private storage restrictions, migration/type agreement, restricted-role access and concurrent commands. These checks use synthetic fixtures and do not deploy or certify real-world HOA readiness. See the [S04 evidence](docs/delivery/evidence/S04.md), [finance operating contract](docs/finance-api.md) and earlier sprint evidence for results and limitations.
 

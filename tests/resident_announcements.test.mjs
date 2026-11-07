@@ -34,12 +34,21 @@ test('announcements enforce publish authority, scoped audiences and replay', asy
       (tenant_id,community_id,author_id,title,body,created_at,expires_at)
       VALUES ($1,$2,$3,'Expired','Synthetic notice',now()-interval '2 days',now()-interval '1 day')`,
       [f.villageTenant,f.village,f.coownerMember]);
+    await db.query("SELECT set_config('request.headers',$1,false)",[JSON.stringify({'idempotency-key':'future-revision'})]);
+    const future = (await db.query(`SELECT public.enclavix_announcement_publish($1,$2,NULL,
+      'Future revision','Synthetic future notice','2099-01-01','Synthetic schedule verification',
+      now()+interval '1 day',$3) AS id`,[f.villageTenant,f.village,notice])).rows[0].id;
     await signIn(resident,id(9502));
     await assert.rejects(publish('Forged notice','resident-publish'),e=>e.code==='42501');
     await db.exec('SET ROLE authenticated');
     try {
       const feed = (await db.query('SELECT * FROM public.enclavix_announcement_feed($1,$2)',[f.villageTenant,f.village])).rows;
       assert.deepEqual(feed.map(row=>row.id),[notice]);
+      const ack = async id => (await db.query('SELECT public.enclavix_announcement_ack($1,$2,$3) AS at',
+        [f.villageTenant,f.village,id])).rows[0].at;
+      const receipt = await ack(notice);
+      assert.deepEqual(await ack(notice),receipt);
+      await assert.rejects(ack(future),e=>e.code==='42501');
       assert.deepEqual((await db.query('SELECT * FROM public.enclavix_announcement_feed($1,$2)',[f.condoTenant,f.village])).rows,[]);
       await assert.rejects(db.query('SELECT * FROM app.resident_announcements'),e=>e.code==='42501');
     } finally {

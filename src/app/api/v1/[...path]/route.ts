@@ -44,6 +44,10 @@ export async function GET(request: Request) {
       if (BigInt(authorized.size_bytes)>BigInt(20971520)) return failed(413);
       const downloaded = await backend.storage.from("tenant-private").download(authorized.object_path);
       if (downloaded.error || downloaded.data.size>20971520) return failed(503);
+      const released = result(await client.rpc("enclavix_document_release", {
+        p_tenant: uuid(document[1]), p_document: uuid(document[2]),
+      }));
+      if (released !== true) return failed(404);
       return new Response(downloaded.data.stream(), {headers:{...headers,"Content-Type":"application/octet-stream","Content-Disposition":'attachment; filename="document"',"Content-Security-Policy":"sandbox; default-src 'none'"}});
     }
     const match = path.match(/^\/api\/v1\/tenants\/([^/]+)\/(properties|applications|access-audit|access-directory)$/);

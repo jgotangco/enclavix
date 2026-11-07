@@ -47,6 +47,12 @@ test('tickets enforce requester access, staff transitions and replay', async () 
     assert.deepEqual(record.history.map(event => event.action),['open','assign_self','escalate','in_progress','resolved','reopen']);
     assert.ok(record.history.every(event => !Object.hasOwn(event,'reason')));
     assert.deepEqual(await list(f.condoTenant),[]);
+    const inbox = async preference => (await db.query('SELECT public.enclavix_ticket_inbox($1,$2,$3) AS result',
+      [f.villageTenant,f.village,preference])).rows[0].result;
+    const delivered = await inbox(null);
+    assert.equal(delivered.items.length,5);
+    assert.deepEqual(await inbox(null),delivered);
+    assert.equal((await inbox(false)).enabled,false);
     await db.query("UPDATE app.memberships SET status='revoked' WHERE id=$1",[f.villageMember]);
     assert.deepEqual(await list(f.villageTenant),[]);
   } finally {

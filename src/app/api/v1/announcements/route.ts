@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     const key = request.headers.get("idempotency-key");
     if (!key || !/^[A-Za-z0-9._:-]{1,128}$/.test(key)) throw new RequestError("Request key required");
     const keys = ["p_tenant", "p_community", "p_property", "p_title", "p_body", "p_expires_at", "p_reason"];
-    const args = fields(await readJson(request, 65536), keys);
+    const args = fields(await readJson(request, 65536), [...keys, "p_publish_at", "p_previous", "p_document"]);
     if (keys.some(key => !Object.hasOwn(args, key))) throw new RequestError("Missing fields");
     uuid(args.p_tenant);
     uuid(args.p_community);
@@ -52,6 +52,9 @@ export async function POST(request: Request) {
     for (const key of ["p_title", "p_body", "p_expires_at", "p_reason"]) {
       if (typeof args[key] !== "string") throw new RequestError("Invalid field");
     }
+    if (args.p_previous != null) uuid(args.p_previous);
+    if (args.p_document != null) uuid(args.p_document);
+    if (args.p_publish_at != null && typeof args.p_publish_at !== "string") throw new RequestError("Invalid publication date");
     const client = await authorizedClient(request);
     const { data, error } = await client.rpc("enclavix_announcement_publish", args).setHeader("Idempotency-Key", key);
     if (error) {

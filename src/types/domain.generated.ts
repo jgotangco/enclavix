@@ -39,6 +39,26 @@ export interface DomainDatabase {
           "created_at"?: string;
         };
       };
+      "announcement_acknowledgments": {
+        Row: {
+          "tenant_id": string;
+          "announcement_id": string;
+          "membership_id": string;
+          "acknowledged_at": string;
+        };
+        Insert: {
+          "tenant_id": string;
+          "announcement_id": string;
+          "membership_id": string;
+          "acknowledged_at"?: string;
+        };
+        Update: {
+          "tenant_id"?: string;
+          "announcement_id"?: string;
+          "membership_id"?: string;
+          "acknowledged_at"?: string;
+        };
+      };
       "asset_allocations": {
         Row: {
           "id": string;
@@ -284,6 +304,7 @@ export interface DomainDatabase {
           "created_at": string;
           "audience": string;
           "purpose": string;
+          "previous_version_id": string | null;
         };
         Insert: {
           "id"?: string;
@@ -301,6 +322,7 @@ export interface DomainDatabase {
           "created_at"?: string;
           "audience"?: string;
           "purpose"?: string;
+          "previous_version_id"?: string | null;
         };
         Update: {
           "id"?: string;
@@ -318,6 +340,7 @@ export interface DomainDatabase {
           "created_at"?: string;
           "audience"?: string;
           "purpose"?: string;
+          "previous_version_id"?: string | null;
         };
       };
       "finance_allocations": {
@@ -895,6 +918,7 @@ export interface DomainDatabase {
           "valid_from": string;
           "valid_until": string | null;
           "created_at": string;
+          "ticket_notifications": boolean;
         };
         Insert: {
           "id"?: string;
@@ -904,6 +928,7 @@ export interface DomainDatabase {
           "valid_from": string;
           "valid_until"?: string | null;
           "created_at"?: string;
+          "ticket_notifications"?: boolean;
         };
         Update: {
           "id"?: string;
@@ -913,6 +938,7 @@ export interface DomainDatabase {
           "valid_from"?: string;
           "valid_until"?: string | null;
           "created_at"?: string;
+          "ticket_notifications"?: boolean;
         };
       };
       "offboarding_requests": {
@@ -1098,6 +1124,35 @@ export interface DomainDatabase {
           "created_at"?: string;
         };
       };
+      "privacy_requests": {
+        Row: {
+          "id": string;
+          "tenant_id": string;
+          "requester_id": string;
+          "kind": string;
+          "detail": string;
+          "status": string;
+          "created_at": string;
+        };
+        Insert: {
+          "id"?: string;
+          "tenant_id": string;
+          "requester_id": string;
+          "kind": string;
+          "detail": string;
+          "status"?: string;
+          "created_at"?: string;
+        };
+        Update: {
+          "id"?: string;
+          "tenant_id"?: string;
+          "requester_id"?: string;
+          "kind"?: string;
+          "detail"?: string;
+          "status"?: string;
+          "created_at"?: string;
+        };
+      };
       "properties": {
         Row: {
           "id": string;
@@ -1223,6 +1278,9 @@ export interface DomainDatabase {
           "body": string;
           "created_at": string;
           "expires_at": string;
+          "publish_at": string;
+          "previous_id": string | null;
+          "document_id": string | null;
         };
         Insert: {
           "id"?: string;
@@ -1234,6 +1292,9 @@ export interface DomainDatabase {
           "body": string;
           "created_at"?: string;
           "expires_at": string;
+          "publish_at"?: string;
+          "previous_id"?: string | null;
+          "document_id"?: string | null;
         };
         Update: {
           "id"?: string;
@@ -1245,6 +1306,9 @@ export interface DomainDatabase {
           "body"?: string;
           "created_at"?: string;
           "expires_at"?: string;
+          "publish_at"?: string;
+          "previous_id"?: string | null;
+          "document_id"?: string | null;
         };
       };
       "resident_tickets": {
