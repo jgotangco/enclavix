@@ -13,14 +13,14 @@ Each BRD requirement has one sprint accountable for completion evidence. Earlier
 | ARC 01 | S01 | Schema/path and S02 account/access controls verified; later workflow/operating controls pending S03–S10 |
 | ARC 02 | S01 | Uniqueness/rollback foundation verified; S04 posting/retry verified for review; delivery pending S05 |
 | ARC 03 | S01 | Migration/type foundation verified; client compatibility web compatibility S10; mobile compatibility post-S11 S06/S07 |
-| FIN 01 | S04 | Engineering ready for review: Effective approved rule revisions, dimensions, discount/penalty snapshots and rounding parity verified; owner acceptance pending; see evidence/S04.md |
-| FIN 02 | S04 | Engineering ready for review: Frozen previews, reconciliation, concurrent/repeated generation and missing-line recovery verified; owner acceptance pending; see evidence/S04.md |
-| FIN 03 | S04 | Engineering ready for review: Append-only subledger, partial/overpayments, allocations, refund/reversal links and dated balances verified; owner acceptance pending; see evidence/S04.md |
-| FIN 04 | S04 | Engineering ready for review: Private proof protocol/storage, pending submission, duplicate review, rejection/re-review and independent approval verified; production scanner efficacy remains a deployment gate; owner acceptance pending; see evidence/S04.md |
-| FIN 05 | S04 | Engineering ready for review: Explicit scoped roles, fresh MFA, post-lock expiry/revocation, monotonic approval limits and independent actors verified; owner acceptance pending; see evidence/S04.md |
-| FIN 06 | S04 | Engineering ready for review: Tenant-scoped acknowledgment uniqueness/replay and retained void/reversal numbering verified; production terminology remains subject to finance approval; owner acceptance pending; see evidence/S04.md |
-| FIN 07 | S04 | Engineering ready for review: Unique fine keys, linked reassessment, grace/caps, disputes and historical penalty bases verified; owner acceptance pending; see evidence/S04.md |
-| FIN 08 | S04 | Engineering ready for review: Opening row errors/fingerprints/sign-off, exact dated reports/aging/registers, paged queues and period close/reopen verified; real cutover/pilot sign-off pending; owner acceptance pending; see evidence/S04.md |
+| FIN 01 | S04 | Accepted engineering scope: Effective approved rule revisions, dimensions, discount/penalty snapshots and rounding parity verified; see evidence/S04.md |
+| FIN 02 | S04 | Accepted engineering scope: Frozen previews, reconciliation, concurrent/repeated generation and missing-line recovery verified; see evidence/S04.md |
+| FIN 03 | S04 | Accepted engineering scope: Append-only subledger, partial/overpayments, allocations, refund/reversal links and dated balances verified; see evidence/S04.md |
+| FIN 04 | S04 | Accepted engineering scope: Private proof protocol/storage, pending submission, duplicate review, rejection/re-review and independent approval verified; production scanner efficacy remains a deployment gate; see evidence/S04.md |
+| FIN 05 | S04 | Accepted engineering scope: Explicit scoped roles, fresh MFA, post-lock expiry/revocation, monotonic approval limits and independent actors verified; see evidence/S04.md |
+| FIN 06 | S04 | Accepted engineering scope: Tenant-scoped acknowledgment uniqueness/replay and retained void/reversal numbering verified; production terminology remains subject to finance approval; see evidence/S04.md |
+| FIN 07 | S04 | Accepted engineering scope: Unique fine keys, linked reassessment, grace/caps, disputes and historical penalty bases verified; see evidence/S04.md |
+| FIN 08 | S04 | Accepted engineering scope: Opening row errors/fingerprints/sign-off, exact dated reports/aging/registers, paged queues and period close/reopen verified; real cutover/pilot sign-off pending; see evidence/S04.md |
 | IAM 01 | S02 | Implemented; provider and final CI verification in S02 evidence; S02 engineering scope accepted; see evidence |
 | IAM 02 | S02 | Forged-cookie/claim and native request checks implemented; S02 engineering scope accepted; see evidence |
 | IAM 03 | S02 | Account/property/document service and RLS checks implemented; later modules remain denied |
@@ -35,9 +35,9 @@ Each BRD requirement has one sprint accountable for completion evidence. Earlier
 | NFR 05 | S10 | unverified |
 | NFR 06 | S10 | unverified |
 | NFR 07 | S10 | unverified |
-| OPS 01 | S09 | unverified |
-| OPS 02 | S09 | unverified |
-| OPS 03 | S09 | unverified |
+| OPS 01 | S09 | S05 increment implements property-linked submission, requester visibility and audited staff transitions. S05 adds assignment to active administrators, response deadlines, escalation, reopening, private attachments and optional closure evidence. Full lifecycle verification remains pending. |
+| OPS 02 | S09 | S05 increment implements immediate publication, community/property audience and expiry. Scheduling, scoped revisions, authorized document links and durable acknowledgments now implemented in S05. Browser verification and complete delivery scope remain pending. |
+| OPS 03 | S09 | S05 implements private version reservation, scanner-gated uploads, authorized downloads and audit. Full retention and export verification remain pending. |
 | OPS 04 | S09 | unverified |
 | OPS 05 | S09 | unverified |
 | OPS 06 | S09 | unverified |
@@ -69,4 +69,4 @@ S01 is the architecture foundation evidence owner for ARC requirements. These re
 
 S02 engineering acceptance includes the four PR #3 review repairs and successful 58-test, web/demo, real Supabase and container verification. It does not accept later modules, production email/hosting configuration, independent security assessment or Android device behavior.
 
-Jerome Gotangco explicitly accepted the bounded S03 engineering delivery on 2 November 2026 after completed review (PR #4/#6). Later finance, document, vehicle/gate and exit/retention obligations within the TEN requirements remain open in their owning workflows; this is not full-product or production acceptance. S04 was selected on 3 November 2026 and is ready_for_review after engineering checks; owner acceptance and production finance approval remain pending.
+Jerome Gotangco explicitly accepted the bounded S03 engineering delivery on 2 November 2026 after completed review (PR #4/#6). Later finance, document, vehicle/gate and exit/retention obligations within the TEN requirements remain open in their owning workflows; this is not full-product or production acceptance. S04 was selected on 3 November 2026 and was accepted on 7 November 2026. Production finance approval remains pending.

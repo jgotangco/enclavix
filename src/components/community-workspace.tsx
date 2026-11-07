@@ -115,10 +115,373 @@ function Table({ rows, columns, timeZone = "UTC" }: {
     timeZone?: string;
 }) { return rows.length ? <div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead><tr>{columns.map(k => <th className="border-b p-2" key={k}>{k.replaceAll("_", " ")}</th>)}</tr></thead><tbody>{rows.map(r => <tr key={r.id}>{columns.map(k => <td key={k} className="border-b p-2">{r[k] ? ["valid_from","valid_until","created_at","expires_at"].includes(k) ? formatWorkspaceDate(r[k]!,r.time_zone||timeZone) : k==="kind" ? r[k]!.replaceAll("_"," ") : r[k] : "—"}</td>)}</tr>)}</tbody></table></div> : <p className="text-sm text-slate-500">No records yet.</p>; }
 function download(text: string, name: string, type: string) { const href = URL.createObjectURL(new Blob([text], { type })); const a = document.createElement("a"); a.href = href; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(href), 1000); }
+type Announcement = { document_id: string | null; id: string; title: string; body: string; created_at: string; expires_at: string };
+
+function AnnouncementFeed({ tenant, community, canAcknowledge, path, api, timeZone }: {
+    tenant: string;
+    community: string;
+    canAcknowledge: boolean;
+    path: string;
+    api: ReturnType<typeof createAccountApi>["api"];
+    timeZone: string;
+}) {
+    const [items, setItems] = useState<Announcement[] | null>(null);
+    const [acknowledged, setAcknowledged] = useState<string[]>([]);
+    const [ackError, setAckError] = useState("");
+    const [ackPending, setAckPending] = useState(false);
+    async function acknowledge(id: string) {
+        setAckPending(true);
+        setAckError("");
+        try {
+            await api("announcement-ack", { p_tenant: tenant, p_community: community, p_announcement: id });
+            setAcknowledged(previous => [...previous, id]);
+        } catch {
+            setAckError("Acknowledgment could not be confirmed. Try again.");
+        } finally {
+            setAckPending(false);
+        }
+    }
+    const [error, setError] = useState(false);
+    useEffect(() => {
+        let active = true;
+        api(path).then(data => { if (active) setItems(data); })
+            .catch(() => { if (active) setError(true); });
+        return () => { active = false; };
+    }, [api, path]);
+    if (error) return <p role="alert">Announcements are unavailable. Use Refresh announcements to try again.</p>;
+    if (!items) return <p role="status">Loading announcements…</p>;
+    if (!items.length) return <p>No current announcements for this community.</p>;
+    return <><p role="status">{ackError}</p><ul className="space-y-4">{items.map(item => <li key={item.id} className="border-b pb-3">
+        <h3 className="font-semibold">{item.title}</h3>
+        <p className="whitespace-pre-wrap break-words">{item.body}</p>
+        <p className="text-sm text-slate-600">Posted {formatWorkspaceDate(item.created_at, timeZone)} · Expires {formatWorkspaceDate(item.expires_at, timeZone)}</p>
+        <p className="break-all text-sm">Reference {item.id}</p>
+        {item.document_id && <a className="underline" href={`/api/v1/tenants/${tenant}/documents/${item.document_id}`}>Download attachment</a>}
+        {canAcknowledge && <button type="button" className="ml-2 underline"
+            disabled={ackPending || acknowledged.includes(item.id)} onClick={() => void acknowledge(item.id)}>
+            {acknowledged.includes(item.id) ? "Acknowledged" : "Acknowledge"}
+        </button>}
+    </li>)}</ul></>;
+}
+
+type Ticket = {
+    id: string;
+    property_id: string;
+    description: string;
+    status: string;
+    created_at: string;
+    assigned: boolean;
+    escalated: boolean;
+    response_due_at: string | null;
+    history: { action: string; at: string }[];
+};
+const ticketActions: Record<string, string> = {
+    open: "Submitted", in_progress: "Work started", resolved: "Resolved",
+    assign_self: "Assigned to staff", assign: "Reassigned to staff", set_due: "Response deadline set", escalate: "Escalated", reopen: "Reopened",
+};
+
+function TicketQueue({ tenant, community, api, administrator, properties, timeZone }: {
+    tenant: string;
+    community: string;
+    api: ReturnType<typeof createAccountApi>["api"];
+    administrator: boolean;
+    properties: Entry[];
+    timeZone: string;
+}) {
+    const [tickets, setTickets] = useState<Ticket[] | null>(null);
+    const [assignees, setAssignees] = useState<{ id: string; name: string }[]>([]);
+    const [error, setError] = useState(false);
+    const [busy, setBusy] = useState(false);
+    const [message, setMessage] = useState("");
+    const [revision, refresh] = useState(0);
+    useEffect(() => {
+        let active = true;
+        api(`tickets?tenant=${tenant}&community=${community}`)
+            .then(data => { if (active) setTickets(data); })
+            .catch(() => { if (active) setError(true); });
+        return () => { active = false; };
+    }, [api, tenant, community, revision]);
+    useEffect(() => {
+        if (!administrator) return;
+        let active = true;
+        api(`tickets?tenant=${tenant}&view=assignees`)
+            .then(data => { if (active) setAssignees(data); })
+            .catch(() => { if (active) setMessage("Staff assignment directory is unavailable."); });
+        return () => { active = false; };
+    }, [api, tenant, administrator]);
+    async function save(fields: Record<string, string | null>) {
+        setBusy(true);
+        setMessage("");
+        try {
+            const result = await api("tickets", {
+                p_tenant: tenant, p_community: community, p_property: null, p_description: null,
+                p_ticket: null, p_status: null, p_reason: null, ...fields,
+            });
+            setMessage(`Ticket saved. Reference ${result.id}.`);
+            setError(false);
+            refresh(n => n + 1);
+        } catch (error) {
+            setMessage(error instanceof Error ? error.message : "Ticket could not be saved.");
+        } finally {
+            setBusy(false);
+        }
+    }
+    return <Panel title="Service tickets">
+        {error ? <p role="alert">Tickets are unavailable.</p> : !tickets
+            ? <p role="status">Loading tickets…</p>
+            : tickets.length === 0 ? <p>No tickets for this community.</p>
+            : <ul className="space-y-4">{tickets.map(ticket => <li className="border-b pb-3" key={ticket.id}>
+                <p className="font-semibold">{ticket.status.replaceAll("_", " ")} · {formatWorkspaceDate(ticket.created_at, timeZone)}</p>
+                <p className="whitespace-pre-wrap break-words">{ticket.description}</p>
+                <p className="break-all text-sm">Reference {ticket.id}</p>
+                <p>{ticket.assigned ? "Assigned to staff" : "Awaiting assignment"}{ticket.escalated && " · Escalated"}</p>
+                {ticket.response_due_at && <p>Response due {formatWorkspaceDate(ticket.response_due_at, timeZone)}</p>}
+                <details className="mt-2">
+                    <summary>Ticket history</summary>
+                    <ol>{ticket.history.map((event, index) => <li key={index}>
+                        {ticketActions[event.action]} · {formatWorkspaceDate(event.at, timeZone)}
+                    </li>)}</ol>
+                </details>
+                <details className="my-2">
+                    <summary>Private attachments</summary>
+                    <DocumentLibrary tenant={tenant} community={community} api={api}
+                        administrator={administrator} properties={properties} ticket={ticket}/>
+                </details>
+                {administrator && <ActionForm
+                    title="Update ticket" busy={busy}
+                    inputs={[{ name: "p_status", label: "Action", options: ticket.status === "resolved"
+                        ? [{ id: "reopen", label: "Reopen ticket" }]
+                        : [
+                            { id: ticket.status === "open" ? "in_progress" : "resolved", label: ticket.status === "open" ? "Start work" : "Resolve ticket" },
+                            { id: "assign_self", label: "Assign to me" },
+                            ...(!ticket.escalated ? [{ id: "escalate", label: "Escalate" }] : []),
+                        ] }, ...(ticket.status === "in_progress"
+                            ? [{ name: "p_evidence", label: "Clean attachment reference for closure", optional: true }]
+                            : []), reason]}
+                    submit={values => save({ ...values, p_ticket: ticket.id, p_evidence: values.p_evidence || null })}/>}
+                {administrator && ticket.status !== "resolved" && <>
+                    {assignees.length > 0 && <ActionForm title="Assign to staff" busy={busy}
+                        inputs={[{ name: "p_assignee", label: "Administrator", options: assignees.map(person => ({ id: person.id, label: person.name })) }, reason]}
+                        submit={values => save({ ...values, p_ticket: ticket.id, p_status: "assign" })}/>}
+                    <ActionForm title="Set response deadline" busy={busy}
+                        inputs={[{ name: "p_due", label: "Response deadline with time zone (ISO 8601)" }, reason]}
+                        submit={values => save({ ...values, p_ticket: ticket.id, p_status: "set_due" })}/>
+                </>}
+            </li>)}</ul>}
+        <button type="button" className="my-3 underline" onClick={() => { setError(false); refresh(n => n + 1); }}>Refresh tickets</button>
+        {!administrator && properties.length > 0 && <ActionForm title="Submit service ticket" busy={busy}
+            inputs={[{ name: "p_property", label: "Property", options: properties.map(p => ({ id: p.id, label: p.label || p.code || p.id })) },
+                { name: "p_description", label: "Describe the issue" }]}
+            submit={save}/>}
+        <p role="status" className="break-words">{message}</p>
+    </Panel>;
+}
+
+type PrivateDocument = {
+    id: string;
+    display_name: string;
+    scan_status: string;
+    previous_version_id: string | null;
+};
+
+function DocumentLibrary({ tenant, community, api, administrator, properties, ticket }: {
+    tenant: string;
+    community: string;
+    api: ReturnType<typeof createAccountApi>["api"];
+    administrator: boolean;
+    properties: Entry[];
+    ticket?: Ticket;
+}) {
+    const [documents, setDocuments] = useState<PrivateDocument[]>([]);
+    const [message, setMessage] = useState(ticket ? "Select Load attachments to view files." : "Loading documents…");
+    const [busy, setBusy] = useState(false);
+    const [revision, refresh] = useState(0);
+    useEffect(() => {
+        if (ticket && revision === 0) return;
+        let active = true;
+        const query = new URLSearchParams({ tenant, community });
+        if (ticket) query.set("ticket", ticket.id);
+        api(`documents?${query}`).then(data => {
+            if (active) { setDocuments(data); setMessage(data.length ? "" : "No documents available."); }
+        }).catch(() => { if (active) setMessage("Documents are unavailable."); });
+        return () => { active = false; };
+    }, [api, tenant, community, revision, ticket]);
+
+    async function upload(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const fields = new FormData(form);
+        const file = fields.get("file");
+        if (!(file instanceof File) || file.size < 1 || file.size > 5 * 1024 * 1024) {
+            setMessage("Choose a file up to 5 MiB.");
+            return;
+        }
+        setBusy(true);
+        setMessage("Uploading and scanning…");
+        try {
+            const base64 = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(String(reader.result).split(",")[1]);
+                reader.onerror = () => reject(new Error("Unable to read file."));
+                reader.readAsDataURL(file);
+            });
+            await api("documents", {
+                tenant, community, title: fields.get("title"), reason: fields.get("reason"),
+                audience: ticket ? "association_admin" : fields.get("audience"),
+                property: ticket?.property_id ?? (fields.get("property") || null),
+                previous: ticket ? null : fields.get("previous") || null,
+                ticket: ticket?.id ?? null, base64, content_type: file.type,
+            });
+            form.reset();
+        } catch (error) {
+            setMessage(error instanceof Error ? error.message : "Upload failed.");
+            return;
+        } finally {
+            setBusy(false);
+        }
+        refresh(n => n + 1);
+    }
+
+    return <Panel title={ticket ? "Ticket files" : "Private documents"}>
+        {ticket && <button type="button" className="underline" disabled={busy} onClick={() => refresh(n => n + 1)}>Load attachments</button>}
+        <ul className="space-y-2">{documents.map(doc => <li key={doc.id}>
+            {doc.scan_status === "clean" ? <a className="underline"
+                href={`/api/v1/tenants/${tenant}/documents/${doc.id}`}>{doc.display_name}</a> : doc.display_name}
+            {" · "}{doc.scan_status}{doc.previous_version_id && " · revised version"}
+            {administrator && <p className="break-all text-sm">Reference {doc.id}</p>}
+        </li>)}</ul>
+        {(administrator || ticket) && <form onSubmit={upload} className="mt-4 grid gap-3 md:grid-cols-2">
+            <label>Title<input name="title" className={control} required maxLength={255}/></label>
+            <label>File<input name="file" type="file" className={control} required accept="application/pdf,image/png,image/jpeg"/></label>
+            {!ticket && <><label>Audience<select name="audience" className={control}>
+                <option value="association_admin">Association administrators</option>
+                <option value="property_owners">Property owners</option>
+                <option value="property_occupants">Property occupants</option>
+            </select></label>
+            <label>Property<select name="property" className={control}><option value="">Staff-only document</option>
+                {properties.map(p => <option key={p.id} value={p.id}>{p.label || p.code}</option>)}
+            </select></label>
+            <label>Previous version<select name="previous" className={control}><option value="">New document</option>
+                {documents.filter(doc => doc.scan_status === "clean").map(doc => <option key={doc.id} value={doc.id}>{doc.display_name}</option>)}
+            </select></label>
+            </>}
+            <label>Reason<input name="reason" className={control} required minLength={10} maxLength={1000}/></label>
+            <button type="submit" className="rounded bg-emerald-900 px-3 py-2 text-white" disabled={busy}>Upload private document</button>
+        </form>}
+        <p role="status">{message}</p>
+    </Panel>;
+}
+
+function TicketInbox({ tenant, community, api, timeZone }: {
+    tenant: string;
+    community: string;
+    api: ReturnType<typeof createAccountApi>["api"];
+    timeZone: string;
+}) {
+    const [inbox, setInbox] = useState<{ enabled: boolean; items: { id: string; ticket_id: string; at: string }[] } | null>(null);
+    const [message, setMessage] = useState("");
+    const [busy, setBusy] = useState(false);
+    async function update(preference: boolean | null) {
+        setBusy(true);
+        setMessage("Updating inbox…");
+        try {
+            setInbox(await api("ticket-inbox", { p_tenant: tenant, p_community: community, p_preference: preference }));
+            setMessage("");
+        } catch {
+            setInbox(null);
+            setMessage("Inbox unavailable. Try again when connected.");
+        } finally {
+            setBusy(false);
+        }
+    }
+    return <Panel title="Ticket notifications">
+        <button type="button" className="underline" disabled={busy} onClick={() => void update(null)}>Check inbox</button>
+        {inbox && <>
+            <p>Association ticket notifications are {inbox.enabled ? "on" : "off"}.</p>
+            <button type="button" className="underline" disabled={busy} onClick={() => void update(!inbox.enabled)}>
+                Turn {inbox.enabled ? "off" : "on"} ticket notifications
+            </button>
+            {inbox.items.length ? <ul>{inbox.items.map(item => <li key={item.id} className="break-all">
+                Ticket {item.ticket_id} was updated · {formatWorkspaceDate(item.at, timeZone)}
+            </li>)}</ul> : <p>No ticket notifications.</p>}
+        </>}
+        <p role="status">{message}</p>
+    </Panel>;
+}
+
+type PrivacyRequest = { id: string; kind: string; detail: string; status: string };
+
+function PrivacyRequests({ tenant, api, administrator }: {
+    tenant: string;
+    api: ReturnType<typeof createAccountApi>["api"];
+    administrator: boolean;
+}) {
+    const [requests, setRequests] = useState<PrivacyRequest[] | null>(null);
+    const [message, setMessage] = useState("");
+    const [revision, refresh] = useState(0);
+    const [busy, setBusy] = useState(false);
+    useEffect(() => {
+        let active = true;
+        api(`privacy?tenant=${tenant}`).then(data => { if (active) setRequests(data); })
+            .catch(() => { if (active) setMessage("Privacy requests are unavailable."); });
+        return () => { active = false; };
+    }, [api, tenant, revision]);
+    async function save(values: Record<string, string | null>) {
+        setBusy(true);
+        setMessage("");
+        try {
+            const result = await api("privacy", {
+                p_tenant: tenant, p_kind: null, p_detail: null, p_request: null, p_reason: null, ...values,
+            });
+            setMessage(`Request recorded. Reference ${result.id}.`);
+            refresh(n => n + 1);
+        } catch (error) {
+            setMessage(error instanceof Error ? error.message : "Request failed.");
+        } finally {
+            setBusy(false);
+        }
+    }
+    async function configure(values: Record<string, string>) {
+        setBusy(true);
+        try {
+            const settings = await api("privacy-controls", {
+                p_tenant: tenant, p_days: Number(values.p_days),
+                p_hold: values.p_hold === "active", p_reason: values.p_reason,
+            });
+            setMessage(`Recorded ${settings.document_retention_days} days and a ${settings.legal_hold ? "held" : "clear"} association hold state.`);
+        } catch (error) {
+            setMessage(error instanceof Error ? error.message : "Unable to save controls.");
+        } finally {
+            setBusy(false);
+        }
+    }
+    return <Panel title="Privacy requests">
+        <p>Requests go to association review. Include only the information needed to identify the request.</p>
+        <ActionForm title="Submit privacy request" busy={busy} inputs={[
+            { name: "p_kind", label: "Request type", options: ["access","correction","export","deletion"].map(id => ({ id, label: id })) },
+            { name: "p_detail", label: "What would you like the association to review?" },
+        ]} submit={save}/>
+        {administrator && <ActionForm title="Record retention and hold settings" busy={busy} inputs={[
+            { name: "p_days", label: "Document retention in days", type: "number" },
+            { name: "p_hold", label: "Association legal hold", options: [{ id: "active", label: "Active" }, { id: "clear", label: "Clear" }] },
+            reason,
+        ]} submit={configure}/>}
+        {requests?.length === 0 && <p>No privacy requests.</p>}
+        {requests?.map(request => <div key={request.id} className="my-3 border-b pb-3">
+            <p>{request.kind} · {request.status}</p>
+            <p className="whitespace-pre-wrap break-words">{request.detail}</p>
+            {administrator && request.status === "pending" && <ActionForm title="Begin review" busy={busy}
+                inputs={[reason]} submit={values => save({ ...values, p_request: request.id })}/>}
+        </div>)}
+        <p role="status" className="break-words">{message}</p>
+    </Panel>;
+}
+
 export function CommunityWorkspace() {
     const [{ api }] = useState(() => createAccountApi());
     const [fileReader] = useState(() => createRegistryFileReader());
     const [index, setIndex] = useState<Index | null>(null), [tenant, setTenant] = useState(""), [community, setCommunity] = useState(""), [property, setProperty] = useState("");
+    const [announcementRefresh, refreshAnnouncements] = useState(0);
     const [allocations, setAllocations] = useState<Entry[]>([]);
     const [setup, setSetup] = useState<Setup | null>(null), [registry, setRegistry] = useState<Registry | null>(null), [properties, setProperties] = useState<Entry[]>([]), [detail, setDetail] = useState<{
         property: Entry;
@@ -201,6 +564,31 @@ export function CommunityWorkspace() {
  <div className="min-w-0 flex-1 space-y-6 p-5 md:p-8"><header><p className="text-sm uppercase tracking-widest text-slate-500">Association operations</p><h1 className="text-3xl font-semibold text-[#123F35]">Your community, clearly organized</h1><p className="mt-2">Sign in and verify MFA through <Link className="underline" href="/account">your account</Link> before staff actions. Sensitive changes require a sign-in within 10 minutes.</p></header>
  <div role="status" aria-live="polite" className="rounded-lg border border-amber-200 bg-amber-50 p-3">{busy ? "Loading or saving…" : message || (tenant ? "Choose a community or property to view its records." : "Choose an authorized association to begin.")}</div>
  <Panel title="Association context"><div className="grid gap-4 md:grid-cols-2"><label>Association<select className={control} value={tenant} disabled={busy} onChange={e => setTenant(e.target.value)}><option value="">Choose an association</option>{associations.map(x => <option key={x.tenant_id} value={x.tenant_id}>{x.name}</option>)}</select></label><label>Community<select className={control} value={community} disabled={busy} onChange={e => { generation.current++; fileReader.clear(); setMessage(""); setCommunity(e.target.value); setProperty(""); setDetail(null); setPreview(null); setCsv(""); }}><option value="">All authorized communities</option>{communities.map(x => <option key={x.id} value={x.id}>{x.name}</option>)}</select></label></div>{index && !associations.length && <p className="mt-3">No association access yet. An operator must nominate the first administrator; residents request access from their association.</p>}</Panel>
+ {tenant && community && context && !context.support_only && <Panel title="Community announcements">
+ <AnnouncementFeed tenant={tenant} community={community} canAcknowledge={context.roles.some(role => role.role === "resident" && (!role.community_id || role.community_id === community))} key={`${tenant}:${community}:${announcementRefresh}`} path={`announcements?tenant=${tenant}&community=${community}`} api={api} timeZone={communities.find(c => c.id === community)?.time_zone || timeZone}/>
+ <button type="button" className="mt-3 underline" onClick={() => refreshAnnouncements(n => n + 1)}>Refresh announcements</button>
+ {context.roles.some(role => role.role === "association_admin" && !role.community_id) && <ActionForm
+ key={`${tenant}:${community}:publish`} title="Publish announcement" busy={busy}
+ inputs={[{ name: "p_title", label: "Title" }, { name: "p_body", label: "Announcement text" }, { name: "p_expires_at", label: "Expiry with time zone (ISO 8601)" }, { name: "p_publish_at", label: "Scheduled publication (ISO 8601, optional)", optional: true }, { name: "p_previous", label: "Previous announcement reference (optional)", optional: true }, { name: "p_document", label: "Private document reference (optional)", optional: true }, reason]}
+ submit={values => run(async () => {
+     await api("announcements", { ...values, p_tenant: tenant, p_community: community, p_property: null, p_publish_at: values.p_publish_at || null, p_previous: values.p_previous || null, p_document: values.p_document || null });
+     refreshAnnouncements(n => n + 1);
+     setMessage(values.p_publish_at ? "Announcement scheduled." : "Announcement published.");
+ })}/>}
+ </Panel>}
+ {tenant && community && context && !context.support_only && <TicketQueue
+    key={`${tenant}:${community}:tickets`} tenant={tenant} community={community} api={api}
+    administrator={context.roles.some(role => role.role === "association_admin" && !role.community_id)}
+    properties={scoped(properties)} timeZone={communities.find(c => c.id === community)?.time_zone || timeZone}/>}
+ {tenant && community && context && !context.support_only && <DocumentLibrary
+    key={`${tenant}:${community}:documents`} tenant={tenant} community={community} api={api}
+    administrator={context.roles.some(role => role.role === "association_admin" && !role.community_id)}
+    properties={scoped(properties)}/>}
+ {tenant && community && context?.roles.some(role => role.role === "resident" && (!role.community_id || role.community_id === community)) &&
+    <TicketInbox key={`${tenant}:${community}:inbox`} tenant={tenant} community={community} api={api}
+        timeZone={communities.find(c => c.id === community)?.time_zone || timeZone}/>}
+ {tenant && context && !context.support_only && <PrivacyRequests key={`${tenant}:privacy`} tenant={tenant} api={api}
+    administrator={context.roles.some(role => role.role === "association_admin" && !role.community_id)}/>}
  {index?.operator && <Panel title="Create an association sandbox"><p>Nominate a different, already verified account. A second operator must review the completed setup. This does not authorize real resident data.</p><ActionForm title="Create setup" busy={busy} inputs={[{ name: "tenant_key", label: "Unique association key" }, { name: "legal_name", label: "Legal association name" }, { name: "administrator_email", label: "Nominated administrator email", type: "email" }, { name: "authority_ref", label: "Authority evidence reference (synthetic)" }, { name: "currency", label: "Currency", value: "PHP" }, { name: "time_zone", label: "Time zone", value: "Asia/Manila" }, { name: "locale", label: "Locale", value: "en-PH" }, reason]} submit={v => run(async () => { const { p_reason, ...p_data } = v; await mutate("create", { p_data, p_reason }); })}/></Panel>}
  <div id="overview">{setup && <Panel title={`${setup.tenant.name} · ${setup.tenant.status}`}><p>{setup.tenant.currency} · {setup.tenant.time_zone} · {setup.tenant.locale} · revision {String(setup.setup.revision)}. Sandbox only.</p>{submitted && <p role="status" className="my-3 rounded-lg bg-emerald-50 p-3">Checklist submitted for independent review. Further setup edits require resubmission.</p>}<ol className="my-3 space-y-1">{Object.entries(setup.checklist).map(([key, value]) => <li key={key}>{typeof value === "boolean" ? (value ? "✓" : "○") : value} {key.replaceAll("_", " ")}</li>)}</ol>
  {administrator && <><p>Complete configuration, create communities and locations, then add properties. Resolve or cancel every import before submission.</p><ActionForm key={`${tenant}:settings:${setup.setup.revision}`} title="Save onboarding configuration" busy={busy} inputs={[...["address", "brand_name", "accent_color", "billing_day", "notification_contact", "support_contact", "privacy_notice_ref"].map(name => ({ name, label: name.replaceAll("_", " "), value: String(setup.setup[name] ?? ""), type: name === "billing_day" ? "number" : name === "notification_contact" ? "email" : "text" })), { name: "opening_balance_state", label: "Opening balances", value: String(setup.setup.opening_balance_state), options: kinds(["pending", "no_opening_balances", "deferred_to_s04"]) }, reason]} submit={v => run(async () => { const { p_reason, ...p_data } = v; await mutate("settings", { p_tenant: tenant, p_data, p_reason }); })}/>{setup.tenant.status === "onboarding" && <ActionForm title="Submit checklist for independent review" inputs={[reason]} busy={busy || submitted} submit={v => run(() => mutate("submit", { p_tenant: tenant, ...v }))}/>}</>}

@@ -93,6 +93,53 @@ export async function verifyWebIdentity({state,owner,staff,password,finance}) {
   assert.equal((await fetch(endpoint+'finance/constructor',{method:'POST',headers:fh,body:'{}'})).status,404);
   assert.equal((await fetch(endpoint+'finance/index',{headers:{authorization:`Bearer ${token}`}})).status,200);
   console.log('S04 built cookie/native API: private scanner/upload/download, rejected proof, replay, pending submission, tenant controls and no resident approval passed');
+  const scope={p_tenant:f.villageTenant,p_community:f.village};
+  const communityQuery=new URLSearchParams({tenant:f.villageTenant,community:f.village});
+  async function s05Post(path,body,key,asStaff=false) {
+   return fetch(endpoint+path,{method:'POST',headers:{
+    ...(asStaff?nativeHeaders:fh),'Idempotency-Key':key,
+   },body:JSON.stringify(body)});
+  }
+  const announcement=await s05Post('announcements',{
+   ...scope,p_property:null,p_title:'Synthetic S05 notice',p_body:'Synthetic notice body',
+   p_expires_at:new Date(Date.now()+86400000).toISOString(),p_reason:'Verify synthetic announcement',
+  },'s05-announce',true);
+  assert.equal(announcement.status,200);
+  const notice=(await announcement.json()).data.id;
+  const feed=await fetch(endpoint+'announcements?'+communityQuery,{headers:{cookie}});
+  assert.equal(feed.status,200);
+  assert.ok((await feed.json()).data.some(row=>row.id===notice));
+  const acknowledgment=await s05Post('announcement-ack',{...scope,p_announcement:notice},'s05-ack');
+  assert.equal(acknowledgment.status,200);
+  const ticket=await s05Post('tickets',{
+   ...scope,p_property:f.lot,p_description:'Synthetic maintenance issue',p_ticket:null,p_status:null,p_reason:null,
+  },'s05-ticket');
+  assert.equal(ticket.status,200);
+  const ticketId=(await ticket.json()).data.id;
+  const ticketUpdate={...scope,p_property:null,p_description:null,p_ticket:ticketId,p_status:'in_progress',p_reason:'Verify synthetic ticket transition'};
+  assert.equal((await s05Post('tickets',ticketUpdate,'s05-deny')).status,403);
+  assert.equal((await s05Post('tickets',ticketUpdate,'s05-work',true)).status,200);
+  const inbox=await s05Post('ticket-inbox',{...scope,p_preference:null},'s05-inbox');
+  assert.equal(inbox.status,200);
+  assert.deepEqual((await inbox.json()).data.items.map(item=>item.ticket_id),[ticketId]);
+  const privacy=await s05Post('privacy',{
+   p_tenant:f.villageTenant,p_kind:'access',p_detail:'Synthetic access request',p_request:null,p_reason:null,
+  },'s05-privacy');
+  assert.equal(privacy.status,200);
+  const document=await s05Post('documents',{
+   tenant:f.villageTenant,community:f.village,property:f.lot,previous:null,
+   title:'Synthetic resident guide',audience:'property_occupants',reason:'Verify private resident document',
+   base64:Buffer.from('%PDF-1.4\nSynthetic S05 resident guide').toString('base64'),content_type:'application/pdf',
+  },'s05-document',true);
+  assert.equal(document.status,200);
+  const documentId=(await document.json()).data.id;
+  const documentList=await fetch(endpoint+'documents?'+communityQuery,{headers:{cookie}});
+  assert.equal(documentList.status,200);
+  assert.ok((await documentList.json()).data.some(row=>row.id===documentId));
+  const privateFile=await fetch(endpoint+`tenants/${f.villageTenant}/documents/${documentId}`,{headers:{cookie}});
+  assert.equal(privateFile.status,200);
+  assert.equal(await privateFile.text(),'%PDF-1.4\nSynthetic S05 resident guide');
+  console.log('S05 built API: authenticated announcements, ticket transitions, inbox, privacy intake and scanner-backed private downloads passed');
   const roleCommand={p_tenant:f.villageTenant,p_member:f.villageMember,p_role:'finance_preparer',p_community:null,p_until:null,p_revoke:false,p_reason:'Verified native permission change retry'};
   for(let i=0;i<2;i++){
    const changed=await fetch(endpoint+'access/role',{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json','Idempotency-Key':'native-role-command'},body:JSON.stringify(roleCommand)});assert.equal(changed.status,200);

@@ -39,6 +39,26 @@ export interface DomainDatabase {
           "created_at"?: string;
         };
       };
+      "announcement_acknowledgments": {
+        Row: {
+          "tenant_id": string;
+          "announcement_id": string;
+          "membership_id": string;
+          "acknowledged_at": string;
+        };
+        Insert: {
+          "tenant_id": string;
+          "announcement_id": string;
+          "membership_id": string;
+          "acknowledged_at"?: string;
+        };
+        Update: {
+          "tenant_id"?: string;
+          "announcement_id"?: string;
+          "membership_id"?: string;
+          "acknowledged_at"?: string;
+        };
+      };
       "asset_allocations": {
         Row: {
           "id": string;
@@ -284,6 +304,8 @@ export interface DomainDatabase {
           "created_at": string;
           "audience": string;
           "purpose": string;
+          "ticket_id": string | null;
+          "previous_version_id": string | null;
         };
         Insert: {
           "id"?: string;
@@ -301,6 +323,8 @@ export interface DomainDatabase {
           "created_at"?: string;
           "audience"?: string;
           "purpose"?: string;
+          "ticket_id"?: string | null;
+          "previous_version_id"?: string | null;
         };
         Update: {
           "id"?: string;
@@ -318,6 +342,8 @@ export interface DomainDatabase {
           "created_at"?: string;
           "audience"?: string;
           "purpose"?: string;
+          "ticket_id"?: string | null;
+          "previous_version_id"?: string | null;
         };
       };
       "finance_allocations": {
@@ -895,6 +921,7 @@ export interface DomainDatabase {
           "valid_from": string;
           "valid_until": string | null;
           "created_at": string;
+          "ticket_notifications": boolean;
         };
         Insert: {
           "id"?: string;
@@ -904,6 +931,7 @@ export interface DomainDatabase {
           "valid_from": string;
           "valid_until"?: string | null;
           "created_at"?: string;
+          "ticket_notifications"?: boolean;
         };
         Update: {
           "id"?: string;
@@ -913,6 +941,7 @@ export interface DomainDatabase {
           "valid_from"?: string;
           "valid_until"?: string | null;
           "created_at"?: string;
+          "ticket_notifications"?: boolean;
         };
       };
       "offboarding_requests": {
@@ -1098,6 +1127,58 @@ export interface DomainDatabase {
           "created_at"?: string;
         };
       };
+      "privacy_controls": {
+        Row: {
+          "tenant_id": string;
+          "document_retention_days": number;
+          "legal_hold": boolean;
+          "updated_by": string;
+          "updated_at": string;
+        };
+        Insert: {
+          "tenant_id": string;
+          "document_retention_days": number;
+          "legal_hold": boolean;
+          "updated_by": string;
+          "updated_at"?: string;
+        };
+        Update: {
+          "tenant_id"?: string;
+          "document_retention_days"?: number;
+          "legal_hold"?: boolean;
+          "updated_by"?: string;
+          "updated_at"?: string;
+        };
+      };
+      "privacy_requests": {
+        Row: {
+          "id": string;
+          "tenant_id": string;
+          "requester_id": string;
+          "kind": string;
+          "detail": string;
+          "status": string;
+          "created_at": string;
+        };
+        Insert: {
+          "id"?: string;
+          "tenant_id": string;
+          "requester_id": string;
+          "kind": string;
+          "detail": string;
+          "status"?: string;
+          "created_at"?: string;
+        };
+        Update: {
+          "id"?: string;
+          "tenant_id"?: string;
+          "requester_id"?: string;
+          "kind"?: string;
+          "detail"?: string;
+          "status"?: string;
+          "created_at"?: string;
+        };
+      };
       "properties": {
         Row: {
           "id": string;
@@ -1209,6 +1290,91 @@ export interface DomainDatabase {
           "created_by_membership_id"?: string;
           "snapshot"?: DomainJson;
           "expires_at"?: string;
+          "created_at"?: string;
+        };
+      };
+      "resident_announcements": {
+        Row: {
+          "id": string;
+          "tenant_id": string;
+          "community_id": string;
+          "property_id": string | null;
+          "author_id": string;
+          "title": string;
+          "body": string;
+          "created_at": string;
+          "expires_at": string;
+          "publish_at": string;
+          "previous_id": string | null;
+          "document_id": string | null;
+        };
+        Insert: {
+          "id"?: string;
+          "tenant_id": string;
+          "community_id": string;
+          "property_id"?: string | null;
+          "author_id": string;
+          "title": string;
+          "body": string;
+          "created_at"?: string;
+          "expires_at": string;
+          "publish_at"?: string;
+          "previous_id"?: string | null;
+          "document_id"?: string | null;
+        };
+        Update: {
+          "id"?: string;
+          "tenant_id"?: string;
+          "community_id"?: string;
+          "property_id"?: string | null;
+          "author_id"?: string;
+          "title"?: string;
+          "body"?: string;
+          "created_at"?: string;
+          "expires_at"?: string;
+          "publish_at"?: string;
+          "previous_id"?: string | null;
+          "document_id"?: string | null;
+        };
+      };
+      "resident_tickets": {
+        Row: {
+          "id": string;
+          "tenant_id": string;
+          "community_id": string;
+          "property_id": string;
+          "requester_id": string;
+          "description": string;
+          "status": string;
+          "assignee_id": string | null;
+          "escalated_at": string | null;
+          "response_due_at": string | null;
+          "created_at": string;
+        };
+        Insert: {
+          "id"?: string;
+          "tenant_id": string;
+          "community_id": string;
+          "property_id": string;
+          "requester_id": string;
+          "description": string;
+          "status"?: string;
+          "assignee_id"?: string | null;
+          "escalated_at"?: string | null;
+          "response_due_at"?: string | null;
+          "created_at"?: string;
+        };
+        Update: {
+          "id"?: string;
+          "tenant_id"?: string;
+          "community_id"?: string;
+          "property_id"?: string;
+          "requester_id"?: string;
+          "description"?: string;
+          "status"?: string;
+          "assignee_id"?: string | null;
+          "escalated_at"?: string | null;
+          "response_due_at"?: string | null;
           "created_at"?: string;
         };
       };

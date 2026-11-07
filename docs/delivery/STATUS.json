@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "baseline_commit": "d150f8b3a84b77a53c9f1136434481ed544d4067",
-  "current_sprint": "S04",
+  "current_sprint": "S05",
   "sprints": [
     {
       "id": "S00",
@@ -56,20 +56,20 @@
     {
       "id": "S04",
       "title": "Receivables and payment verification",
-      "status": "ready_for_review",
+      "status": "accepted",
       "depends_on": [
         "S03"
       ],
       "prompt": "docs/delivery/sprints/S04.md",
       "evidence": "docs/delivery/evidence/S04.md",
       "blockers": [],
-      "accepted_by": null,
-      "accepted_at": null
+      "accepted_by": "Jerome Gotangco via explicit authorization to proceed",
+      "accepted_at": "2026-11-07"
     },
     {
       "id": "S05",
       "title": "Core resident services and private documents",
-      "status": "not_started",
+      "status": "in_progress",
       "depends_on": [
         "S04"
       ],
