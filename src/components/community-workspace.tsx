@@ -115,10 +115,36 @@ function Table({ rows, columns, timeZone = "UTC" }: {
     timeZone?: string;
 }) { return rows.length ? <div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead><tr>{columns.map(k => <th className="border-b p-2" key={k}>{k.replaceAll("_", " ")}</th>)}</tr></thead><tbody>{rows.map(r => <tr key={r.id}>{columns.map(k => <td key={k} className="border-b p-2">{r[k] ? ["valid_from","valid_until","created_at","expires_at"].includes(k) ? formatWorkspaceDate(r[k]!,r.time_zone||timeZone) : k==="kind" ? r[k]!.replaceAll("_"," ") : r[k] : "—"}</td>)}</tr>)}</tbody></table></div> : <p className="text-sm text-slate-500">No records yet.</p>; }
 function download(text: string, name: string, type: string) { const href = URL.createObjectURL(new Blob([text], { type })); const a = document.createElement("a"); a.href = href; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(href), 1000); }
+type Announcement = { id: string; title: string; body: string; created_at: string; expires_at: string };
+
+function AnnouncementFeed({ path, api, timeZone }: {
+    path: string;
+    api: ReturnType<typeof createAccountApi>["api"];
+    timeZone: string;
+}) {
+    const [items, setItems] = useState<Announcement[] | null>(null);
+    const [error, setError] = useState(false);
+    useEffect(() => {
+        let active = true;
+        api(path).then(data => { if (active) setItems(data); })
+            .catch(() => { if (active) setError(true); });
+        return () => { active = false; };
+    }, [api, path]);
+    if (error) return <p role="alert">Announcements are unavailable. Use Refresh announcements to try again.</p>;
+    if (!items) return <p role="status">Loading announcements…</p>;
+    if (!items.length) return <p>No current announcements for this community.</p>;
+    return <ul className="space-y-4">{items.map(item => <li key={item.id} className="border-b pb-3">
+        <h3 className="font-semibold">{item.title}</h3>
+        <p className="whitespace-pre-wrap break-words">{item.body}</p>
+        <p className="text-sm text-slate-600">Posted {formatWorkspaceDate(item.created_at, timeZone)} · Expires {formatWorkspaceDate(item.expires_at, timeZone)}</p>
+    </li>)}</ul>;
+}
+
 export function CommunityWorkspace() {
     const [{ api }] = useState(() => createAccountApi());
     const [fileReader] = useState(() => createRegistryFileReader());
     const [index, setIndex] = useState<Index | null>(null), [tenant, setTenant] = useState(""), [community, setCommunity] = useState(""), [property, setProperty] = useState("");
+    const [announcementRefresh, refreshAnnouncements] = useState(0);
     const [allocations, setAllocations] = useState<Entry[]>([]);
     const [setup, setSetup] = useState<Setup | null>(null), [registry, setRegistry] = useState<Registry | null>(null), [properties, setProperties] = useState<Entry[]>([]), [detail, setDetail] = useState<{
         property: Entry;
@@ -201,6 +227,18 @@ export function CommunityWorkspace() {
  <div className="min-w-0 flex-1 space-y-6 p-5 md:p-8"><header><p className="text-sm uppercase tracking-widest text-slate-500">Association operations</p><h1 className="text-3xl font-semibold text-[#123F35]">Your community, clearly organized</h1><p className="mt-2">Sign in and verify MFA through <Link className="underline" href="/account">your account</Link> before staff actions. Sensitive changes require a sign-in within 10 minutes.</p></header>
  <div role="status" aria-live="polite" className="rounded-lg border border-amber-200 bg-amber-50 p-3">{busy ? "Loading or saving…" : message || (tenant ? "Choose a community or property to view its records." : "Choose an authorized association to begin.")}</div>
  <Panel title="Association context"><div className="grid gap-4 md:grid-cols-2"><label>Association<select className={control} value={tenant} disabled={busy} onChange={e => setTenant(e.target.value)}><option value="">Choose an association</option>{associations.map(x => <option key={x.tenant_id} value={x.tenant_id}>{x.name}</option>)}</select></label><label>Community<select className={control} value={community} disabled={busy} onChange={e => { generation.current++; fileReader.clear(); setMessage(""); setCommunity(e.target.value); setProperty(""); setDetail(null); setPreview(null); setCsv(""); }}><option value="">All authorized communities</option>{communities.map(x => <option key={x.id} value={x.id}>{x.name}</option>)}</select></label></div>{index && !associations.length && <p className="mt-3">No association access yet. An operator must nominate the first administrator; residents request access from their association.</p>}</Panel>
+ {tenant && community && context && !context.support_only && <Panel title="Community announcements">
+ <AnnouncementFeed key={`${tenant}:${community}:${announcementRefresh}`} path={`announcements?tenant=${tenant}&community=${community}`} api={api} timeZone={communities.find(c => c.id === community)?.time_zone || timeZone}/>
+ <button type="button" className="mt-3 underline" onClick={() => refreshAnnouncements(n => n + 1)}>Refresh announcements</button>
+ {context.roles.some(role => role.role === "association_admin" && !role.community_id) && <ActionForm
+ key={`${tenant}:${community}:publish`} title="Publish announcement" busy={busy}
+ inputs={[{ name: "p_title", label: "Title" }, { name: "p_body", label: "Announcement text" }, { name: "p_expires_at", label: "Expiry with time zone (ISO 8601)" }, reason]}
+ submit={values => run(async () => {
+     await api("announcements", { ...values, p_tenant: tenant, p_community: community, p_property: null });
+     refreshAnnouncements(n => n + 1);
+     setMessage("Announcement published.");
+ })}/>}
+ </Panel>}
  {index?.operator && <Panel title="Create an association sandbox"><p>Nominate a different, already verified account. A second operator must review the completed setup. This does not authorize real resident data.</p><ActionForm title="Create setup" busy={busy} inputs={[{ name: "tenant_key", label: "Unique association key" }, { name: "legal_name", label: "Legal association name" }, { name: "administrator_email", label: "Nominated administrator email", type: "email" }, { name: "authority_ref", label: "Authority evidence reference (synthetic)" }, { name: "currency", label: "Currency", value: "PHP" }, { name: "time_zone", label: "Time zone", value: "Asia/Manila" }, { name: "locale", label: "Locale", value: "en-PH" }, reason]} submit={v => run(async () => { const { p_reason, ...p_data } = v; await mutate("create", { p_data, p_reason }); })}/></Panel>}
  <div id="overview">{setup && <Panel title={`${setup.tenant.name} · ${setup.tenant.status}`}><p>{setup.tenant.currency} · {setup.tenant.time_zone} · {setup.tenant.locale} · revision {String(setup.setup.revision)}. Sandbox only.</p>{submitted && <p role="status" className="my-3 rounded-lg bg-emerald-50 p-3">Checklist submitted for independent review. Further setup edits require resubmission.</p>}<ol className="my-3 space-y-1">{Object.entries(setup.checklist).map(([key, value]) => <li key={key}>{typeof value === "boolean" ? (value ? "✓" : "○") : value} {key.replaceAll("_", " ")}</li>)}</ol>
  {administrator && <><p>Complete configuration, create communities and locations, then add properties. Resolve or cancel every import before submission.</p><ActionForm key={`${tenant}:settings:${setup.setup.revision}`} title="Save onboarding configuration" busy={busy} inputs={[...["address", "brand_name", "accent_color", "billing_day", "notification_contact", "support_contact", "privacy_notice_ref"].map(name => ({ name, label: name.replaceAll("_", " "), value: String(setup.setup[name] ?? ""), type: name === "billing_day" ? "number" : name === "notification_contact" ? "email" : "text" })), { name: "opening_balance_state", label: "Opening balances", value: String(setup.setup.opening_balance_state), options: kinds(["pending", "no_opening_balances", "deferred_to_s04"]) }, reason]} submit={v => run(async () => { const { p_reason, ...p_data } = v; await mutate("settings", { p_tenant: tenant, p_data, p_reason }); })}/>{setup.tenant.status === "onboarding" && <ActionForm title="Submit checklist for independent review" inputs={[reason]} busy={busy || submitted} submit={v => run(() => mutate("submit", { p_tenant: tenant, ...v }))}/>}</>}

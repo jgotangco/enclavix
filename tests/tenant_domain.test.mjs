@@ -98,7 +98,7 @@ test('audit history is append only, even for the fixture administrator', async (
 });
 test('every app table denies reads and writes even if restricted roles receive accidental DML grants', async () => {
   const tables=(await db.query(`SELECT tablename,rowsecurity FROM pg_tables WHERE schemaname='app' ORDER BY tablename`)).rows;
-  assert.equal(tables.length,36);
+  assert.equal(tables.length,37);
   assert.ok(tables.every(t=>t.rowsecurity));
   assert.equal((await db.query(`SELECT count(*)::int AS count FROM pg_policies WHERE schemaname='app' AND roles <> ARRAY['enclavix_reader']::name[]`)).rows[0].count,0);
   for (const role of ['anon','authenticated']) {

@@ -1212,6 +1212,41 @@ export interface DomainDatabase {
           "created_at"?: string;
         };
       };
+      "resident_announcements": {
+        Row: {
+          "id": string;
+          "tenant_id": string;
+          "community_id": string;
+          "property_id": string | null;
+          "author_id": string;
+          "title": string;
+          "body": string;
+          "created_at": string;
+          "expires_at": string;
+        };
+        Insert: {
+          "id"?: string;
+          "tenant_id": string;
+          "community_id": string;
+          "property_id"?: string | null;
+          "author_id": string;
+          "title": string;
+          "body": string;
+          "created_at"?: string;
+          "expires_at": string;
+        };
+        Update: {
+          "id"?: string;
+          "tenant_id"?: string;
+          "community_id"?: string;
+          "property_id"?: string | null;
+          "author_id"?: string;
+          "title"?: string;
+          "body"?: string;
+          "created_at"?: string;
+          "expires_at"?: string;
+        };
+      };
       "support_access": {
         Row: {
           "id": string;

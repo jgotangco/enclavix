@@ -84,3 +84,7 @@ Jerome Gotangco asked for an easier installation experience and explicitly place
 ## D06 synthetic implementation defaults — 3 November 2026
 
 Jerome Gotangco explicitly approved “Use these synthetic defaults”: exact decimals, half-up rounding to two places per charge; explicit payment allocations and unapplied overpayments held as credit; different preparer and approver with no self-approval; tenant-set approval limits; numbered “payment acknowledgments”, without official tax receipt claims. This approves configurable synthetic S04 implementation, not any association's production accounting policy. D06 remains proposed for each association finance owner's real-use approval. No monetary approval limit, real funds, tax treatment, hosting or deployment is approved by this decision.
+
+## S04 acceptance and S05 selection
+
+On 7 November 2026, Jerome Gotangco authorized S04 acceptance, merge of PR #9 and continuation into S05. S04 merged as `53aff7d`. S05 begins with immediate scoped announcements. Existing privacy and retention decisions remain proposed.
