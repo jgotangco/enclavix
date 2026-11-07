@@ -140,7 +140,20 @@ function AnnouncementFeed({ path, api, timeZone }: {
     </li>)}</ul>;
 }
 
-type Ticket = { id: string; property_id: string; description: string; status: string; created_at: string };
+type Ticket = {
+    id: string;
+    property_id: string;
+    description: string;
+    status: string;
+    created_at: string;
+    assigned: boolean;
+    escalated: boolean;
+    history: { action: string; at: string }[];
+};
+const ticketActions: Record<string, string> = {
+    open: "Submitted", in_progress: "Work started", resolved: "Resolved",
+    assign_self: "Assigned to staff", escalate: "Escalated", reopen: "Reopened",
+};
 
 function TicketQueue({ tenant, community, api, administrator, properties, timeZone }: {
     tenant: string;
@@ -187,9 +200,23 @@ function TicketQueue({ tenant, community, api, administrator, properties, timeZo
                 <p className="font-semibold">{ticket.status.replaceAll("_", " ")} · {formatWorkspaceDate(ticket.created_at, timeZone)}</p>
                 <p className="whitespace-pre-wrap break-words">{ticket.description}</p>
                 <p className="break-all text-sm">Reference {ticket.id}</p>
-                {administrator && ticket.status !== "resolved" && <ActionForm
-                    title={ticket.status === "open" ? "Start work" : "Resolve ticket"} busy={busy} inputs={[reason]}
-                    submit={values => save({ ...values, p_ticket: ticket.id, p_status: ticket.status === "open" ? "in_progress" : "resolved" })}/>}
+                <p>{ticket.assigned ? "Assigned to staff" : "Awaiting assignment"}{ticket.escalated && " · Escalated"}</p>
+                <details className="mt-2">
+                    <summary>Ticket history</summary>
+                    <ol>{ticket.history.map((event, index) => <li key={index}>
+                        {ticketActions[event.action]} · {formatWorkspaceDate(event.at, timeZone)}
+                    </li>)}</ol>
+                </details>
+                {administrator && <ActionForm
+                    title="Update ticket" busy={busy}
+                    inputs={[{ name: "p_status", label: "Action", options: ticket.status === "resolved"
+                        ? [{ id: "reopen", label: "Reopen ticket" }]
+                        : [
+                            { id: ticket.status === "open" ? "in_progress" : "resolved", label: ticket.status === "open" ? "Start work" : "Resolve ticket" },
+                            { id: "assign_self", label: "Assign to me" },
+                            ...(!ticket.escalated ? [{ id: "escalate", label: "Escalate" }] : []),
+                        ] }, reason]}
+                    submit={values => save({ ...values, p_ticket: ticket.id })}/>}
             </li>)}</ul>}
         <button type="button" className="my-3 underline" onClick={() => { setError(false); refresh(n => n + 1); }}>Refresh tickets</button>
         {!administrator && properties.length > 0 && <ActionForm title="Submit service ticket" busy={busy}

@@ -6,6 +6,9 @@ CREATE TABLE app.resident_tickets (
   requester_id uuid NOT NULL,
   description text NOT NULL CHECK (length(btrim(description)) BETWEEN 1 AND 4000),
   status text NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'in_progress', 'resolved')),
+  assignee_id uuid,
+  escalated_at timestamptz,
+  FOREIGN KEY (tenant_id, assignee_id) REFERENCES app.memberships (tenant_id, id),
   created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
   FOREIGN KEY (tenant_id, community_id, property_id) REFERENCES app.properties (tenant_id, community_id, id),
   FOREIGN KEY (tenant_id, requester_id) REFERENCES app.memberships (tenant_id, id)
@@ -39,7 +42,7 @@ BEGIN
   ELSE
     actor := app.require_admin(p_tenant, p_reason);
     IF p_property IS NOT NULL OR p_description IS NOT NULL OR p_status IS NULL
-       OR p_status NOT IN ('in_progress', 'resolved') THEN
+       OR p_status NOT IN ('in_progress', 'resolved', 'assign_self', 'escalate', 'reopen') THEN
       RAISE EXCEPTION 'Invalid transition request' USING ERRCODE = '22023';
     END IF;
     event_name := 'ticket.transition';
@@ -55,10 +58,17 @@ BEGIN
     INSERT INTO app.resident_tickets (tenant_id, community_id, property_id, requester_id, description)
       VALUES (p_tenant, p_community, p_property, actor, btrim(p_description)) RETURNING id INTO ticket_id;
   ELSE
-    UPDATE app.resident_tickets SET status = p_status
+    UPDATE app.resident_tickets
+      SET status = CASE p_status WHEN 'reopen' THEN 'open'
+        WHEN 'assign_self' THEN status WHEN 'escalate' THEN status ELSE p_status END,
+        assignee_id = CASE WHEN p_status = 'assign_self' THEN actor ELSE assignee_id END,
+        escalated_at = CASE WHEN p_status = 'escalate' THEN clock_timestamp() ELSE escalated_at END
       WHERE tenant_id = p_tenant AND community_id = p_community AND id = p_ticket
         AND ((status = 'open' AND p_status = 'in_progress')
-          OR (status = 'in_progress' AND p_status = 'resolved'))
+          OR (status = 'in_progress' AND p_status = 'resolved')
+          OR (status = 'resolved' AND p_status = 'reopen')
+          OR (status <> 'resolved' AND p_status = 'assign_self' AND assignee_id IS DISTINCT FROM actor)
+          OR (status <> 'resolved' AND p_status = 'escalate' AND escalated_at IS NULL))
       RETURNING id INTO ticket_id;
     IF ticket_id IS NULL THEN
       RAISE EXCEPTION 'Ticket unavailable for transition' USING ERRCODE = '22023';
@@ -74,10 +84,18 @@ BEGIN
 END;
 $$;
 
+CREATE INDEX resident_ticket_history ON app.audit_events (tenant_id, (details->>'ticket_id'), created_at)
+  WHERE event_type IN ('ticket.submit', 'ticket.transition');
+
 CREATE FUNCTION public.enclavix_ticket_list(p_tenant uuid, p_community uuid)
-RETURNS TABLE(id uuid, property_id uuid, description text, status text, created_at timestamptz)
+RETURNS TABLE(id uuid, property_id uuid, description text, status text, created_at timestamptz, assigned boolean, escalated boolean, history jsonb)
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog AS $$
-  SELECT t.id, t.property_id, t.description, t.status, t.created_at
+  SELECT t.id, t.property_id, t.description, t.status, t.created_at, t.assignee_id IS NOT NULL, t.escalated_at IS NOT NULL,
+      coalesce((SELECT jsonb_agg(jsonb_build_object('action', a.details->>'status', 'at', a.created_at)
+        ORDER BY a.created_at, a.id)
+        FROM app.audit_events a
+        WHERE a.tenant_id = t.tenant_id AND a.event_type IN ('ticket.submit', 'ticket.transition')
+          AND a.details->>'ticket_id' = t.id::text), '[]'::jsonb)
     FROM app.resident_tickets t
     WHERE t.tenant_id = p_tenant AND t.community_id = p_community
       AND (app.role_at(p_tenant, 'association_admin')

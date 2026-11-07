@@ -1256,6 +1256,8 @@ export interface DomainDatabase {
           "requester_id": string;
           "description": string;
           "status": string;
+          "assignee_id": string | null;
+          "escalated_at": string | null;
           "created_at": string;
         };
         Insert: {
@@ -1266,6 +1268,8 @@ export interface DomainDatabase {
           "requester_id": string;
           "description": string;
           "status"?: string;
+          "assignee_id"?: string | null;
+          "escalated_at"?: string | null;
           "created_at"?: string;
         };
         Update: {
@@ -1276,6 +1280,8 @@ export interface DomainDatabase {
           "requester_id"?: string;
           "description"?: string;
           "status"?: string;
+          "assignee_id"?: string | null;
+          "escalated_at"?: string | null;
           "created_at"?: string;
         };
       };
