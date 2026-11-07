@@ -22,7 +22,7 @@ export function createAccountApi(fetcher: typeof fetch = fetch, newKey = () => c
   }
   async function api(path: string, body?: unknown) {
     const mutation = body !== undefined;
-    const tracked = mutation && (path.startsWith("access/") || path.startsWith("community/"));
+    const tracked = mutation && (path.startsWith("access/") || path.startsWith("community/") || path.startsWith("finance/"));
     const fingerprint = `${path}:${JSON.stringify(canonical(body))}`;
     const key = tracked ? pending.get(fingerprint) ?? newKey() : mutation ? newKey() : undefined;
     if (tracked) pending.set(fingerprint, key!);
@@ -41,9 +41,10 @@ export function createAccountApi(fetcher: typeof fetch = fetch, newKey = () => c
     // A deliberate replacement is allowed only after explicit revocation in the UI.
     if (tracked && response.status < 500 && response.status !== 409) pending.delete(fingerprint);
     const message = response.status === 401 ? "Sign in with a verified email address to continue."
+      : response.status === 409 && path.startsWith("finance/") ? "This finance request conflicts with an earlier record. Refresh and review its durable status before retrying."
       : response.status === 409 ? "This request conflicts with an earlier attempt. Refresh the access workspace. If an invitation was already created but its token was lost, revoke it before issuing a replacement."
       : response.status === 429 ? "Too many requests. Wait before trying again."
-      : response.status >= 500 ? "The service is unavailable. Try again; an uncertain access request will keep its original request key."
+      : response.status >= 500 ? "The service is unavailable. Try again; an uncertain request will keep its original request key."
       : "Request not permitted. Staff actions require a recent MFA sign-in. Check your details and try again.";
     throw new Error(message);
   }

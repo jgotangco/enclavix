@@ -13,7 +13,7 @@ Architecture design and implementation boundaries: [S01 architecture](architectu
 6. `docs/delivery/TRACEABILITY.md` and `docs/delivery/ACCEPTANCE.md`.
 
 ## Development handoff
-S00–S02 are accepted following explicit owner review and merge authorization for PR #1, PR #2 and PR #3. Jerome Gotangco completed review and explicitly accepted S03 on 2 November 2026, including its asset registry and authenticated screen follow-up (PR #4 and PR #6). S04 is planned for 3 November 2026, Asia/Manila, and has not started. Read `AGENTS.md`, the selected sprint and its evidence before continuing. `docs/development.md` documents local setup and containment. The Antigravity prompts remain available for any future handoff.
+S00–S02 are accepted following explicit owner review and merge authorization for PR #1, PR #2 and PR #3. Jerome Gotangco completed review and explicitly accepted S03 on 2 November 2026, including its asset registry and authenticated screen follow-up (PR #4 and PR #6). S04 was selected on 3 November 2026 (Asia/Manila) and is ready_for_review in [PR #9](https://github.com/jgotangco/enclavix/pull/9), branch `feature/s04-receivables`. Engineering verification is recorded in its evidence; actual owner acceptance remains pending. S05 has not started. Read `AGENTS.md`, the selected sprint and its evidence before continuing. `docs/development.md` documents local setup and containment. The Antigravity prompts remain available for any future handoff.
 
 Run `python3 tools/validate_delivery.py` from the repository root to validate planning structure. Python 3.9 or later is sufficient; no packages or application credentials are needed. Application checks are documented in `docs/development.md` and the completed sprint evidence.
 

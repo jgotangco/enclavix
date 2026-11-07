@@ -19,6 +19,23 @@ await db.query("INSERT INTO app.property_relationships(tenant_id,community_id,pr
 await db.query('INSERT INTO app.platform_operators(auth_user_id,enabled) VALUES($1,true),($2,true)',['c0000000-0000-0000-0000-000000000001','c0000000-0000-0000-0000-000000000002']);
 await db.query("INSERT INTO app.assets(id,tenant_id,community_id,code,label,kind) VALUES($1,$2,$3,'SAMPLE-STORAGE','Synthetic sample storage','storage')",[id(9804),f.villageTenant,f.village]);
 await db.query("INSERT INTO app.asset_allocations(tenant_id,community_id,asset_id,property_id,kind,valid_from) VALUES($1,$2,$3,$4,'use',now())",[f.villageTenant,f.village,id(9804),f.secondLot]);
+// S04 fixtures are explicitly synthetic, approved only inside this disposable UI stand-in.
+const financeApprover='c0000000-0000-0000-0000-000000000005';
+await db.query('INSERT INTO app.people(id,tenant_id,display_name,auth_user_id) VALUES($1,$2,$3,$4)',[id(9701),f.villageTenant,'Synthetic finance approver',financeApprover]);
+await db.query("INSERT INTO app.memberships(id,tenant_id,person_id,status,valid_from) VALUES($1,$2,$3,'active',now())",[id(9702),f.villageTenant,id(9701)]);
+await db.query("INSERT INTO app.membership_roles(tenant_id,membership_id,role,valid_from) VALUES($1,$2,'finance_preparer',now()),($1,$3,'finance_approver',now())",[f.villageTenant,f.coownerMember,id(9702)]);
+for(const [sid,uid] of [[id(9703),staff],[id(9704),financeApprover]])await db.query('INSERT INTO auth.sessions(id,user_id) VALUES($1,$2)',[sid,uid]);
+async function financeFixture(who,name,args){
+ const uid=who==='prepare'?staff:financeApprover,sid=who==='prepare'?id(9703):id(9704);
+ await db.query("SELECT set_config('request.jwt.claims',$1,false),set_config('request.headers',$2,false)",[JSON.stringify({role:'authenticated',sub:uid,session_id:sid,aal:'aal2',exp:Math.floor(Date.now()/1000)+3600}),JSON.stringify({'idempotency-key':randomUUID()})]);
+ return(await db.query(`SELECT public.enclavix_finance_${name}(${args.map((_,i)=>'$'+(i+1)).join(',')}) result`,args)).rows[0].result;
+}
+async function financeApproved(kind,data){const p=await financeFixture('prepare','prepare',[f.villageTenant,f.village,kind,JSON.stringify(data),'Synthetic UI fixture finance preparation']);await financeFixture('approve','decide',[f.villageTenant,p.id,true,'Synthetic UI fixture independent decision']);return p;}
+await financeApproved('policy',{approval_limit:'1000000'});
+await financeApproved('rule',{code:'MONTHLY',label:'Monthly association dues',basis:'fixed',rate:'3000',effective_from:'2026-01-01',recurring:true,category:'dues',due_days:10});
+const financeBatch=await financeApproved('generation',{period:'2026-11-01'});
+await financeFixture('prepare','generate',[f.villageTenant,financeBatch.id,100,'Synthetic UI fixture billing generation']);
+await financeFixture('prepare','prepare',[f.villageTenant,f.village,'credit',JSON.stringify({property_id:f.secondLot,amount:'200',posted_on:'2026-11-03',due_on:'2026-11-03',label:'Synthetic reviewed adjustment'}),'Synthetic UI fixture adjustment proposal']);
 const tokens=new Map();let queue=Promise.resolve(),child;
 const password='Synthetic-workspace-42!'; // Disposable test value; never an account outside this stand-in.
 const provider=createServer((req,res)=>{

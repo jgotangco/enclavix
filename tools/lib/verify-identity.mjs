@@ -3,7 +3,7 @@ import {createHmac,randomBytes} from 'node:crypto';
 import {createClient} from '@supabase/supabase-js';
 import {FIXTURE as f,id} from './domain-fixtures.mjs';
 
-function totp(secret) {
+export function totp(secret) {
  const alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';let bits='';
  for(const c of secret.toUpperCase().replace(/=+$/,'')) bits+=alphabet.indexOf(c).toString(2).padStart(5,'0');
  const bytes=[];for(let i=0;i+8<=bits.length;i+=8) bytes.push(parseInt(bits.slice(i,i+8),2));
