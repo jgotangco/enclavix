@@ -35,7 +35,7 @@ Each BRD requirement has one sprint accountable for completion evidence. Earlier
 | NFR 05 | S10 | unverified |
 | NFR 06 | S10 | unverified |
 | NFR 07 | S10 | unverified |
-| OPS 01 | S09 | unverified |
+| OPS 01 | S09 | S05 increment implements property-linked submission, requester visibility and audited staff transitions. Assignment, escalation and full lifecycle verification remain pending. |
 | OPS 02 | S09 | S05 increment implements immediate publication, community/property audience and expiry. Full revision, attachment and delivery verification pending. |
 | OPS 03 | S09 | unverified |
 | OPS 04 | S09 | unverified |

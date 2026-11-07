@@ -140,6 +140,66 @@ function AnnouncementFeed({ path, api, timeZone }: {
     </li>)}</ul>;
 }
 
+type Ticket = { id: string; property_id: string; description: string; status: string; created_at: string };
+
+function TicketQueue({ tenant, community, api, administrator, properties, timeZone }: {
+    tenant: string;
+    community: string;
+    api: ReturnType<typeof createAccountApi>["api"];
+    administrator: boolean;
+    properties: Entry[];
+    timeZone: string;
+}) {
+    const [tickets, setTickets] = useState<Ticket[] | null>(null);
+    const [error, setError] = useState(false);
+    const [busy, setBusy] = useState(false);
+    const [message, setMessage] = useState("");
+    const [revision, refresh] = useState(0);
+    useEffect(() => {
+        let active = true;
+        api(`tickets?tenant=${tenant}&community=${community}`)
+            .then(data => { if (active) setTickets(data); })
+            .catch(() => { if (active) setError(true); });
+        return () => { active = false; };
+    }, [api, tenant, community, revision]);
+    async function save(fields: Record<string, string | null>) {
+        setBusy(true);
+        setMessage("");
+        try {
+            const result = await api("tickets", {
+                p_tenant: tenant, p_community: community, p_property: null, p_description: null,
+                p_ticket: null, p_status: null, p_reason: null, ...fields,
+            });
+            setMessage(`Ticket saved. Reference ${result.id}.`);
+            setError(false);
+            refresh(n => n + 1);
+        } catch (error) {
+            setMessage(error instanceof Error ? error.message : "Ticket could not be saved.");
+        } finally {
+            setBusy(false);
+        }
+    }
+    return <Panel title="Service tickets">
+        {error ? <p role="alert">Tickets are unavailable.</p> : !tickets
+            ? <p role="status">Loading tickets…</p>
+            : tickets.length === 0 ? <p>No tickets for this community.</p>
+            : <ul className="space-y-4">{tickets.map(ticket => <li className="border-b pb-3" key={ticket.id}>
+                <p className="font-semibold">{ticket.status.replaceAll("_", " ")} · {formatWorkspaceDate(ticket.created_at, timeZone)}</p>
+                <p className="whitespace-pre-wrap break-words">{ticket.description}</p>
+                <p className="break-all text-sm">Reference {ticket.id}</p>
+                {administrator && ticket.status !== "resolved" && <ActionForm
+                    title={ticket.status === "open" ? "Start work" : "Resolve ticket"} busy={busy} inputs={[reason]}
+                    submit={values => save({ ...values, p_ticket: ticket.id, p_status: ticket.status === "open" ? "in_progress" : "resolved" })}/>}
+            </li>)}</ul>}
+        <button type="button" className="my-3 underline" onClick={() => { setError(false); refresh(n => n + 1); }}>Refresh tickets</button>
+        {!administrator && properties.length > 0 && <ActionForm title="Submit service ticket" busy={busy}
+            inputs={[{ name: "p_property", label: "Property", options: properties.map(p => ({ id: p.id, label: p.label || p.code || p.id })) },
+                { name: "p_description", label: "Describe the issue" }]}
+            submit={save}/>}
+        <p role="status" className="break-words">{message}</p>
+    </Panel>;
+}
+
 export function CommunityWorkspace() {
     const [{ api }] = useState(() => createAccountApi());
     const [fileReader] = useState(() => createRegistryFileReader());
@@ -239,6 +299,10 @@ export function CommunityWorkspace() {
      setMessage("Announcement published.");
  })}/>}
  </Panel>}
+ {tenant && community && context && !context.support_only && <TicketQueue
+    key={`${tenant}:${community}:tickets`} tenant={tenant} community={community} api={api}
+    administrator={context.roles.some(role => role.role === "association_admin" && !role.community_id)}
+    properties={scoped(properties)} timeZone={communities.find(c => c.id === community)?.time_zone || timeZone}/>}
  {index?.operator && <Panel title="Create an association sandbox"><p>Nominate a different, already verified account. A second operator must review the completed setup. This does not authorize real resident data.</p><ActionForm title="Create setup" busy={busy} inputs={[{ name: "tenant_key", label: "Unique association key" }, { name: "legal_name", label: "Legal association name" }, { name: "administrator_email", label: "Nominated administrator email", type: "email" }, { name: "authority_ref", label: "Authority evidence reference (synthetic)" }, { name: "currency", label: "Currency", value: "PHP" }, { name: "time_zone", label: "Time zone", value: "Asia/Manila" }, { name: "locale", label: "Locale", value: "en-PH" }, reason]} submit={v => run(async () => { const { p_reason, ...p_data } = v; await mutate("create", { p_data, p_reason }); })}/></Panel>}
  <div id="overview">{setup && <Panel title={`${setup.tenant.name} · ${setup.tenant.status}`}><p>{setup.tenant.currency} · {setup.tenant.time_zone} · {setup.tenant.locale} · revision {String(setup.setup.revision)}. Sandbox only.</p>{submitted && <p role="status" className="my-3 rounded-lg bg-emerald-50 p-3">Checklist submitted for independent review. Further setup edits require resubmission.</p>}<ol className="my-3 space-y-1">{Object.entries(setup.checklist).map(([key, value]) => <li key={key}>{typeof value === "boolean" ? (value ? "✓" : "○") : value} {key.replaceAll("_", " ")}</li>)}</ol>
  {administrator && <><p>Complete configuration, create communities and locations, then add properties. Resolve or cancel every import before submission.</p><ActionForm key={`${tenant}:settings:${setup.setup.revision}`} title="Save onboarding configuration" busy={busy} inputs={[...["address", "brand_name", "accent_color", "billing_day", "notification_contact", "support_contact", "privacy_notice_ref"].map(name => ({ name, label: name.replaceAll("_", " "), value: String(setup.setup[name] ?? ""), type: name === "billing_day" ? "number" : name === "notification_contact" ? "email" : "text" })), { name: "opening_balance_state", label: "Opening balances", value: String(setup.setup.opening_balance_state), options: kinds(["pending", "no_opening_balances", "deferred_to_s04"]) }, reason]} submit={v => run(async () => { const { p_reason, ...p_data } = v; await mutate("settings", { p_tenant: tenant, p_data, p_reason }); })}/>{setup.tenant.status === "onboarding" && <ActionForm title="Submit checklist for independent review" inputs={[reason]} busy={busy || submitted} submit={v => run(() => mutate("submit", { p_tenant: tenant, ...v }))}/>}</>}

@@ -1247,6 +1247,38 @@ export interface DomainDatabase {
           "expires_at"?: string;
         };
       };
+      "resident_tickets": {
+        Row: {
+          "id": string;
+          "tenant_id": string;
+          "community_id": string;
+          "property_id": string;
+          "requester_id": string;
+          "description": string;
+          "status": string;
+          "created_at": string;
+        };
+        Insert: {
+          "id"?: string;
+          "tenant_id": string;
+          "community_id": string;
+          "property_id": string;
+          "requester_id": string;
+          "description": string;
+          "status"?: string;
+          "created_at"?: string;
+        };
+        Update: {
+          "id"?: string;
+          "tenant_id"?: string;
+          "community_id"?: string;
+          "property_id"?: string;
+          "requester_id"?: string;
+          "description"?: string;
+          "status"?: string;
+          "created_at"?: string;
+        };
+      };
       "support_access": {
         Row: {
           "id": string;

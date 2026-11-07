@@ -22,7 +22,7 @@ export function createAccountApi(fetcher: typeof fetch = fetch, newKey = () => c
   }
   async function api(path: string, body?: unknown) {
     const mutation = body !== undefined;
-    const tracked = mutation && (path.startsWith("access/") || path.startsWith("community/") || path.startsWith("finance/") || path === "announcements");
+    const tracked = mutation && (path.startsWith("access/") || path.startsWith("community/") || path.startsWith("finance/") || path === "announcements" || path === "tickets");
     const fingerprint = `${path}:${JSON.stringify(canonical(body))}`;
     const key = tracked ? pending.get(fingerprint) ?? newKey() : mutation ? newKey() : undefined;
     if (tracked) pending.set(fingerprint, key!);
@@ -42,6 +42,7 @@ export function createAccountApi(fetcher: typeof fetch = fetch, newKey = () => c
     if (tracked && response.status < 500 && response.status !== 409) pending.delete(fingerprint);
     const message = response.status === 401 ? "Sign in with a verified email address to continue."
       : response.status === 409 && path.startsWith("finance/") ? "This finance request conflicts with an earlier record. Refresh and review its durable status before retrying."
+      : response.status === 409 && path === "tickets" ? "This ticket request conflicts with an earlier attempt. Refresh the queue before retrying."
       : response.status === 409 && path === "announcements" ? "This announcement conflicts with an earlier request. Refresh the feed before trying again."
       : response.status === 409 ? "This request conflicts with an earlier attempt. Refresh the access workspace. If an invitation was already created but its token was lost, revoke it before issuing a replacement."
       : response.status === 429 ? "Too many requests. Wait before trying again."
